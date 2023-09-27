@@ -10,4 +10,4 @@ crate-type = ["cdylib"]
 
 [dependencies]
 pyo3 = "0.19.2"
-jpegxl-rs = { version = "0.8.2", default-features = false, features = ["threads"] }
+jpegxl-rs = { version = "0.8.2", default-features = false, features = ["vendored", "threads"] }
