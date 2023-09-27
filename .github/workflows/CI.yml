@@ -23,7 +23,7 @@ permissions:
 jobs:
   linux:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 60
     strategy:
       matrix:
         target: [x86_64]
@@ -60,6 +60,7 @@ jobs:
           docker-options: |
             -e DEP_JXL_LIB=${{ github.workspace }}/libjxl/build/lib
             -e RUST_BACKTRACE=1
+            -L
 
       - name: Upload wheels
         uses: actions/upload-artifact@v3
