@@ -131,7 +131,23 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: wheels
+      - name: upload to github release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            wasm/*.whl
+          prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') }}
+      - name: Publish to TestPyPI
+        if: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') }}
+        uses: PyO3/maturin-action@v1
+        env:
+          MATURIN_PYPI_TOKEN: ${{ secrets.TESTPYPI_API_TOKEN }}
+          MATURIN_REPOSITORY_URL: https://test.pypi.org/legacy/ 
+        with:
+          command: upload
+          args: --non-interactive --skip-existing *
       - name: Publish to PyPI
+        if: ${{ !contains(github.ref, 'alpha') || !contains(github.ref, 'beta') }}
         uses: PyO3/maturin-action@v1
         env:
           MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
