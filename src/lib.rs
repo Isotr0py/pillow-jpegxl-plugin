@@ -7,7 +7,7 @@ use jpegxl_rs::parallel::threads_runner::ThreadsRunner;
 use jpegxl_rs::{decoder_builder, encoder_builder};
 // it works even if the item is not documented:
 
-#[pyclass(module = "pillow_jxl_plugin")]
+#[pyclass(module = "pillow_jxl")]
 struct Encoder {
     parallel: bool,
     has_alpha: bool,
@@ -76,7 +76,7 @@ impl Encoder {
     }
 }
 
-#[pyclass(module = "pillow_jxl_plugin")]
+#[pyclass(module = "pillow_jxl")]
 struct ImageInfo {
     #[pyo3(get, set)]
     mode: String, // Mode of the image
@@ -112,7 +112,7 @@ impl ImageInfo {
     }
 }
 
-#[pyclass(module = "pillow_jxl_plugin")]
+#[pyclass(module = "pillow_jxl")]
 struct Decoder {
     parallel: bool,
 }
@@ -148,8 +148,8 @@ impl Decoder {
 }
 
 #[pymodule]
-#[pyo3(name = "pillow_jxl_plugin")]
-fn pillow_jxl_plugin(_py: Python, m: &PyModule) -> PyResult<()> {
+#[pyo3(name = "pillow_jxl")]
+fn pillow_jxl(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<Encoder>()?;
     m.add_class::<Decoder>()?;
     Ok(())
