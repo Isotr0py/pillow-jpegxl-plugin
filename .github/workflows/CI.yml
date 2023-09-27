@@ -57,7 +57,8 @@ jobs:
           manylinux: auto
           docker-options: |
             -e RUST_BACKTRACE=1
-          before-script-linux: sudo apt-get install cmake clang doxygen g++ extra-cmake-modules libgif-dev libjpeg-dev ninja-build libgoogle-perftools-dev libunwind-dev
+          before-script-linux: |
+            yum install -y cmake clang doxygen g++ extra-cmake-modules libgif-dev libjpeg-dev ninja-build libgoogle-perftools-dev libunwind-dev
 
       - name: Upload wheels
         uses: actions/upload-artifact@v3
