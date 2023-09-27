@@ -53,7 +53,7 @@ jobs:
         with:
           target: ${{ matrix.target }}
           args: --release --out dist --find-interpreter
-          container: off
+          # container: off
           sccache: 'true'
           manylinux: auto
           docker-options: |
