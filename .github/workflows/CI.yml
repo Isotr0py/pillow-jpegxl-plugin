@@ -52,7 +52,8 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --find-interpreter -- -L --verbose
+          args: --release --out dist --find-interpreter
+          container: off
           sccache: 'true'
           manylinux: auto
           docker-options: |
