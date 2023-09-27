@@ -57,6 +57,7 @@ jobs:
           manylinux: auto
           docker-options: |
             -e RUST_BACKTRACE=1
+          working-directory: pillow-jpegxl-plugin/
           before-script-linux: |
             sudo apt-get update
             sudo apt-get install cmake clang doxygen g++ extra-cmake-modules libgif-dev libjpeg-dev ninja-build libgoogle-perftools-dev libunwind-dev
