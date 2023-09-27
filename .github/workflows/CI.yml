@@ -58,7 +58,7 @@ jobs:
           docker-options: |
             -e RUST_BACKTRACE=1
           before-script-linux: |
-            yum install -y cmake clang doxygen extra-cmake-modules libgif-dev libjpeg-dev ninja-build libgoogle-perftools-dev libunwind-dev
+            yum install -y cmake clang doxygen extra-cmake-modules ninja-build
 
       - name: Upload wheels
         uses: actions/upload-artifact@v3
