@@ -135,7 +135,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            wasm/*.whl
+            *.whl
           prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') }}
       - name: Publish to TestPyPI
         if: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') }}
