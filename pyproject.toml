@@ -4,13 +4,15 @@ build-backend = "maturin"
 
 [project]
 name = "pillow_jxl_plugin"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
-
+dependencies = [
+    "Pillow >= 10.1",
+]
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
