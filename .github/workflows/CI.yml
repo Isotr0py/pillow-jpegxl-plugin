@@ -51,10 +51,8 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
-          # target: ${{ matrix.target }}
-          rust-toolchain: stable-x86_64-unknown-linux-gnu
-          target: x86_64-unknown-linux-gnu
-          args: --release --out dist --find-interpreter -L
+          target: ${{ matrix.target }}
+          args: --release --out dist --find-interpreter -- -L --verbose
           sccache: 'true'
           manylinux: auto
           docker-options: |
