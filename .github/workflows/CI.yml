@@ -53,15 +53,13 @@ jobs:
         with:
           target: ${{ matrix.target }}
           args: --release --out dist --find-interpreter
-          # container: off
           sccache: 'true'
           manylinux: auto
           docker-options: |
             -e RUST_BACKTRACE=1
           before-script-linux: |
-            apt --fix-broken install
-            apt update
-            apt install cmake clang doxygen g++ extra-cmake-modules libgif-dev libjpeg-dev ninja-build libgoogle-perftools-dev libunwind-dev
+            sudo apt-get update
+            sudo apt-get install cmake clang doxygen g++ extra-cmake-modules libgif-dev libjpeg-dev ninja-build libgoogle-perftools-dev libunwind-dev
 
       - name: Upload wheels
         uses: actions/upload-artifact@v3
