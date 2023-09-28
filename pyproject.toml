@@ -11,7 +11,7 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-    "Pillow >= 10.1",
+    "Pillow",
 ]
 
 [tool.maturin]
