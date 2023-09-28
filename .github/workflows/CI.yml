@@ -97,7 +97,7 @@ jobs:
         with:
           rust-toolchain: stable-x86_64-pc-windows-gnu
           target: x86_64-pc-windows-gnu
-          args: --release --out dist --find-interpreter --cargo-extra-args="--features vendored"
+          args: --release --out dist --find-interpreter --all-features
           sccache: 'true'
 
       - name: Upload wheels
