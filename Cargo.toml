@@ -10,4 +10,8 @@ crate-type = ["cdylib"]
 
 [dependencies]
 pyo3 = "0.19.2"
-jpegxl-rs = { version = "0.8.2", default-features = false, features = ["vendored", "threads"] }
+jpegxl-rs = { version = "0.8.2", default-features = false, features = ["threads"] }
+
+[features]
+# Enables parallel processing support by enabling the "rayon" feature of jpeg-decoder.
+vendored = ["jpegxl-rs/vendored"]
