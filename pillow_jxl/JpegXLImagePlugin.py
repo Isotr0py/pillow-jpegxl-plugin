@@ -1,6 +1,6 @@
 from io import BytesIO
 from PIL import Image, ImageFile
-from pillow_jxl_plugin import Decoder, Encoder
+from pillow_jxl import Decoder, Encoder
 
 _VALID_JXL_MODES = {"RGB", "RGBA", "L", "LA"}
 

@@ -23,7 +23,7 @@ permissions:
 jobs:
   linux:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 60
     strategy:
       matrix:
         target: [x86_64]
@@ -56,8 +56,10 @@ jobs:
           sccache: 'true'
           manylinux: auto
           docker-options: |
-            -e DEP_JXL_LIB=${{ github.workspace }}/libjxl/build/lib
             -e RUST_BACKTRACE=1
+            -e DEP_JXL_LIB=${{ github.workspace }}/libjxl/build/lib
+          # before-script-linux: |
+          #   yum install -y cmake clang doxygen extra-cmake-modules ninja-build
 
       - name: Upload wheels
         uses: actions/upload-artifact@v3
@@ -95,7 +97,7 @@ jobs:
         with:
           rust-toolchain: stable-x86_64-pc-windows-gnu
           target: x86_64-pc-windows-gnu
-          args: --release --out dist --find-interpreter
+          args: --release --out dist --find-interpreter --all-features -- -L gcc -L stdc++ -L pthread
           sccache: 'true'
 
       - name: Upload wheels
@@ -125,13 +127,31 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: write
     if: "startsWith(github.ref, 'refs/tags/')"
     needs: [linux, windows, sdist]
     steps:
       - uses: actions/download-artifact@v3
         with:
           name: wheels
+      - name: upload to github release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            *.whl
+          prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') }}
+      - name: Publish to TestPyPI
+        if: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') }}
+        uses: PyO3/maturin-action@v1
+        env:
+          MATURIN_PYPI_TOKEN: ${{ secrets.TESTPYPI_API_TOKEN }}
+          MATURIN_REPOSITORY_URL: https://test.pypi.org/legacy/ 
+        with:
+          command: upload
+          args: --non-interactive --skip-existing *
       - name: Publish to PyPI
+        if: ${{ !contains(github.ref, 'alpha') || !contains(github.ref, 'beta') }}
         uses: PyO3/maturin-action@v1
         env:
           MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}

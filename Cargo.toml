@@ -5,9 +5,13 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
-name = "pillow_jxl_plugin"
+name = "pillow_jxl"
 crate-type = ["cdylib"]
 
 [dependencies]
 pyo3 = "0.19.2"
 jpegxl-rs = { version = "0.8.2", default-features = false, features = ["threads"] }
+
+[features]
+# Enables parallel processing support by enabling the "rayon" feature of jpeg-decoder.
+vendored = ["jpegxl-rs/vendored"]
