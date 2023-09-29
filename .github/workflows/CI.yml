@@ -151,7 +151,7 @@ jobs:
           command: upload
           args: --non-interactive --skip-existing *
       - name: Publish to PyPI
-        if: ${{ !contains(github.ref, 'alpha') || !contains(github.ref, 'beta') }}
+        if: ${{ !contains(github.ref, 'alpha') && !contains(github.ref, 'beta') }}
         uses: PyO3/maturin-action@v1
         env:
           MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
