@@ -3,7 +3,7 @@ requires = ["maturin>=1.2,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "pillow_jxl_plugin"
+name = "pillow-jxl-plugin"
 requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Rust",
