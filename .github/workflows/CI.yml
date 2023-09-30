@@ -23,7 +23,6 @@ permissions:
 jobs:
   linux:
     runs-on: ubuntu-latest
-    container: dockcross/linux-x86_64-full
     timeout-minutes: 60
     strategy:
       matrix:
@@ -53,23 +52,23 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --find-interpreter --all-features
+          args: --release --out wheels --find-interpreter --all-features
           sccache: 'true'
           manylinux: auto
           docker-options: |
             -e RUST_BACKTRACE=1
             -e DEP_JXL_LIB=${{ github.workspace }}/libjxl/build/lib
-          container: off
+            -e LD_LIBRARY_PATH=/usr/local/lib/
           # before-script-linux: |
           #   yum install -y cmake clang doxygen extra-cmake-modules ninja-build
 
-      # - name: Fix wheels with auditwheel
-      #   run: |
-      #     pip install auditwheel
-      #     for wheel in ${{ github.workspace }}/wheels/*manylinux*.whl; do
-      #       echo "Processing $wheel"
-      #       auditwheel repair "$wheel" --plat manylinux_2_17_x86_64 --wheel-dir dist
-      #     done
+      - name: Fix wheels with auditwheel
+        run: |
+          pip install auditwheel
+          for wheel in ${{ github.workspace }}/wheels/*manylinux*.whl; do
+            echo "Processing $wheel"
+            auditwheel repair "$wheel" --plat manylinux_2_17_x86_64 --wheel-dir dist
+          done
 
       - name: Upload wheels
         uses: actions/upload-artifact@v3
