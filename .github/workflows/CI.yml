@@ -52,7 +52,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --find-interpreter
+          args: --release --out wheels --find-interpreter
           sccache: 'true'
           manylinux: auto
           docker-options: |
@@ -64,9 +64,9 @@ jobs:
       - name: Fix wheels with auditwheel
         run: |
           pip install auditwheel
-          for wheel in *manylinux*.whl; do
+          for wheel in ${{ github.workspace }}/wheels/*manylinux*.whl; do
             echo "Processing $wheel"
-            auditwheel repair "$wheel" --plat manylinux_2_17_x86_64
+            auditwheel repair "$wheel" --plat manylinux_2_17_x86_64 --wheel-dir dist
           done
 
       - name: Upload wheels
