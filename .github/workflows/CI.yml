@@ -63,13 +63,13 @@ jobs:
           # before-script-linux: |
           #   yum install -y cmake clang doxygen extra-cmake-modules ninja-build
 
-      - name: Fix wheels with auditwheel
-        run: |
-          pip install auditwheel
-          for wheel in ${{ github.workspace }}/wheels/*manylinux*.whl; do
-            echo "Processing $wheel"
-            auditwheel repair "$wheel" --plat manylinux_2_17_x86_64 --wheel-dir dist
-          done
+      # - name: Fix wheels with auditwheel
+      #   run: |
+      #     pip install auditwheel
+      #     for wheel in ${{ github.workspace }}/wheels/*manylinux*.whl; do
+      #       echo "Processing $wheel"
+      #       auditwheel repair "$wheel" --plat manylinux_2_17_x86_64 --wheel-dir dist
+      #     done
 
       - name: Upload wheels
         uses: actions/upload-artifact@v3
