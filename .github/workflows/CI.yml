@@ -42,7 +42,7 @@ jobs:
 
       - name: Yum Install dependencys
         run: |
-          yum install -y cmake clang doxygen gcc-c++ extra-cmake-modules ninja-build
+          yum install -y cmake clang doxygen gcc-c++ extra-cmake-modules ninja-build libgif-devel libjpeg-devel
 
       - name: Build and install libjxl
         run: |
