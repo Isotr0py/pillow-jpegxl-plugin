@@ -61,6 +61,14 @@ jobs:
           # before-script-linux: |
           #   yum install -y cmake clang doxygen extra-cmake-modules ninja-build
 
+      - name: Fix wheels with auditwheel
+        run: |
+          pip install auditwheel
+          for wheel in *manylinux*.whl; do
+            echo "Processing $wheel"
+            auditwheel repair "$wheel"
+          done
+
       - name: Upload wheels
         uses: actions/upload-artifact@v3
         with:
@@ -103,7 +111,7 @@ jobs:
       - name: Fix wheels with delvewheel
         run: |
           pip install delvewheel
-          Get-ChildItem ${{ github.workspace }}/wheels/*.whl | ForEach-Object -Process {delvewheel repair $PSItem -w dist}
+          Get-ChildItem ${{ github.workspace }}/wheels/*win_amd64.whl | ForEach-Object -Process {delvewheel repair $PSItem -w dist}
 
       - name: Upload wheels
         uses: actions/upload-artifact@v3
