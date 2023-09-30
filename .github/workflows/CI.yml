@@ -40,9 +40,9 @@ jobs:
       #     sudo apt update
       #     sudo apt install -y cmake clang doxygen g++ extra-cmake-modules libgif-dev libjpeg-dev ninja-build libgoogle-perftools-dev libunwind-dev
 
-      # - name: Yum Install dependencys
-      #   run: |
-      #     sudo yum install cmake clang doxygen g++ extra-cmake-modules libgif-dev libjpeg-dev ninja-build libgoogle-perftools-dev libunwind-dev
+      - name: Yum Install dependencys
+        run: |
+          sudo yum install cmake clang doxygen g++ extra-cmake-modules libgif-dev libjpeg-dev ninja-build libgoogle-perftools-dev libunwind-dev
 
       - name: Build and install libjxl
         run: |
