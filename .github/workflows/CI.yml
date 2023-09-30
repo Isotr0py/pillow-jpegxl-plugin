@@ -58,8 +58,8 @@ jobs:
           docker-options: |
             -e RUST_BACKTRACE=1
             -e DEP_JXL_LIB=${{ github.workspace }}/libjxl/build/lib
-          # before-script-linux: |
-          #   yum install -y cmake clang doxygen extra-cmake-modules ninja-build
+          before-script-linux: |
+            yum install -y cmake clang doxygen extra-cmake-modules ninja-build
 
       - name: Fix wheels with auditwheel
         run: |
