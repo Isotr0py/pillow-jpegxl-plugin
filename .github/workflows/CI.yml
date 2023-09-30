@@ -61,6 +61,7 @@ jobs:
           manylinux: auto
           docker-options: |
             -e RUST_BACKTRACE=1
+            -e DEP_JXL_LIB=${{ github.workspace }}/libjxl/
           # -e DEP_JXL_LIB=${{ github.workspace }}/libjxl/build/lib
           # -e LD_LIBRARY_PATH=/usr/local/lib/
           before-script-linux: |
