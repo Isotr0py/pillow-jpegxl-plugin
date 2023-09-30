@@ -70,6 +70,7 @@ jobs:
             cmake -B build -G Ninja .
             cmake --build build
             cmake --install build
+            cd ..
 
       # - name: Fix wheels with auditwheel
       #   run: |
