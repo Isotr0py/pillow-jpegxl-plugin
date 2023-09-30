@@ -67,7 +67,7 @@ jobs:
             yum install -y cmake clang doxygen gcc-c++ extra-cmake-modules ninja-build
             git clone --recurse-submodules --depth 1 -b v0.8.2 https://github.com/libjxl/libjxl.git
             cd libjxl
-            cmake -B build -G Ninja .
+            cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
             cmake --build build
             cmake --install build
             cd ..
