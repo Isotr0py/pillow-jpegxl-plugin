@@ -23,6 +23,7 @@ permissions:
 jobs:
   linux:
     runs-on: ubuntu-latest
+    container: dockcross/manylinux2014-x64
     timeout-minutes: 60
     strategy:
       matrix:
@@ -37,7 +38,7 @@ jobs:
         run: |
           sudo apt --fix-broken install
           sudo apt update
-          sudo apt install cmake clang doxygen g++ extra-cmake-modules libgif-dev libjpeg-dev ninja-build libgoogle-perftools-dev libunwind-dev
+          sudo apt install -y cmake clang doxygen g++ extra-cmake-modules libgif-dev libjpeg-dev ninja-build libgoogle-perftools-dev libunwind-dev
       - name: Build and install libjxl
         run: |
           git clone https://github.com/libjxl/libjxl.git --recursive --shallow-submodules
