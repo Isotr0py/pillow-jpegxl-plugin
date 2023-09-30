@@ -40,9 +40,9 @@ jobs:
       #     sudo apt update
       #     sudo apt install -y cmake clang doxygen g++ extra-cmake-modules libgif-dev libjpeg-dev ninja-build libgoogle-perftools-dev libunwind-dev
       # libbrotli-dev nasm pkg-config ninja-build
-      # - name: Yum Install dependencys
-      #   run: |
-      #     yum install -y cmake clang doxygen gcc-c++ extra-cmake-modules ninja-build giflib-devel libjpeg-devel
+      - name: Yum Install dependencys
+        run: |
+          yum install -y cmake clang doxygen gcc-c++ extra-cmake-modules ninja-build
 
       - name: Build and install libjxl
         run: |
