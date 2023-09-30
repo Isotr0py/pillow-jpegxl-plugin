@@ -59,7 +59,7 @@ jobs:
           docker-options: |
             -e RUST_BACKTRACE=1
             -e DEP_JXL_LIB=${{ github.workspace }}/libjxl/build/lib
-          container: false
+          container: off
           # before-script-linux: |
           #   yum install -y cmake clang doxygen extra-cmake-modules ninja-build
 
