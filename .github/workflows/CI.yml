@@ -23,7 +23,7 @@ permissions:
 jobs:
   linux:
     runs-on: ubuntu-latest
-    container: dockcross/manylinux2014-x64
+    container: quay.io/pypa/manylinux2014-x86_64
     timeout-minutes: 60
     strategy:
       matrix:
