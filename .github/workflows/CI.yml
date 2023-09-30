@@ -23,7 +23,7 @@ permissions:
 jobs:
   linux:
     runs-on: ubuntu-latest
-    container: quay.io/pypa/manylinux2014_x86_64
+    # container: quay.io/pypa/manylinux2014_x86_64
     timeout-minutes: 60
     strategy:
       matrix:
@@ -40,32 +40,37 @@ jobs:
       #     sudo apt update
       #     sudo apt install -y cmake clang doxygen g++ extra-cmake-modules libgif-dev libjpeg-dev ninja-build libgoogle-perftools-dev libunwind-dev
       # libbrotli-dev nasm pkg-config ninja-build
-      - name: Yum Install dependencys
-        run: |
-          yum install -y cmake clang doxygen gcc-c++ extra-cmake-modules ninja-build
+      # - name: Yum Install dependencys
+      #   run: |
+      #     yum install -y cmake clang doxygen gcc-c++ extra-cmake-modules ninja-build
 
-      - name: Build and install libjxl
-        run: |
-          git clone --recurse-submodules --depth 1 -b v0.8.2 https://github.com/libjxl/libjxl.git
-          cd libjxl
-          cmake -B build -G Ninja .
-          cmake --build build
-          cmake --install build
+      # - name: Build and install libjxl
+      #   run: |
+      #     git clone --recurse-submodules --depth 1 -b v0.8.2 https://github.com/libjxl/libjxl.git
+      #     cd libjxl
+      #     cmake -B build -G Ninja .
+      #     cmake --build build
+      #     cmake --install build
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --find-interpreter --all-features
+          args: --release --out dist --find-interpreter
           sccache: 'true'
           manylinux: auto
           container: off
           docker-options: |
             -e RUST_BACKTRACE=1
             -e DEP_JXL_LIB=${{ github.workspace }}/libjxl/build/lib
-            -e LD_LIBRARY_PATH=/usr/local/lib/
-          # before-script-linux: |
-          #   yum install -y cmake clang doxygen extra-cmake-modules ninja-build
+          # -e LD_LIBRARY_PATH=/usr/local/lib/
+          before-script-linux: |
+            yum install -y cmake clang doxygen gcc-c++ extra-cmake-modules ninja-build
+            git clone --recurse-submodules --depth 1 -b v0.8.2 https://github.com/libjxl/libjxl.git
+            cd libjxl
+            cmake -B build -G Ninja .
+            cmake --build build
+            cmake --install build
 
       # - name: Fix wheels with auditwheel
       #   run: |
