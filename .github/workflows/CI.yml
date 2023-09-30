@@ -65,7 +65,7 @@ jobs:
             -e DEP_JXL_LIB=${{ github.workspace }}/libjxl/build/lib
           # -e LD_LIBRARY_PATH=/usr/local/lib/
           before-script-linux: |
-            yum install -y cmake clang doxygen gcc-c++ extra-cmake-modules ninja-build
+            yum install cmake clang doxygen gcc-c++ extra-cmake-modules ninja-build
             git clone --recurse-submodules --depth 1 -b v0.8.2 https://github.com/libjxl/libjxl.git
             cd libjxl
             cmake -B build -G Ninja .
