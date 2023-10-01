@@ -62,7 +62,7 @@ jobs:
           docker-options: |
             -e RUST_BACKTRACE=1
             -e DEP_JXL_LIB=${{ github.workspace }}/libjxl/build/lib
-            -e DEP_HWY_LIB=${{ github.workspace }}/libjxl/build/third_party/brotli
+            -e DEP_HWY_LIB=${{ github.workspace }}/libjxl/build/third_party/highway
           # -e DEP_BROTLI_LIB=${{ github.workspace }}/libjxl/build/third_party/brotli
           before-script-linux: |
             yum install -y epel-release
