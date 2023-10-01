@@ -1,4 +1,4 @@
-use std::env;
+// use std::env;
 
 fn main() {
     #[cfg(not(feature = "vendored"))]
