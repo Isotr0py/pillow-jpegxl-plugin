@@ -23,7 +23,6 @@ permissions:
 jobs:
   linux:
     runs-on: ubuntu-latest
-    container: quay.io/pypa/manylinux2014_x86_64
     timeout-minutes: 60
     strategy:
       matrix:
@@ -67,13 +66,13 @@ jobs:
             cmake --install build
             cd ..
 
-      # - name: Fix wheels with auditwheel
-      #   run: |
-      #     pip install auditwheel
-      #     for wheel in ${{ github.workspace }}/wheels/*manylinux*.whl; do
-      #       echo "Processing $wheel"
-      #       auditwheel repair "$wheel" --plat manylinux_2_17_x86_64 --wheel-dir dist
-      #     done
+      - name: Fix wheels with auditwheel
+        run: |
+          pip install auditwheel
+          for wheel in ${{ github.workspace }}/wheels/*manylinux*.whl; do
+            echo "Processing $wheel"
+            auditwheel repair "$wheel" --plat manylinux_2_17_x86_64 --wheel-dir dist
+          done
 
       - name: Upload wheels
         uses: actions/upload-artifact@v3
