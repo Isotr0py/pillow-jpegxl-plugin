@@ -8,5 +8,5 @@ fn main() {
     println!("cargo:rustc-link-lib=static=brotlienc-static");
 
     // println!("cargo:rustc-link-lib=stdc++");
-    println!("cargo:rustc-link-lib=dylib=stdc++");
+    println!("cargo:rustc-link-lib=static=stdc++");
 }
