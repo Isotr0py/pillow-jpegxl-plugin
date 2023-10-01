@@ -8,13 +8,17 @@ fn main() {
 
         println!("cargo:rustc-link-lib=static=hwy");
 
-        println!("cargo:rustc-link-lib=static=brotlicommon-static");
         println!("cargo:rustc-link-lib=static=brotlidec-static");
         println!("cargo:rustc-link-lib=static=brotlienc-static");
-        // println!("cargo:rustc-link-lib=static=brotlicommon-static");
+        println!("cargo:rustc-link-lib=static=brotlicommon-static");
+        // println!("cargo:rustc-link-search=native={}", "/mnt/d/rust/dev/test/libjxl/build/third_party/brotli");
         if let Ok(path) = env::var("DEP_BROTLI_LIB") {
             println!("cargo:rustc-link-search=native={}", path);
         }
+
+        // println!("cargo:rustc-link-lib=brotlidec");
+        // println!("cargo:rustc-link-lib=brotlienc");
+        // println!("cargo:rustc-link-lib=brotlicommon");
     }
 
     println!("cargo:rustc-link-lib=stdc++");
