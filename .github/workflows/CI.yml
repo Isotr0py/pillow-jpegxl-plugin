@@ -38,19 +38,15 @@ jobs:
       #   run: |
       #     sudo apt --fix-broken install
       #     sudo apt update
-      #     sudo apt install -y cmake clang doxygen g++ extra-cmake-modules libgif-dev libjpeg-dev ninja-build libgoogle-perftools-dev libunwind-dev
-      # libbrotli-dev nasm pkg-config ninja-build
-      # - name: Yum Install dependencys
-      #   run: |
-      #     yum install -y cmake clang doxygen gcc-c++ extra-cmake-modules ninja-build
+      #     sudo apt install -y cmake clang doxygen g++ extra-cmake-modules ninja-build
 
-      - name: Build and install libjxl
-        run: |
-          git clone --recurse-submodules --depth 1 -b v0.8.2 https://github.com/libjxl/libjxl.git
-          cd libjxl
-          cmake -B build -G Ninja .
-          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
-          cmake --build build
+      # - name: Build and install libjxl
+      #   run: |
+      #     git clone --recurse-submodules --depth 1 -b v0.8.2 https://github.com/libjxl/libjxl.git
+      #     cd libjxl
+      #     cmake -B build -G Ninja .
+      #     cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+      #     cmake --build build
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
@@ -64,15 +60,15 @@ jobs:
             -e DEP_JXL_LIB=${{ github.workspace }}/libjxl/build/lib
             -e DEP_HWY_LIB=${{ github.workspace }}/libjxl/build/third_party/highway
             -e DEP_BROTLI_LIB=${{ github.workspace }}/libjxl/build/third_party/brotli
-          # before-script-linux: |
-          #   yum install -y epel-release
-          #   yum install -y cmake clang doxygen gcc-c++ extra-cmake-modules ninja-build
-          #   git clone --recurse-submodules --depth 1 -b v0.8.2 https://github.com/libjxl/libjxl.git
-          #   cd libjxl
-          #   cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
-          #   cmake --build build
-          #   nm ${{ github.workspace }}/libjxl/build/third_party/brotli/libbrotlidec-static.a | grep BrotliDecoder
-          #   cd ..
+          before-script-linux: |
+            yum install -y epel-release
+            yum install -y cmake clang doxygen gcc-c++ extra-cmake-modules ninja-build
+            git clone --recurse-submodules --depth 1 -b v0.8.2 https://github.com/libjxl/libjxl.git
+            cd libjxl
+            cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+            cmake --build build
+            nm ${{ github.workspace }}/libjxl/build/third_party/brotli/libbrotlidec-static.a | grep BrotliDecoder
+            cd ..
           # cmake --install build
           # cd ..
 

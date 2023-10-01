@@ -11,10 +11,13 @@ fn main() {
             println!("cargo:rustc-link-search=native={}", path);
         }
 
+        // println!("cargo:rustc-link-lib=static=brotlidec-static");
+        // println!("cargo:rustc-link-lib=static=brotlienc-static");
+        // println!("cargo:rustc-link-lib=static=brotlicommon-static");
+        // println!("cargo:rustc-link-search=native={}", "/mnt/d/rust/dev/test/libjxl/build/third_party/brotli");
+        println!("cargo:rustc-link-lib=static=brotlicommon-static");
         println!("cargo:rustc-link-lib=static=brotlidec-static");
         println!("cargo:rustc-link-lib=static=brotlienc-static");
-        println!("cargo:rustc-link-lib=static=brotlicommon-static");
-        // println!("cargo:rustc-link-search=native={}", "/mnt/d/rust/dev/test/libjxl/build/third_party/brotli");
         if let Ok(path) = env::var("DEP_BROTLI_LIB") {
             println!("cargo:rustc-link-search=native={}", path);
         }
