@@ -23,6 +23,7 @@ permissions:
 jobs:
   linux:
     runs-on: ubuntu-latest
+    container: quay.io/pypa/manylinux2014_x86_64
     timeout-minutes: 60
     strategy:
       matrix:
@@ -53,6 +54,7 @@ jobs:
           args: --release --out dist --find-interpreter
           sccache: 'true'
           manylinux: auto
+          container: off
           docker-options: |
             -e RUST_BACKTRACE=1
             -e DEP_JXL_LIB=${{ github.workspace }}/libjxl/build/lib
