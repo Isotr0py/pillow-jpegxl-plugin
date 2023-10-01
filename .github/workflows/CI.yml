@@ -50,7 +50,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --find-interpreter
+          args: --release --out wheels --find-interpreter
           sccache: 'true'
           manylinux: auto
           docker-options: |
