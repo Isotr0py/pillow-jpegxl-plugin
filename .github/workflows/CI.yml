@@ -66,7 +66,7 @@ jobs:
             -e DEP_HWY_LIB=${{ github.workspace }}/libjxl/build/third_party/highway
           before-script-linux: |
             yum install -y epel-release
-            yum install -y cmake clang doxygen gcc-c++ extra-cmake-modules ninja-build brotli-devel
+            yum install -y cmake clang doxygen gcc-c++ extra-cmake-modules ninja-build
             git clone --recurse-submodules --depth 1 -b v0.8.2 https://github.com/libjxl/libjxl.git
             cd libjxl
             cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
