@@ -7,6 +7,9 @@ fn main() {
         println!("cargo:rustc-link-lib=static=jxl_threads");
 
         println!("cargo:rustc-link-lib=static=hwy");
+        if let Ok(path) = env::var("DEP_HWY_LIB") {
+            println!("cargo:rustc-link-search=native={}", path);
+        }
 
         println!("cargo:rustc-link-lib=static=brotlidec-static");
         println!("cargo:rustc-link-lib=static=brotlienc-static");
