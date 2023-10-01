@@ -3,8 +3,8 @@ use std::env;
 fn main() {
     #[cfg(not(feature = "vendored"))]
     {
-        // println!("cargo:rustc-link-lib=static=jxl");
-        // println!("cargo:rustc-link-lib=static=jxl_threads");
+        println!("cargo:rustc-link-lib=static=jxl");
+        println!("cargo:rustc-link-lib=static=jxl_threads");
 
         println!("cargo:rustc-link-lib=static=hwy");
         if let Ok(path) = env::var("DEP_HWY_LIB") {
