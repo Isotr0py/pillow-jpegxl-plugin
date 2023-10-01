@@ -70,8 +70,9 @@ jobs:
             cd libjxl
             cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
             cmake --build build
-            cmake --install build
             cd ..
+          # cmake --install build
+          # cd ..
 
       # - name: Fix wheels with auditwheel
       #   run: |
