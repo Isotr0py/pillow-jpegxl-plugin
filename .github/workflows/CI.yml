@@ -62,6 +62,7 @@ jobs:
           docker-options: |
             -e RUST_BACKTRACE=1
             -e DEP_JXL_LIB=${{ github.workspace }}/libjxl/build/lib
+            -e DEP_BROTLI_LIB=${{ github.workspace }}/libjxl/build/third_party/brotli
           before-script-linux: |
             yum install -y epel-release
             yum install -y cmake clang doxygen gcc-c++ extra-cmake-modules ninja-build brotli-devel
