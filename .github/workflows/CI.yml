@@ -33,19 +33,6 @@ jobs:
         with:
           python-version: '3.10'
 
-      # - name: Install dependencys
-      #   run: |
-      #     sudo apt --fix-broken install
-      #     sudo apt update
-      #     sudo apt install -y cmake clang doxygen g++ extra-cmake-modules ninja-build
-
-      # - name: Build and install libjxl
-      #   run: |
-      #     git clone --recurse-submodules --depth 1 -b v0.8.2 https://github.com/libjxl/libjxl.git
-      #     cd libjxl
-      #     cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
-      #     cmake --build build
-
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -65,14 +52,6 @@ jobs:
             cmake --build build
             cmake --install build
             cd ..
-
-      # - name: Fix wheels with auditwheel
-      #   run: |
-      #     pip install auditwheel
-      #     for wheel in ${{ github.workspace }}/wheels/*manylinux*.whl; do
-      #       echo "Processing $wheel"
-      #       auditwheel repair "$wheel" --plat manylinux_2_17_x86_64 --wheel-dir dist
-      #     done
 
       - name: Upload wheels
         uses: actions/upload-artifact@v3
