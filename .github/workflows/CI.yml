@@ -26,7 +26,7 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        target: [x86_64]
+        target: [x86_64, x86, aarch64, armv7, s390x, ppc64le]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -103,6 +103,32 @@ jobs:
           name: wheels
           path: dist
 
+  macos:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        target: [x86_64, aarch64]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          architecture: ${{ matrix.target }}
+
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          rust-toolchain: stable-x86_64-pc-windows-gnu
+          target: ${{ matrix.target }}
+          args: --release --out dist --find-interpreter --all-features
+          sccache: 'true'
+      
+      - name: Upload wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels
+          path: dist
+    
   sdist:
     runs-on: ubuntu-latest
     timeout-minutes: 60
