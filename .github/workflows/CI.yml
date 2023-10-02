@@ -33,21 +33,6 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install dependencys
-        run: |
-          sudo apt --fix-broken install
-          sudo apt update
-          sudo apt install cmake clang doxygen g++ extra-cmake-modules libgif-dev libjpeg-dev ninja-build libgoogle-perftools-dev libunwind-dev
-      - name: Build and install libjxl
-        run: |
-          git clone https://github.com/libjxl/libjxl.git --recursive --shallow-submodules
-          cd libjxl
-          mkdir build
-          cd build
-          cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF ..
-          cmake --build . -- -j$(nproc)
-          sudo cmake --install .
-
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -58,8 +43,15 @@ jobs:
           docker-options: |
             -e RUST_BACKTRACE=1
             -e DEP_JXL_LIB=${{ github.workspace }}/libjxl/build/lib
-          # before-script-linux: |
-          #   yum install -y cmake clang doxygen extra-cmake-modules ninja-build
+          before-script-linux: |
+            yum install -y epel-release
+            yum install -y cmake clang doxygen gcc-c++ extra-cmake-modules ninja-build
+            git clone --recurse-submodules --depth 1 -b v0.8.2 https://github.com/libjxl/libjxl.git
+            cd libjxl
+            cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+            cmake --build build
+            cmake --install build
+            cd ..
 
       - name: Upload wheels
         uses: actions/upload-artifact@v3
@@ -97,8 +89,13 @@ jobs:
         with:
           rust-toolchain: stable-x86_64-pc-windows-gnu
           target: x86_64-pc-windows-gnu
-          args: --release --out dist --find-interpreter --all-features -- -L gcc -L stdc++ -L pthread
+          args: --release --out wheels --find-interpreter --all-features
           sccache: 'true'
+      
+      - name: Fix wheels with delvewheel
+        run: |
+          pip install delvewheel
+          Get-ChildItem ${{ github.workspace }}/wheels/*win_amd64.whl | ForEach-Object -Process {delvewheel repair $PSItem -w dist}
 
       - name: Upload wheels
         uses: actions/upload-artifact@v3
