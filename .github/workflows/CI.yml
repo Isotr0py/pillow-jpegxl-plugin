@@ -26,7 +26,7 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        target: [x86_64, x86, aarch64, armv7, s390x]
+        target: [x86_64, x86]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -138,6 +138,10 @@ jobs:
           docker-options: |
             -e RUST_BACKTRACE=1
             -e DEP_JXL_LIB=${{ github.workspace }}/libjxl/build/lib
+          before-script-linux: |
+            cd libjxl
+            cmake --install build
+            cd ..
       
       - name: Upload wheels
         uses: actions/upload-artifact@v3
