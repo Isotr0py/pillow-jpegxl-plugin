@@ -123,7 +123,7 @@ jobs:
           architecture: ${{ matrix.target }}
       
       - name: Install libjxl
-        run: brew install libjxl
+        run: brew install jpeg-xl
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
