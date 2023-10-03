@@ -122,7 +122,7 @@ jobs:
           sccache: 'true'
           docker-options: |
             -e RUST_BACKTRACE=1
-            -e DEP_JXL_LIB=${{ github.workspace }}/libjxl/build/lib
+            -e DEP_JXL_LIB=/usr/local/lib
       
       - name: Upload wheels
         uses: actions/upload-artifact@v3
