@@ -129,6 +129,7 @@ jobs:
           cmake --build build
           cmake --install build
           echo "PATH=/usr/local/lib" >> $GITHUB_PATH
+          pkg-config hwy
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
