@@ -26,23 +26,12 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        target: [x86_64, x86, aarch64, armv7, s390x]
-      # target: [x86_64, x86, aarch64, armv7, s390x, ppc64le]
+        target: [x86_64, x86, aarch64, armv7, s390x, ppc64le]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-
-      - name: Build libjxl
-        run: |
-          sudo apt update
-          sudo apt install -y clang cmake git libbrotli-dev nasm pkg-config ninja-build
-          git clone --recurse-submodules --depth 1 -b v0.8.2 https://github.com/libjxl/libjxl.git
-          cd libjxl
-          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
-          cmake --build build
-        # cmake --install build
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
@@ -57,7 +46,10 @@ jobs:
           # -e DEP_BROTLI_LIB=${{ github.workspace }}/libjxl/third_party/brotli
           # -e DEP_HWY_LIB=${{ github.workspace }}/libjxl/third_party/highway
           before-script-linux: |
+            git clone --recurse-submodules --depth 1 -b v0.8.2 https://github.com/libjxl/libjxl.git
             cd libjxl
+            cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+            cmake --build build
             cmake --install build
             cd ..
 
@@ -121,9 +113,6 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           architecture: ${{ matrix.target }}
-      
-      - name: Install libjxl
-        run: brew install jpeg-xl brotli highway
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
@@ -131,6 +120,9 @@ jobs:
           target: ${{ matrix.target }}
           args: --release --out dist --find-interpreter
           sccache: 'true'
+          docker-options: |
+            -e RUST_BACKTRACE=1
+            -e DEP_JXL_LIB=${{ github.workspace }}/libjxl/build/lib
       
       - name: Upload wheels
         uses: actions/upload-artifact@v3
