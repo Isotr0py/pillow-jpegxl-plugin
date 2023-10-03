@@ -119,6 +119,8 @@ jobs:
 
       - name: Build libjxl
         run: |
+          brew uninstall jpeg-xl highway
+          brew autoremove
           brew install ninja pkg-config
           git clone --recurse-submodules --depth 1 -b v0.8.2 https://github.com/libjxl/libjxl.git
           cd libjxl
