@@ -1,6 +1,7 @@
 use std::env;
 
 fn main() {
+    // Static link libjxl
     #[cfg(not(feature = "vendored"))]
     {
         println!("cargo:rustc-link-lib=static=jxl");
@@ -18,5 +19,15 @@ fn main() {
             println!("cargo:rustc-link-search=native={}", path);
         }
     }
-    println!("cargo:rustc-link-lib=stdc++");
+
+    // Dynamic link c++
+    // TODO: Support MSVC and use Cargo
+    let platform = env::consts::OS;
+    match platform {
+        // Since MSVC will stuck on building libjxl
+        // Linux and Windows should all use GNU toolchain
+        "linux" | "windows" => println!("cargo:rustc-link-lib=stdc++"),
+        "macos" => println!("cargo:rustc-link-lib=c++"),
+        _ => panic!("Not implemented c++ link on {}", platform)
+    }
 }
