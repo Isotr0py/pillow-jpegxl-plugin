@@ -133,6 +133,7 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         env: 
+          RUSTFLAGS: "-C target-feature=+crt-static"
           RUST_BACKTRACE: 1
           MACOSX_DEPLOYMENT_TARGET: 12.7
           DEP_JXL_LIB: ${{ github.workspace }}/libjxl/build/lib
