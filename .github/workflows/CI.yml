@@ -119,7 +119,7 @@ jobs:
 
       - name: Build libjxl
         run: |
-          brew install ninja gcc
+          brew install ninja
           git clone --recurse-submodules --depth 1 -b v0.8.2 https://github.com/libjxl/libjxl.git
           cd libjxl
           cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
@@ -132,11 +132,11 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         env: 
+          RUST_BACKTRACE: 1
           MACOSX_DEPLOYMENT_TARGET: 12.7
           DEP_JXL_LIB: ${{ github.workspace }}/libjxl/build/lib
-          DEP_BROTLI_LIB: ${{ github.workspace }}/libjxl/build/third_party/brotli
-          DEP_HWY_LIB: ${{ github.workspace }}/libjxl/third_party/highway
-          RUST_BACKTRACE: 1
+        # DEP_BROTLI_LIB: ${{ github.workspace }}/libjxl/build/third_party/brotli
+        # DEP_HWY_LIB: ${{ github.workspace }}/libjxl/third_party/highway
         with:
           target: ${{ matrix.target }}
           args: --release --out dist --find-interpreter
