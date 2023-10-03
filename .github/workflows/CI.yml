@@ -41,7 +41,7 @@ jobs:
           cd libjxl
           cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
           cmake --build build
-          cmake --install build
+        # cmake --install build
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
