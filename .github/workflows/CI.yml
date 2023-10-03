@@ -133,6 +133,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         env: 
           DEP_JXL_LIB: ${{ github.workspace }}/libjxl/build/lib
+          DEP_BROTLI_LIB: ${{ github.workspace }}/libjxl/build/third_party/brotli
           RUST_BACKTRACE: 1
         with:
           target: ${{ matrix.target }}
