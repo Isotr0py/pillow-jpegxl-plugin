@@ -121,12 +121,15 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           architecture: ${{ matrix.target }}
+      
+      - name: Install libjxl
+        run: brew install libjxl
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --find-interpreter --all-features
+          args: --release --out dist --find-interpreter
           sccache: 'true'
       
       - name: Upload wheels
