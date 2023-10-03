@@ -117,9 +117,9 @@ jobs:
         with:
           architecture: ${{ matrix.target }}
 
-      # - name: Build libjxl
-      #   run: |
-      #     brew install ninja
+      - name: Build libjxl
+        run: |
+          brew install ninja gcc
       #     git clone --recurse-submodules --depth 1 -b v0.8.2 https://github.com/libjxl/libjxl.git
       #     cd libjxl
       #     cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
