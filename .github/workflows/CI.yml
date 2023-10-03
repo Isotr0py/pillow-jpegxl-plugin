@@ -128,6 +128,7 @@ jobs:
             -DJPEGXL_ENABLE_SJPEG=OFF -DJPEGXL_ENABLE_OPENEXR=OFF
           cmake --build build
           cmake --install build
+          echo "PATH=/usr/local/lib" >> $GITHUB_PATH
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
@@ -135,8 +136,8 @@ jobs:
           RUST_BACKTRACE: 1
           MACOSX_DEPLOYMENT_TARGET: 12.7
           DEP_JXL_LIB: ${{ github.workspace }}/libjxl/build/lib
-        # DEP_BROTLI_LIB: ${{ github.workspace }}/libjxl/build/third_party/brotli
-        # DEP_HWY_LIB: ${{ github.workspace }}/libjxl/third_party/highway
+          DEP_BROTLI_LIB: ${{ github.workspace }}/libjxl/build/third_party/brotli
+          DEP_HWY_LIB: ${{ github.workspace }}/libjxl/third_party/highway
         with:
           target: ${{ matrix.target }}
           args: --release --out dist --find-interpreter
