@@ -135,7 +135,7 @@ jobs:
           MACOSX_DEPLOYMENT_TARGET: 12.7
           DEP_JXL_LIB: ${{ github.workspace }}/libjxl/build/lib
           DEP_BROTLI_LIB: ${{ github.workspace }}/libjxl/build/third_party/brotli
-          DEP_HWY_LIB: ${{ github.workspace }}/libjxl/third_party/highway
+          DEP_HWY_LIB: ${{ github.workspace }}/libjxl/build/third_party/highway
         with:
           target: ${{ matrix.target }}
           args: --release --out dist --find-interpreter
