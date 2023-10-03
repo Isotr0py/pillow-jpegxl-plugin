@@ -120,23 +120,24 @@ jobs:
       - name: Build libjxl
         run: |
           brew install ninja gcc
-      #     git clone --recurse-submodules --depth 1 -b v0.8.2 https://github.com/libjxl/libjxl.git
-      #     cd libjxl
-      #     cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
-      #       -DJPEGXL_ENABLE_TOOLS=OFF -DJPEGXL_ENABLE_DOXYGEN=OFF -DJPEGXL_ENABLE_MANPAGES=OFF \
-      #       -DJPEGXL_ENABLE_BENCHMARKS=OFF -DJPEGXL_ENABLE_EXAMPLES=OFF -DJPEGXL_ENABLE_JNI=OFF \
-      #       -DJPEGXL_ENABLE_SJPEG=OFF -DJPEGXL_ENABLE_OPENEXR=OFF
-      #     cmake --build build
-      #     cmake --install build
+          git clone --recurse-submodules --depth 1 -b v0.8.2 https://github.com/libjxl/libjxl.git
+          cd libjxl
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
+            -DJPEGXL_ENABLE_TOOLS=OFF -DJPEGXL_ENABLE_DOXYGEN=OFF -DJPEGXL_ENABLE_MANPAGES=OFF \
+            -DJPEGXL_ENABLE_BENCHMARKS=OFF -DJPEGXL_ENABLE_EXAMPLES=OFF -DJPEGXL_ENABLE_JNI=OFF \
+            -DJPEGXL_ENABLE_SJPEG=OFF -DJPEGXL_ENABLE_OPENEXR=OFF
+          cmake --build build
+          cmake --install build
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
+        env: 
+          DEP_JXL_LIB: ${{ github.workspace }}/libjxl/build/lib
+          RUST_BACKTRACE: 1
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --find-interpreter --all-features
+          args: --release --out dist --find-interpreter
           sccache: 'true'
-          docker-options: |
-            -e RUST_BACKTRACE=1
       
       - name: Upload wheels
         uses: actions/upload-artifact@v3
