@@ -134,6 +134,7 @@ jobs:
         env: 
           DEP_JXL_LIB: ${{ github.workspace }}/libjxl/build/lib
           DEP_BROTLI_LIB: ${{ github.workspace }}/libjxl/build/third_party/brotli
+          DEP_HWY_LIB: ${{ github.workspace }}/libjxl/third_party/highway
           RUST_BACKTRACE: 1
         with:
           target: ${{ matrix.target }}
