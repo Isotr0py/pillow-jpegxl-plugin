@@ -27,25 +27,27 @@ jobs:
     strategy:
       matrix:
         target: [x86_64, x86]
+        include:
+          - target: x86_64
+            docker_image: quay.io/pypa/manylinux2014_x86_64:latest
+          - target: x86
+            docker_image: quay.io/pypa/manylinux2014_i686:latest
+
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: Build wheels
-        uses: PyO3/maturin-action@v1
+      - name: Build libjxl (x86/x64)
+        if: ${{ contains(matrix.target, 'x86')}}
+        uses: kohlerdominik/docker-run-action@v1
         with:
-          target: ${{ matrix.target }}
-          args: --release --out dist --find-interpreter
-          sccache: 'true'
-          manylinux: auto
-          docker-options: |
-            -e RUST_BACKTRACE=1
-            -e DEP_JXL_LIB=${{ github.workspace }}/libjxl/build/lib
-          # -e DEP_BROTLI_LIB=${{ github.workspace }}/libjxl/third_party/brotli
-          # -e DEP_HWY_LIB=${{ github.workspace }}/libjxl/third_party/highway
-          before-script-linux: |
+          image: ${{ matrix.docker_image }}
+          volumes: ${{ github.workspace }}:/workspace
+          workdir: /workspace
+          run: |
+            yum install -y cmake clang gcc-c++
             git clone --recurse-submodules --depth 1 -b v0.8.2 https://github.com/libjxl/libjxl.git
             cd libjxl
             cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
@@ -54,7 +56,18 @@ jobs:
               -DJPEGXL_ENABLE_SJPEG=OFF -DJPEGXL_ENABLE_OPENEXR=OFF
             cmake --build build
             cmake --install build
-            cd ..
+
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.target }}
+          args: --release --out dist --find-interpreter
+          manylinux: auto
+          docker-options: |
+            -e RUST_BACKTRACE=1
+            -e DEP_JXL_LIB=${{ github.workspace }}/libjxl/build/lib
+            -e DEP_BROTLI_LIB=${{ github.workspace }}/libjxl/build/third_party/brotli
+            -e DEP_HWY_LIB=${{ github.workspace }}/libjxl/build/third_party/highway
 
       - name: Upload wheels
         uses: actions/upload-artifact@v3
@@ -119,7 +132,7 @@ jobs:
 
       - name: Build libjxl
         run: |
-          brew install ninja pkg-config
+          brew install ninja
           git clone --recurse-submodules --depth 1 -b v0.8.2 https://github.com/libjxl/libjxl.git
           cd libjxl
           cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
