@@ -28,16 +28,17 @@ with Image.open("example.jxl") as img:
 ```
 
 ## Wheels status
-| Wheels      | Windows 64-bit | manylinux |
-|-------------|:--------------:|:---------:|
-| CPython3.8  |        ✔       |   x86_64  |
-| CPython3.9  |        ✔       |   x86_64  |
-| CPython3.10 |        ✔       |   x86_64  |
-| CPython3.11 |        ✔       |   x86_64  |
-| CPython3.12 |        ❌       |   x86_64  |
-| PyPy3.8     |        ❌       |   x86_64  |
-| PyPy3.9     |        ❌       |   x86_64  |
-| PyPy3.10    |        ❌       |   x86_64  |
+| Wheels      | Windows 64-bit | MacOS | manylinux |
+|-------------|:--------------:|:-----:|:---------:|
+| CPython3.8  |        ✔       |   ✔   |     ♻     |
+| CPython3.9  |        ✔       |   ✔   |     ♻     |
+| CPython3.10 |        ✔       |   ✔   |     ♻     |
+| CPython3.11 |        ✔       |   ✔   |     ♻     |
+| CPython3.12 |        ❌       |   ❌   |     ♻     |
+| PyPy3.8     |        ❌       |   ❌   |     ♻     |
+| PyPy3.9     |        ❌       |   ❌   |     ♻     |
+| PyPy3.10    |        ❌       |   ❌   |     ♻     |
 
+♻: Work in progress, avaliable platforms: `x86`, `x86_64` and `aarch64`
 ## Credits
 - [inflation/jpegxl-rs](https://github.com/inflation/jpegxl-rs)
