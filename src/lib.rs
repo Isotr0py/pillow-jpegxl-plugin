@@ -74,6 +74,13 @@ impl Encoder {
         let buffer: EncoderResult<u8> = encoder.encode(&data, width, height).unwrap();
         PyBytes::new(_py, &buffer.data)
     }
+
+    fn __repr__(&self) -> PyResult<String> {
+        Ok(format!(
+            "Encoder(parallel={}, has_alpha={}, lossless={}, quality={}, decoding_speed={})",
+            self.parallel, self.has_alpha, self.lossless, self.quality, self.decoding_speed
+        ))
+    }
 }
 
 #[pyclass(module = "pillow_jxl")]
@@ -144,6 +151,10 @@ impl Decoder {
             _ => panic!("Unsupported dtype for decoding"),
         };
         (ImageInfo::from(info), PyBytes::new(_py, &img))
+    }
+
+    fn __repr__(&self) -> PyResult<String> {
+        Ok(format!("Decoder(parallel={})", self.parallel))
     }
 }
 
