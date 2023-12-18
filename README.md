@@ -10,6 +10,15 @@ Pillow plugin for JPEG-XL, using Rust for bindings.
 pip install pillow-jxl-plugin
 ```
 
+## Build from source
+Make sure `Rust` and [maturin](https://github.com/PyO3/maturin) installed, then run:
+```
+git clone https://github.com/Isotr0py/pillow-jpegxl-plugin
+cd pillow-jpegxl-plugin
+
+maturin build --release --features vendored
+```
+
 ## Plugin Usage
 Use `import pillow_jxl` to register the plugin in your code. 
 
