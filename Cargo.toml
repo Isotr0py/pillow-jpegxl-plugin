@@ -16,3 +16,4 @@ jpegxl-rs = { version = "0.8.3", default-features = false, features = ["threads"
 [features]
 # Enables parallel processing support by enabling the "rayon" feature of jpeg-decoder.
 vendored = ["jpegxl-rs/vendored"]
+dynamic = []
