@@ -18,6 +18,10 @@ cd pillow-jpegxl-plugin
 
 maturin build --release --features vendored
 ```
+If you have `libjxl` installed and want to use dynamic link, run:
+```
+maturin build --release --features dynamic
+```
 
 ## Plugin Usage
 Use `import pillow_jxl` to register the plugin in your code. 
