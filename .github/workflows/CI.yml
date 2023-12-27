@@ -26,13 +26,19 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        target: [x86_64, x86]
+        target: [x86_64, x86, aarch64, armv7, s390x, ppc64le]
         include:
           - target: x86_64
             docker_image: quay.io/pypa/manylinux2014_x86_64:latest
           - target: x86
             docker_image: quay.io/pypa/manylinux2014_i686:latest
           - target: aarch64
+            distro: ubuntu_latest
+          - target: armv7
+            distro: ubuntu_latest
+          - target: s390x
+            distro: ubuntu_latest
+          - target: ppc64le
             distro: ubuntu_latest
 
     steps:
