@@ -52,6 +52,5 @@ with Image.open("example.jxl") as img:
 | PyPy3.9     |        ❌       |   ❌   |     ✔     |
 | PyPy3.10    |        ❌       |   ❌   |     ✔     |
 
-♻: Work in progress, avaliable platforms: `x86`, `x86_64` and `aarch64`
 ## Credits
 - [inflation/jpegxl-rs](https://github.com/inflation/jpegxl-rs)
