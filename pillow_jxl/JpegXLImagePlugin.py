@@ -1,5 +1,9 @@
 from io import BytesIO
+
+import PIL
 from PIL import Image, ImageFile
+from pkg_resources import parse_version
+
 from pillow_jxl import Decoder, Encoder
 
 _VALID_JXL_MODES = {"RGB", "RGBA", "L", "LA"}
@@ -24,10 +28,14 @@ class JXLImageFile(ImageFile.ImageFile):
         self._decoder = Decoder()
 
         self._jxlinfo, self._data = self._decoder(self.fc)
-        # self._size = (self._jxlinfo['width'], self._jxlinfo['height'])
-        # self.mode = self.rawmode = self._jxlinfo["mode"]
         self._size = (self._jxlinfo.width, self._jxlinfo.height)
-        self.mode = self.rawmode = self._jxlinfo.mode
+        self.rawmode = self._jxlinfo.mode
+        # NOTE (Isotr0py): PIL 10.1.0 changed the mode to property, use _mode instead
+        if parse_version(PIL.__version__) >= parse_version("10.1.0"):
+            self._mode = self.rawmode
+        else:
+            self.mode = self.rawmode
+
         self.tile = []
 
     def seek(self, frame):
