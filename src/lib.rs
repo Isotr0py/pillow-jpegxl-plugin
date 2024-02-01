@@ -1,7 +1,7 @@
 use pyo3::prelude::*;
 use pyo3::types::PyBytes;
 
-use jpegxl_rs::decode::{Metadata, Pixels};
+use jpegxl_rs::decode::{Metadata, Pixels, Data};
 use jpegxl_rs::encode::EncoderResult;
 use jpegxl_rs::parallel::threads_runner::ThreadsRunner;
 use jpegxl_rs::{decoder_builder, encoder_builder};
@@ -145,9 +145,15 @@ impl Decoder {
             }
             false => decoder_builder().build().unwrap(),
         };
-        let (info, img) = decoder.decode(&data).unwrap();
+        // let (info, img) = decoder.decode(&data).unwrap();
+        // let img: Vec<u8> = match img {
+        //     Pixels::Uint8(x) => x,
+        //     _ => panic!("Unsupported dtype for decoding"),
+        // };
+        let (info, img) = decoder.reconstruct(&data).unwrap();
         let img: Vec<u8> = match img {
-            Pixels::Uint8(x) => x,
+            Data::Jpeg(x) => x,
+            Data::Pixels(Pixels::Uint8(x)) => x,
             _ => panic!("Unsupported dtype for decoding"),
         };
         (ImageInfo::from(info), PyBytes::new(_py, &img))

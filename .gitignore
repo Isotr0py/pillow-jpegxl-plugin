@@ -1,5 +1,8 @@
 /target
 Cargo.lock
+*.ipynb
+*.jxl
+*.jpeg
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
