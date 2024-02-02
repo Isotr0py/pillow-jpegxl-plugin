@@ -133,7 +133,7 @@ impl Decoder {
     }
 
     #[pyo3(signature = (data))]
-    fn __call__<'a>(&'a self, _py: Python<'a>, data: &[u8]) -> (ImageInfo, &PyBytes) {
+    fn __call__<'a>(&'a self, _py: Python<'a>, data: &[u8]) -> (bool, ImageInfo, &PyBytes) {
         let parallel_runner: ThreadsRunner;
         let decoder = match self.parallel {
             true => {
@@ -145,18 +145,13 @@ impl Decoder {
             }
             false => decoder_builder().build().unwrap(),
         };
-        // let (info, img) = decoder.decode(&data).unwrap();
-        // let img: Vec<u8> = match img {
-        //     Pixels::Uint8(x) => x,
-        //     _ => panic!("Unsupported dtype for decoding"),
-        // };
         let (info, img) = decoder.reconstruct(&data).unwrap();
-        let img: Vec<u8> = match img {
-            Data::Jpeg(x) => x,
-            Data::Pixels(Pixels::Uint8(x)) => x,
+        let (jpeg, img) = match img {
+            Data::Jpeg(x) => (true, x),
+            Data::Pixels(Pixels::Uint8(x)) => (false, x),
             _ => panic!("Unsupported dtype for decoding"),
         };
-        (ImageInfo::from(info), PyBytes::new(_py, &img))
+        (jpeg, ImageInfo::from(info), PyBytes::new(_py, &img))
     }
 
     fn __repr__(&self) -> PyResult<String> {
