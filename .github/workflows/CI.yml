@@ -121,7 +121,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --find-interpreter --features dynamic
+          args: --release --out dist --find-interpreter
           manylinux: auto
           docker-options: |
             -e RUST_BACKTRACE=1
