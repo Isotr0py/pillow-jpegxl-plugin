@@ -89,7 +89,12 @@ def _save(im, fp, filename, save_all=False):
         decoding_speed=decoding_speed,
         use_container=use_container,
     )
-    data = enc(im.tobytes(), im.width, im.height)
+    # FIXME (Isotr0py): im.filename maybe None if parse stream
+    if im.format == "JPEG" and im.filename:
+        with open(im.filename, "rb") as f:
+            data = enc(f.read(), im.width, im.height, jpeg_encode=True)
+    else:
+        data = enc(im.tobytes(), im.width, im.height, jpeg_encode=False)
     fp.write(data)
 
 

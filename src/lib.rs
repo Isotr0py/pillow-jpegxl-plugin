@@ -52,8 +52,8 @@ impl Encoder {
         }
     }
 
-    #[pyo3(signature = (data, width, height))]
-    fn __call__<'a>(&'a self, _py: Python<'a>, data: &[u8], width: u32, height: u32) -> &PyBytes {
+    #[pyo3(signature = (data, width, height, jpeg_encode))]
+    fn __call__<'a>(&'a self, _py: Python<'a>, data: &[u8], width: u32, height: u32, jpeg_encode: bool) -> &PyBytes {
         let parallel_runner: ThreadsRunner;
         let mut encoder = match self.parallel {
             true => {
@@ -71,7 +71,10 @@ impl Encoder {
         encoder.quality = self.quality;
         encoder.use_container = self.use_container;
         encoder.decoding_speed = self.decoding_speed;
-        let buffer: EncoderResult<u8> = encoder.encode(&data, width, height).unwrap();
+        let buffer: EncoderResult<u8> = match jpeg_encode {
+            true => encoder.encode_jpeg(&data).unwrap(),
+            false => encoder.encode(&data, width, height).unwrap(),
+        };
         PyBytes::new(_py, &buffer.data)
     }
 
