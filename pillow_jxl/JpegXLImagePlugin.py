@@ -27,7 +27,11 @@ class JXLImageFile(ImageFile.ImageFile):
         self.fc = self.fp.read()
         self._decoder = Decoder()
 
-        self._jxlinfo, self._data = self._decoder(self.fc)
+        self.jpeg, self._jxlinfo, self._data = self._decoder(self.fc)
+        # FIXME (Isotr0py): Maybe slow down jpeg reconstruction
+        if self.jpeg:
+            with Image.open(BytesIO(self._data)) as im:
+                self._data = im.tobytes()
         self._size = (self._jxlinfo.width, self._jxlinfo.height)
         self.rawmode = self._jxlinfo.mode
         # NOTE (Isotr0py): PIL 10.1.0 changed the mode to property, use _mode instead
@@ -85,7 +89,12 @@ def _save(im, fp, filename, save_all=False):
         decoding_speed=decoding_speed,
         use_container=use_container,
     )
-    data = enc(im.tobytes(), im.width, im.height)
+    # FIXME (Isotr0py): im.filename maybe None if parse stream
+    if im.format == "JPEG" and im.filename:
+        with open(im.filename, "rb") as f:
+            data = enc(f.read(), im.width, im.height, jpeg_encode=True)
+    else:
+        data = enc(im.tobytes(), im.width, im.height, jpeg_encode=False)
     fp.write(data)
 
 

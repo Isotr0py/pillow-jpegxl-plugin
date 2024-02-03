@@ -1,7 +1,7 @@
 use pyo3::prelude::*;
 use pyo3::types::PyBytes;
 
-use jpegxl_rs::decode::{Metadata, Pixels};
+use jpegxl_rs::decode::{Metadata, Pixels, Data};
 use jpegxl_rs::encode::EncoderResult;
 use jpegxl_rs::parallel::threads_runner::ThreadsRunner;
 use jpegxl_rs::{decoder_builder, encoder_builder};
@@ -52,8 +52,8 @@ impl Encoder {
         }
     }
 
-    #[pyo3(signature = (data, width, height))]
-    fn __call__<'a>(&'a self, _py: Python<'a>, data: &[u8], width: u32, height: u32) -> &PyBytes {
+    #[pyo3(signature = (data, width, height, jpeg_encode))]
+    fn __call__<'a>(&'a self, _py: Python<'a>, data: &[u8], width: u32, height: u32, jpeg_encode: bool) -> &PyBytes {
         let parallel_runner: ThreadsRunner;
         let mut encoder = match self.parallel {
             true => {
@@ -71,7 +71,10 @@ impl Encoder {
         encoder.quality = self.quality;
         encoder.use_container = self.use_container;
         encoder.decoding_speed = self.decoding_speed;
-        let buffer: EncoderResult<u8> = encoder.encode(&data, width, height).unwrap();
+        let buffer: EncoderResult<u8> = match jpeg_encode {
+            true => encoder.encode_jpeg(&data).unwrap(),
+            false => encoder.encode(&data, width, height).unwrap(),
+        };
         PyBytes::new(_py, &buffer.data)
     }
 
@@ -133,7 +136,7 @@ impl Decoder {
     }
 
     #[pyo3(signature = (data))]
-    fn __call__<'a>(&'a self, _py: Python<'a>, data: &[u8]) -> (ImageInfo, &PyBytes) {
+    fn __call__<'a>(&'a self, _py: Python<'a>, data: &[u8]) -> (bool, ImageInfo, &PyBytes) {
         let parallel_runner: ThreadsRunner;
         let decoder = match self.parallel {
             true => {
@@ -145,12 +148,13 @@ impl Decoder {
             }
             false => decoder_builder().build().unwrap(),
         };
-        let (info, img) = decoder.decode(&data).unwrap();
-        let img: Vec<u8> = match img {
-            Pixels::Uint8(x) => x,
+        let (info, img) = decoder.reconstruct(&data).unwrap();
+        let (jpeg, img) = match img {
+            Data::Jpeg(x) => (true, x),
+            Data::Pixels(Pixels::Uint8(x)) => (false, x),
             _ => panic!("Unsupported dtype for decoding"),
         };
-        (ImageInfo::from(info), PyBytes::new(_py, &img))
+        (jpeg, ImageInfo::from(info), PyBytes::new(_py, &img))
     }
 
     fn __repr__(&self) -> PyResult<String> {

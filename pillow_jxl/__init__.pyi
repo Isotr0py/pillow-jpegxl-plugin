@@ -17,7 +17,16 @@ class Encoder:
                  lossless: bool = True,
                  quality: float = 0.0): ...
 
-    def __call__(self, data: bytes, width: int, height: int) -> bytes: ...
+    def __call__(self, data: bytes, width: int, height: int, jpeg_encode: bool) -> bytes: ...
+    '''
+        Encode a jpeg-xl image.
+
+        Args:
+            data(`bytes`): raw image bytes
+
+        Return:
+            `bytes`: The encoded jpeg-xl image.
+    '''
 
 
 class Decoder:
@@ -30,7 +39,7 @@ class Decoder:
 
     def __init__(self, parallel: bool = True): ...
 
-    def __call__(self, data: bytes) -> (ImageInfo, bytes): ...
+    def __call__(self, data: bytes) -> (bool, ImageInfo, bytes): ...
     '''
         Decode a jpeg-xl image.
 
@@ -38,6 +47,7 @@ class Decoder:
             data(`bytes`): jpeg-xl image
 
         Return:
+            `bool`: If the jpeg is reconstructed
             `ImageInfo`: The metadata of decoded image
             `bytes`: The decoded image.
     '''
