@@ -56,9 +56,9 @@ jobs:
           workdir: /workspace
           run: |
             yum install -y cmake clang gcc-c++
-            git clone --recurse-submodules --depth 1 -b v0.8.2 https://github.com/libjxl/libjxl.git
+            git clone --recurse-submodules --depth 1 -b v0.9.1 https://github.com/libjxl/libjxl.git
             cd libjxl
-            cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
+            cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF \
               -DJPEGXL_ENABLE_TOOLS=OFF -DJPEGXL_ENABLE_DOXYGEN=OFF -DJPEGXL_ENABLE_MANPAGES=OFF \
               -DJPEGXL_ENABLE_BENCHMARKS=OFF -DJPEGXL_ENABLE_EXAMPLES=OFF -DJPEGXL_ENABLE_JNI=OFF \
               -DJPEGXL_ENABLE_SJPEG=OFF -DJPEGXL_ENABLE_OPENEXR=OFF
@@ -108,7 +108,7 @@ jobs:
           run: |
             cd /workspace
             apt-get install -y cmake ninja-build
-            git clone --recurse-submodules --depth 1 -b v0.8.2 https://github.com/libjxl/libjxl.git
+            git clone --recurse-submodules --depth 1 -b v0.9.1 https://github.com/libjxl/libjxl.git
             cd libjxl
             cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
               -DJPEGXL_ENABLE_TOOLS=OFF -DJPEGXL_ENABLE_DOXYGEN=OFF -DJPEGXL_ENABLE_MANPAGES=OFF \
@@ -165,9 +165,9 @@ jobs:
         with:
           rust-toolchain: stable-x86_64-pc-windows-gnu
           target: x86_64-pc-windows-gnu
-          args: --release --out wheels --find-interpreter --all-features
+          args: --release --out wheels --find-interpreter --features vendored
           sccache: 'true'
-      
+
       - name: Fix wheels with delvewheel
         run: |
           pip install delvewheel
@@ -193,9 +193,9 @@ jobs:
       - name: Build libjxl
         run: |
           brew install ninja
-          git clone --recurse-submodules --depth 1 -b v0.8.2 https://github.com/libjxl/libjxl.git
+          git clone --recurse-submodules --depth 1 -b v0.9.1 https://github.com/libjxl/libjxl.git
           cd libjxl
-          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF \
             -DJPEGXL_ENABLE_TOOLS=OFF -DJPEGXL_ENABLE_DOXYGEN=OFF -DJPEGXL_ENABLE_MANPAGES=OFF \
             -DJPEGXL_ENABLE_BENCHMARKS=OFF -DJPEGXL_ENABLE_EXAMPLES=OFF -DJPEGXL_ENABLE_JNI=OFF \
             -DJPEGXL_ENABLE_SJPEG=OFF -DJPEGXL_ENABLE_OPENEXR=OFF
@@ -213,13 +213,13 @@ jobs:
           target: ${{ matrix.target }}
           args: --release --out dist --find-interpreter
           sccache: 'true'
-      
+
       - name: Upload wheels
         uses: actions/upload-artifact@v3
         with:
           name: wheels
           path: dist
-    
+
   sdist:
     runs-on: ubuntu-latest
     timeout-minutes: 60
