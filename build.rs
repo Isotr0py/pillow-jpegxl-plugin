@@ -26,12 +26,9 @@ fn static_link() {
         println!("cargo:rustc-link-search=native={}", path);
     }
 
-    // println!("cargo:rustc-link-lib=static:+whole-archive=brotlidec-static");
-    // println!("cargo:rustc-link-lib=static=brotlienc-static");
-    // println!("cargo:rustc-link-lib=static=brotlicommon-static");
-    println!("cargo:rustc-link-lib:+whole-archive=brotlidec");
-    println!("cargo:rustc-link-lib=brotlienc");
-    println!("cargo:rustc-link-lib=brotlicommon");
+    println!("cargo:rustc-link-lib=static:+whole-archive=brotlidec-static");
+    println!("cargo:rustc-link-lib=static=brotlienc-static");
+    println!("cargo:rustc-link-lib=static=brotlicommon-static");
     if let Ok(path) = env::var("DEP_BROTLI_LIB") {
         println!("cargo:rustc-link-search=native={}", path);
     }

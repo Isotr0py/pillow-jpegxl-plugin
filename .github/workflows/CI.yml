@@ -26,20 +26,18 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        target: [x86_64, x86, aarch64, armv7, s390x, ppc64le]
+        target: [x86_64, aarch64, armv7, s390x, ppc64le]
         include:
           - target: x86_64
-            docker_image: quay.io/pypa/manylinux2014_x86_64:latest
-          - target: x86
-            docker_image: quay.io/pypa/manylinux2014_i686:latest
+            docker_image: quay.io/pypa/manylinux_2_28_x86_64:latest
           - target: aarch64
-            distro: ubuntu_latest
+            docker_image: ghcr.io/rust-cross/manylinux_2_28-cross:aarch64
           - target: armv7
-            distro: ubuntu_latest
+            docker_image: ghcr.io/rust-cross/manylinux_2_28-cross:armv7
           - target: s390x
-            distro: ubuntu_latest
+            docker_image: ghcr.io/rust-cross/manylinux_2_28-cross:s390x
           - target: ppc64le
-            distro: ubuntu_latest
+            docker_image: ghcr.io/rust-cross/manylinux_2_28-cross:ppc64le
 
     steps:
       - uses: actions/checkout@v3
@@ -47,7 +45,7 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Build libjxl (x86/x64)
+      - name: Build libjxl (x86_64)
         if: ${{ contains(matrix.target, 'x86')}}
         uses: kohlerdominik/docker-run-action@v1
         with:
@@ -55,7 +53,6 @@ jobs:
           volumes: ${{ github.workspace }}:/workspace
           workdir: /workspace
           run: |
-            yum install -y cmake clang gcc-c++
             git clone --recurse-submodules --depth 1 -b v0.9.1 https://github.com/libjxl/libjxl.git
             cd libjxl
             cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF \
@@ -70,7 +67,7 @@ jobs:
         uses: uraimo/run-on-arch-action@v2.5.1
         with:
           arch: ${{ matrix.target }}
-          distro: ${{ matrix.distro }}
+          distro: ubuntu_latest
 
           # Not required, but speeds up builds
           githubToken: ${{ github.token }}
@@ -89,7 +86,7 @@ jobs:
           # publicly in your project's package repository, so it is vital that
           # no secrets are present in the container state or logs.
           install: |
-            case "${{ matrix.distro }}" in
+            case "ubuntu_latest" in
               ubuntu*|jessie|stretch|buster|bullseye)
                 apt-get update -q -y
                 apt-get install -q -y git build-essential
@@ -110,7 +107,7 @@ jobs:
             apt-get install -y cmake ninja-build
             git clone --recurse-submodules --depth 1 -b v0.9.1 https://github.com/libjxl/libjxl.git
             cd libjxl
-            cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
+            cmake -B build -G Ninja -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
               -DJPEGXL_ENABLE_TOOLS=OFF -DJPEGXL_ENABLE_DOXYGEN=OFF -DJPEGXL_ENABLE_MANPAGES=OFF \
               -DJPEGXL_ENABLE_BENCHMARKS=OFF -DJPEGXL_ENABLE_EXAMPLES=OFF -DJPEGXL_ENABLE_JNI=OFF \
               -DJPEGXL_ENABLE_SJPEG=OFF -DJPEGXL_ENABLE_OPENEXR=OFF
@@ -121,6 +118,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
+          container: ${{ matrix.docker_image }}
           args: --release --out dist --find-interpreter
           manylinux: auto
           docker-options: |
