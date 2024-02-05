@@ -35,6 +35,10 @@ from PIL import Image
 with Image.open("example.png") as img:
     img.save("example.jxl",lossless=True)
 
+# Lossless construct from a jpeg image
+with Image.open("example.jpg") as img:
+    img.save("example.jxl",lossless=True)
+
 # Decode jxl image
 with Image.open("example.jxl") as img:
     display(img)
@@ -47,7 +51,8 @@ with Image.open("example.jxl") as img:
 | CPython3.9  |        ✔       |   ✔   |     ✔     |
 | CPython3.10 |        ✔       |   ✔   |     ✔     |
 | CPython3.11 |        ✔       |   ✔   |     ✔     |
-| CPython3.12 |        ❌       |   ❌   |     ✔     |
+| CPython3.12 |        ✔       |   ✔   |     ✔     |
+| CPython3.13 |        ❌       |   ❌   |     ✔     |
 | PyPy3.8     |        ❌       |   ❌   |     ✔     |
 | PyPy3.9     |        ❌       |   ❌   |     ✔     |
 | PyPy3.10    |        ❌       |   ❌   |     ✔     |
