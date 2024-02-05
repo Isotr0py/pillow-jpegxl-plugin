@@ -19,6 +19,7 @@ fn dynamic_link() {
 
 fn static_link() {
     println!("cargo:rustc-link-lib=static=jxl");
+    println!("cargo:rustc-link-lib=static=jxl_cms");
     println!("cargo:rustc-link-lib=static=jxl_threads");
 
     println!("cargo:rustc-link-lib=static=hwy");
