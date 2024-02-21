@@ -87,8 +87,8 @@ impl Encoder {
         encoder.use_container = self.use_container;
         encoder.decoding_speed = self.decoding_speed;
         encoder.color_encoding = match self.num_channels {
-            1|2 => ColorEncoding::SrgbLuma,
-            3|4 => ColorEncoding::Srgb,
+            1 | 2 => ColorEncoding::SrgbLuma,
+            3 | 4 => ColorEncoding::Srgb,
             _ => panic!("Invalid num channels"),
         };
         let buffer: EncoderResult<u8> = match jpeg_encode {
