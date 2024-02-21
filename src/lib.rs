@@ -1,8 +1,8 @@
 use pyo3::prelude::*;
 use pyo3::types::PyBytes;
 
-use jpegxl_rs::decode::{Metadata, Pixels, Data};
-use jpegxl_rs::encode::EncoderResult;
+use jpegxl_rs::decode::{Data, Metadata, Pixels};
+use jpegxl_rs::encode::{ColorEncoding, EncoderFrame, EncoderResult};
 use jpegxl_rs::parallel::threads_runner::ThreadsRunner;
 use jpegxl_rs::{decoder_builder, encoder_builder};
 // it works even if the item is not documented:
@@ -10,12 +10,13 @@ use jpegxl_rs::{decoder_builder, encoder_builder};
 #[pyclass(module = "pillow_jxl")]
 struct Encoder {
     parallel: bool,
+    num_channels: u32,
     has_alpha: bool,
     lossless: bool,
     quality: f32,
+    decoding_speed: i64,
     use_container: bool,
     use_original_profile: bool,
-    decoding_speed: i64,
 }
 
 #[pymethods]
@@ -33,6 +34,13 @@ impl Encoder {
     ) -> Self {
         Self {
             parallel: parallel,
+            num_channels: match mode {
+                "RGBA" => 4,
+                "RGB" => 3,
+                "LA" => 2,
+                "L" => 1,
+                _ => panic!("Only RGB, RGBA, L, LA are supported."),
+            },
             has_alpha: match mode {
                 "RGBA" | "LA" => true,
                 "RGB" | "L" => false,
@@ -53,7 +61,14 @@ impl Encoder {
     }
 
     #[pyo3(signature = (data, width, height, jpeg_encode))]
-    fn __call__<'a>(&'a self, _py: Python<'a>, data: &[u8], width: u32, height: u32, jpeg_encode: bool) -> &PyBytes {
+    fn __call__<'a>(
+        &'a self,
+        _py: Python<'a>,
+        data: &[u8],
+        width: u32,
+        height: u32,
+        jpeg_encode: bool,
+    ) -> &PyBytes {
         let parallel_runner: ThreadsRunner;
         let mut encoder = match self.parallel {
             true => {
@@ -71,9 +86,17 @@ impl Encoder {
         encoder.quality = self.quality;
         encoder.use_container = self.use_container;
         encoder.decoding_speed = self.decoding_speed;
+        encoder.color_encoding = match self.num_channels {
+            1 | 2 => ColorEncoding::SrgbLuma,
+            3 | 4 => ColorEncoding::Srgb,
+            _ => panic!("Invalid num channels"),
+        };
         let buffer: EncoderResult<u8> = match jpeg_encode {
             true => encoder.encode_jpeg(&data).unwrap(),
-            false => encoder.encode(&data, width, height).unwrap(),
+            false => {
+                let frame = EncoderFrame::new(data).num_channels(self.num_channels);
+                encoder.encode_frame(&frame, width, height).unwrap()
+            }
         };
         PyBytes::new(_py, &buffer.data)
     }
