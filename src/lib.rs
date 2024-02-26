@@ -2,7 +2,7 @@ use pyo3::prelude::*;
 use pyo3::types::PyBytes;
 
 use jpegxl_rs::decode::{Data, Metadata, Pixels};
-use jpegxl_rs::encode::{ColorEncoding, EncoderFrame, EncoderResult};
+use jpegxl_rs::encode::{ColorEncoding, EncoderSpeed, EncoderFrame, EncoderResult};
 use jpegxl_rs::parallel::threads_runner::ThreadsRunner;
 use jpegxl_rs::{decoder_builder, encoder_builder};
 // it works even if the item is not documented:
@@ -15,6 +15,7 @@ struct Encoder {
     lossless: bool,
     quality: f32,
     decoding_speed: i64,
+    effort: u32,
     use_container: bool,
     use_original_profile: bool,
 }
@@ -22,13 +23,14 @@ struct Encoder {
 #[pymethods]
 impl Encoder {
     #[new]
-    #[pyo3(signature = (mode, parallel=true, lossless=false, quality=1.0, decoding_speed=0, use_container=true, use_original_profile=false))]
+    #[pyo3(signature = (mode, parallel=true, lossless=false, quality=1.0, decoding_speed=0, effort=7, use_container=true, use_original_profile=false))]
     fn new(
         mode: &str,
         parallel: bool,
         lossless: bool,
         quality: f32,
         decoding_speed: i64,
+        effort: u32,
         use_container: bool,
         use_original_profile: bool,
     ) -> Self {
@@ -52,6 +54,7 @@ impl Encoder {
                 0...4 => decoding_speed,
                 _ => panic!("Decoding speed must be between 0 and 4"),
             },
+            effort: effort,
             use_container: use_container,
             use_original_profile: match lossless {
                 true => true,
@@ -91,6 +94,18 @@ impl Encoder {
             3 | 4 => ColorEncoding::Srgb,
             _ => panic!("Invalid num channels"),
         };
+        encoder.speed = match self.effort {
+            1 => EncoderSpeed::Lightning,
+            2 => EncoderSpeed::Thunder,
+            3 => EncoderSpeed::Falcon,
+            4 => EncoderSpeed::Cheetah,
+            5 => EncoderSpeed::Hare,
+            6 => EncoderSpeed::Wombat,
+            7 => EncoderSpeed::Squirrel,
+            8 => EncoderSpeed::Kitten,
+            9 => EncoderSpeed::Tortoise,
+            _ => panic!("Invalid effort"),
+        };
         let buffer: EncoderResult<u8> = match jpeg_encode {
             true => encoder.encode_jpeg(&data).unwrap(),
             false => {
@@ -103,8 +118,8 @@ impl Encoder {
 
     fn __repr__(&self) -> PyResult<String> {
         Ok(format!(
-            "Encoder(parallel={}, has_alpha={}, lossless={}, quality={}, decoding_speed={})",
-            self.parallel, self.has_alpha, self.lossless, self.quality, self.decoding_speed
+            "Encoder(parallel={}, has_alpha={}, lossless={}, quality={}, decoding_speed={}, effort={})",
+            self.parallel, self.has_alpha, self.lossless, self.quality, self.decoding_speed, self.effort
         ))
     }
 }
