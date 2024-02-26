@@ -80,6 +80,7 @@ def _save(im, fp, filename, save_all=False):
     lossless = info.get("lossless", False)
     quality = 0 if lossless else 1
     decoding_speed = info.get("decoding_speed", 0)
+    effort = info.get("effort", 7)
     use_container = info.get("use_container", True)
 
     enc = Encoder(
@@ -87,6 +88,7 @@ def _save(im, fp, filename, save_all=False):
         lossless=lossless,
         quality=quality,
         decoding_speed=decoding_speed,
+        effort=effort,
         use_container=use_container,
     )
     # FIXME (Isotr0py): im.filename maybe None if parse stream
