@@ -4,6 +4,7 @@ Pillow plugin for JPEG-XL, using Rust for bindings.
 ## Features
 - JPEG-XL Plugin for Pillow
 - Encoder/Decoder to work with JPEG-XL using safe wrapper
+- Support EXIF metadata encoding
 
 ## Install via PIP
 ```
