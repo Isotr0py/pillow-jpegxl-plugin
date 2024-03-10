@@ -54,7 +54,7 @@ jobs:
           volumes: ${{ github.workspace }}:/workspace
           workdir: /workspace
           run: |
-            git clone --recurse-submodules --depth 1 -b v0.9.1 https://github.com/libjxl/libjxl.git
+            git clone --recurse-submodules --depth 1 -b v0.10.2 https://github.com/libjxl/libjxl.git
             cd libjxl
             cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF \
               -DJPEGXL_ENABLE_TOOLS=OFF -DJPEGXL_ENABLE_DOXYGEN=OFF -DJPEGXL_ENABLE_MANPAGES=OFF \
@@ -106,7 +106,7 @@ jobs:
           run: |
             cd /workspace
             apt-get install -y cmake ninja-build
-            git clone --recurse-submodules --depth 1 -b v0.9.1 https://github.com/libjxl/libjxl.git
+            git clone --recurse-submodules --depth 1 -b v0.10.2 https://github.com/libjxl/libjxl.git
             cd libjxl
             cmake -B build -G Ninja -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
               -DJPEGXL_ENABLE_TOOLS=OFF -DJPEGXL_ENABLE_DOXYGEN=OFF -DJPEGXL_ENABLE_MANPAGES=OFF \
@@ -164,7 +164,7 @@ jobs:
         with:
           rust-toolchain: stable-x86_64-pc-windows-gnu
           target: x86_64-pc-windows-gnu
-          args: --release --out wheels --find-interpreter --features vendored
+          args: --release --out wheels --find-interpreter --features dynamic
           sccache: 'true'
 
       - name: Fix wheels with delvewheel
@@ -192,7 +192,7 @@ jobs:
       - name: Build libjxl
         run: |
           brew install ninja
-          git clone --recurse-submodules --depth 1 -b v0.9.1 https://github.com/libjxl/libjxl.git
+          git clone --recurse-submodules --depth 1 -b v0.10.2 https://github.com/libjxl/libjxl.git
           cd libjxl
           cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF \
             -DJPEGXL_ENABLE_TOOLS=OFF -DJPEGXL_ENABLE_DOXYGEN=OFF -DJPEGXL_ENABLE_MANPAGES=OFF \
@@ -210,7 +210,7 @@ jobs:
           DEP_HWY_LIB: ${{ github.workspace }}/libjxl/build/third_party/highway
         with:
           target: ${{ matrix.target }}
-          args: --release --out dist --find-interpreter
+          args: --release --out dist --find-interpreter --features dynamic
           sccache: 'true'
 
       - name: Upload wheels
@@ -253,9 +253,9 @@ jobs:
         with:
           files: |
             *.whl
-          prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') }}
+          prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'dev') }}
       - name: Publish to TestPyPI
-        if: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') }}
+        if: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'dev') }}
         uses: PyO3/maturin-action@v1
         env:
           MATURIN_PYPI_TOKEN: ${{ secrets.TESTPYPI_API_TOKEN }}
@@ -264,7 +264,7 @@ jobs:
           command: upload
           args: --non-interactive --skip-existing *
       - name: Publish to PyPI
-        if: ${{ !contains(github.ref, 'alpha') && !contains(github.ref, 'beta') }}
+        if: ${{ !contains(github.ref, 'alpha') && !contains(github.ref, 'beta') && !contains(github.ref, 'dev') }}
         uses: PyO3/maturin-action@v1
         env:
           MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
