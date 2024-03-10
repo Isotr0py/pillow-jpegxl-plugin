@@ -54,7 +54,6 @@ jobs:
           volumes: ${{ github.workspace }}:/workspace
           workdir: /workspace
           run: |
-            apt-get -y install ninja-build
             git clone --recurse-submodules --depth 1 -b v0.10.2 https://github.com/libjxl/libjxl.git
             cd libjxl
             cmake -B build -G  -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF \
