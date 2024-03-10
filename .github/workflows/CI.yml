@@ -54,9 +54,10 @@ jobs:
           volumes: ${{ github.workspace }}:/workspace
           workdir: /workspace
           run: |
-            git clone --recurse-submodules --depth 1 -b v0.9.1 https://github.com/libjxl/libjxl.git
+            apt-get -y install ninja-build
+            git clone --recurse-submodules --depth 1 -b v0.10.2 https://github.com/libjxl/libjxl.git
             cd libjxl
-            cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF \
+            cmake -B build -G  -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF \
               -DJPEGXL_ENABLE_TOOLS=OFF -DJPEGXL_ENABLE_DOXYGEN=OFF -DJPEGXL_ENABLE_MANPAGES=OFF \
               -DJPEGXL_ENABLE_BENCHMARKS=OFF -DJPEGXL_ENABLE_EXAMPLES=OFF -DJPEGXL_ENABLE_JNI=OFF \
               -DJPEGXL_ENABLE_SJPEG=OFF -DJPEGXL_ENABLE_OPENEXR=OFF
@@ -189,18 +190,16 @@ jobs:
         with:
           architecture: ${{ matrix.target }}
 
-      # - name: Build libjxl
-      #   run: |
-      #     brew install ninja
-      #     git clone --recurse-submodules --depth 1 -b v0.9.1 https://github.com/libjxl/libjxl.git
-      #     cd libjxl
-      #     cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF \
-      #       -DJPEGXL_ENABLE_TOOLS=OFF -DJPEGXL_ENABLE_DOXYGEN=OFF -DJPEGXL_ENABLE_MANPAGES=OFF \
-      #       -DJPEGXL_ENABLE_BENCHMARKS=OFF -DJPEGXL_ENABLE_EXAMPLES=OFF -DJPEGXL_ENABLE_JNI=OFF \
-      #       -DJPEGXL_ENABLE_SJPEG=OFF -DJPEGXL_ENABLE_OPENEXR=OFF
-      #     cmake --build build
-      - name: Update libjxl
-        run: brew install jpeg-xl
+      - name: Build libjxl
+        run: |
+          brew install ninja
+          git clone --recurse-submodules --depth 1 -b v0.10.2 https://github.com/libjxl/libjxl.git
+          cd libjxl
+          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF \
+            -DJPEGXL_ENABLE_TOOLS=OFF -DJPEGXL_ENABLE_DOXYGEN=OFF -DJPEGXL_ENABLE_MANPAGES=OFF \
+            -DJPEGXL_ENABLE_BENCHMARKS=OFF -DJPEGXL_ENABLE_EXAMPLES=OFF -DJPEGXL_ENABLE_JNI=OFF \
+            -DJPEGXL_ENABLE_SJPEG=OFF -DJPEGXL_ENABLE_OPENEXR=OFF
+          cmake --build build
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
