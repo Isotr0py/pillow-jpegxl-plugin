@@ -1,8 +1,10 @@
+use std::collections::HashMap;
+
 use pyo3::prelude::*;
 use pyo3::types::PyBytes;
 
 use jpegxl_rs::decode::{Data, Metadata, Pixels};
-use jpegxl_rs::encode::{ColorEncoding, EncoderSpeed, EncoderFrame, EncoderResult};
+use jpegxl_rs::encode::{ColorEncoding, EncoderFrame, EncoderResult, EncoderSpeed, Metadata as EncoderMetadata};
 use jpegxl_rs::parallel::threads_runner::ThreadsRunner;
 use jpegxl_rs::{decoder_builder, encoder_builder};
 // it works even if the item is not documented:
@@ -63,7 +65,7 @@ impl Encoder {
         }
     }
 
-    #[pyo3(signature = (data, width, height, jpeg_encode))]
+    #[pyo3(signature = (data, width, height, jpeg_encode, metadata))]
     fn __call__<'a>(
         &'a self,
         _py: Python<'a>,
@@ -71,6 +73,7 @@ impl Encoder {
         width: u32,
         height: u32,
         jpeg_encode: bool,
+        metadata: HashMap<String, &[u8]>
     ) -> &PyBytes {
         let parallel_runner: ThreadsRunner;
         let mut encoder = match self.parallel {
@@ -110,7 +113,8 @@ impl Encoder {
             true => encoder.encode_jpeg(&data).unwrap(),
             false => {
                 let frame = EncoderFrame::new(data).num_channels(self.num_channels);
-                encoder.encode_frame(&frame, width, height).unwrap()
+                let metadata = EncoderMetadata::new().exif(metadata["exif"]).jumb(metadata["jumb"]).xmp(metadata["xmp"]);
+                encoder.encode_frame_with_metadata(&frame, width, height, metadata).unwrap()
             }
         };
         PyBytes::new(_py, &buffer.data)
