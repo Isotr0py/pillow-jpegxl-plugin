@@ -92,12 +92,12 @@ def _save(im, fp, filename, save_all=False):
         use_container=use_container,
     )
     # FIXME (Isotr0py): im.filename maybe None if parse stream
-    # TODO (Isotr0py): This part should be refactored
+    # TODO (Isotr0py): This part should be refactored in the near future
     if im.format == "JPEG" and im.filename:
         with open(im.filename, "rb") as f:
             data = enc(f.read(), im.width, im.height, jpeg_encode=True, metadata={})
     else:
-        exif = info.get("exif", b"")
+        exif = info.get("exif", im.getexif().tobytes())
         if exif and exif.startswith(b"Exif\x00\x00"):
             exif = exif[6:]
         metadata = {
@@ -105,7 +105,9 @@ def _save(im, fp, filename, save_all=False):
             "jumb": info.get("jumb", b""),
             "xmp": info.get("xmp", b""),
         }
-        data = enc(im.tobytes(), im.width, im.height, jpeg_encode=False, metadata=metadata)
+        data = enc(
+            im.tobytes(), im.width, im.height, jpeg_encode=False, metadata=metadata
+        )
     fp.write(data)
 
 
