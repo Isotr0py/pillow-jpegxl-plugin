@@ -164,7 +164,7 @@ jobs:
         with:
           rust-toolchain: stable-x86_64-pc-windows-gnu
           target: x86_64-pc-windows-gnu
-          args: --release --out wheels --find-interpreter --features dynamic
+          args: --release --out wheels --find-interpreter
           sccache: 'true'
 
       - name: Fix wheels with delvewheel
