@@ -201,8 +201,6 @@ jobs:
       #       -DJPEGXL_ENABLE_BENCHMARKS=OFF -DJPEGXL_ENABLE_EXAMPLES=OFF -DJPEGXL_ENABLE_JNI=OFF \
       #       -DJPEGXL_ENABLE_SJPEG=OFF -DJPEGXL_ENABLE_OPENEXR=OFF
       #     cmake --build build
-      - name: Update libjxl
-        run: port install libjxl
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
