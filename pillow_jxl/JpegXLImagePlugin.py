@@ -42,15 +42,16 @@ class JXLImageFile(ImageFile.ImageFile):
 
         self.tile = []
 
-    def seek(self, frame):
-        self.load()
+    # TODO(Isotr0py): Support animation seeking
+    # def seek(self, frame):
+    #     self.load()
 
-        if self.__frame + 1 != frame:
-            # I believe JPEG XL doesn't support seeking in animations
-            raise NotImplementedError(
-                "Seeking more than one frame forward is currently not supported."
-            )
-        self.__frame = frame
+    #     if self.__frame + 1 != frame:
+    #         # I believe JPEG XL doesn't support seeking in animations
+    #         raise NotImplementedError(
+    #             "Seeking more than one frame forward is currently not supported."
+    #         )
+    #     self.__frame = frame
 
     def load(self):
         if self.__loaded != self.__frame:
