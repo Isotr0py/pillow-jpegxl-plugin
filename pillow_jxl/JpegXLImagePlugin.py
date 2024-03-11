@@ -66,6 +66,14 @@ class JXLImageFile(ImageFile.ImageFile):
 
         return super().load()
 
+    # may be defined for contained formats
+    def load_seek(self, pos):
+        pass
+
+    # may be defined for blocked formats (e.g. PNG)
+    # def load_read(self, bytes):
+    #     pass
+
     def tell(self):
         return self.__frame
 

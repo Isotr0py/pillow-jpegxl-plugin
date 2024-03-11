@@ -36,6 +36,7 @@ wsl_venv/
 *.egg-info/
 .installed.cfg
 *.egg
+wheelhouse/
 
 # Installer logs
 pip-log.txt
