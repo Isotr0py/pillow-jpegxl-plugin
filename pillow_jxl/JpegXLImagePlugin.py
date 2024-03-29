@@ -87,7 +87,7 @@ def _save(im, fp, filename, save_all=False):
 
     # default quality is 1
     lossless = info.get("lossless", False)
-    quality = 0 if lossless else 1
+    quality = 0 if lossless else info.get("quality", 1)
     decoding_speed = info.get("decoding_speed", 0)
     effort = info.get("effort", 7)
     use_container = info.get("use_container", True)
