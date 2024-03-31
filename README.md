@@ -36,6 +36,10 @@ from PIL import Image
 with Image.open("example.png") as img:
     img.save("example.jxl",lossless=True)
 
+# encode image with JPEG-Style quality
+with Image.open("example.png") as img:
+    img.save("example.jxl", quality=98)
+
 # Lossless construct from a jpeg image
 with Image.open("example.jpg") as img:
     img.save("example.jxl",lossless=True)
