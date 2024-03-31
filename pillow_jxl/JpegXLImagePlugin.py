@@ -98,9 +98,9 @@ def _save(im, fp, filename, save_all=False):
 
     info = im.encoderinfo.copy()
 
-    # default quality is 1
+    # default quality is 90
     lossless = info.get("lossless", False)
-    quality = 0 if lossless else _quality_to_frame_distance(info.get("quality", 1))
+    quality = 0 if lossless else _quality_to_frame_distance(info.get("quality", 90))
 
     decoding_speed = info.get("decoding_speed", 0)
     effort = info.get("effort", 7)
