@@ -134,14 +134,14 @@ jobs:
       - name: Install libjxl
         run: |
           brew reinstall jpeg-xl
-          ls /usr/local/Cellar/jpeg-xl/0.10.2
+          ls /usr/local/Cellar/jpeg-xl/0.10.2/share
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         env: 
           RUST_BACKTRACE: 1
           MACOSX_DEPLOYMENT_TARGET: 12.7
-          DEP_JXL_LIB: /usr/local/Cellar/jpeg-xl/0.10.2
+          DEP_JXL_LIB: /usr/local/Cellar/jpeg-xl/0.10.2/share
         with:
           target: ${{ matrix.target }}
           args: --release --out dist --find-interpreter --features dynamic
