@@ -140,6 +140,7 @@ jobs:
         env: 
           RUST_BACKTRACE: 1
           MACOSX_DEPLOYMENT_TARGET: 12.7
+          LIBRARY_PATH: "$LIBRARY_PATH:$(brew --prefix)/lib"
         with:
           target: ${{ matrix.target }}
           args: --release --out dist --find-interpreter --features dynamic
