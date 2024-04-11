@@ -15,6 +15,5 @@ jpegxl-rs = { path="./jpegxl-rs/jpegxl-rs", default-features = false, features =
 
 [features]
 # Enables parallel processing support by enabling the "rayon" feature of jpeg-decoder.
-default = ["vendored"]
 vendored = ["jpegxl-rs/vendored"]
 dynamic = []
