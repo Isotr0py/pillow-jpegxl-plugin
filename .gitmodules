@@ -1,0 +1,4 @@
+[submodule "jpegxl-rs"]
+	path = jpegxl-rs
+	url = https://github.com/Isotr0py/jpegxl-rs.git
+	branch = plugin
