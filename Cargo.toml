@@ -10,11 +10,11 @@ name = "pillow_jxl"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = "0.20.3"
-# jpegxl-rs = { version = "0.9.0", default-features = false, features = ["threads"] }
-jpegxl-rs = { git = "https://github.com/Isotr0py/jpegxl-rs.git", branch = "plugin", default-features = false, features = ["threads"] }
+pyo3 = { version="0.20.3", features = ["extension-module"] }
+jpegxl-rs = { path="./jpegxl-rs/jpegxl-rs", default-features = false, features = ["threads"] }
 
 [features]
 # Enables parallel processing support by enabling the "rayon" feature of jpeg-decoder.
+default = ["vendored"]
 vendored = ["jpegxl-rs/vendored"]
 dynamic = []
