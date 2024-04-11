@@ -141,7 +141,10 @@ jobs:
         env: 
           RUST_BACKTRACE: 1
           MACOSX_DEPLOYMENT_TARGET: 12.7
+          # from homebrew
           DEP_JXL_LIB: /usr/local/Cellar/jpeg-xl/0.10.2/lib
+          DEP_BROTLI_LIB: /usr/local/Cellar/brotli/1.1.0/lib
+          DEP_HWY_LIB: /usr/local/Cellar/highway/1.1.0/lib
         with:
           target: ${{ matrix.target }}
           args: --release --out dist --find-interpreter --features dynamic
