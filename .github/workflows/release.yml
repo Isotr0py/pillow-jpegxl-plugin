@@ -3,7 +3,7 @@
 #
 #    maturin generate-ci github
 #
-name: CI
+name: Release
 
 on:
   push:
@@ -31,102 +31,36 @@ jobs:
         include:
           - target: x86_64
             docker_image: quay.io/pypa/manylinux_2_28_x86_64:latest
-          # - target: aarch64
-          #   docker_image: ghcr.io/rust-cross/manylinux_2_28-cross:aarch64
-          # - target: armv7
-          #   docker_image: ghcr.io/rust-cross/manylinux_2_28-cross:armv7
-          # - target: s390x
-          #   docker_image: ghcr.io/rust-cross/manylinux_2_28-cross:s390x
-          # - target: ppc64le
-          #   docker_image: ghcr.io/rust-cross/manylinux_2_28-cross:ppc64le
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: recursive
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-
-      - name: Build libjxl (x86_64)
-        if: ${{ contains(matrix.target, 'x86')}}
-        uses: kohlerdominik/docker-run-action@v1
-        with:
-          image: ${{ matrix.docker_image }}
-          volumes: ${{ github.workspace }}:/workspace
-          workdir: /workspace
-          run: |
-            git clone --recurse-submodules --depth 1 -b v0.10.2 https://github.com/libjxl/libjxl.git
-            cd libjxl
-            cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF \
-              -DJPEGXL_ENABLE_TOOLS=OFF -DJPEGXL_ENABLE_DOXYGEN=OFF -DJPEGXL_ENABLE_MANPAGES=OFF \
-              -DJPEGXL_ENABLE_BENCHMARKS=OFF -DJPEGXL_ENABLE_EXAMPLES=OFF -DJPEGXL_ENABLE_JNI=OFF \
-              -DJPEGXL_ENABLE_SJPEG=OFF -DJPEGXL_ENABLE_OPENEXR=OFF
-            cmake --build build
-            cmake --install build
-      
-      - name: Build libjxl (non-x86)
-        if: ${{ !contains(matrix.target, 'x86')}}
-        uses: uraimo/run-on-arch-action@v2.5.1
-        with:
-          arch: ${{ matrix.target }}
-          distro: ubuntu_latest
-
-          # Not required, but speeds up builds
-          githubToken: ${{ github.token }}
-
-          # Mount the artifacts directory as /artifacts in the container
-          dockerRunArgs: |
-            --volume "${{ github.workspace }}:/workspace"
-
-          # The shell to run commands with in the container
-          shell: /bin/sh
-
-          # Install some dependencies in the container. This speeds up builds if
-          # you are also using githubToken. Any dependencies installed here will
-          # be part of the container image that gets cached, so subsequent
-          # builds don't have to re-install them. The image layer is cached
-          # publicly in your project's package repository, so it is vital that
-          # no secrets are present in the container state or logs.
-          install: |
-            case "ubuntu_latest" in
-              ubuntu*|jessie|stretch|buster|bullseye)
-                apt-get update -q -y
-                apt-get install -q -y git build-essential
-                ;;
-              fedora*)
-                dnf -y update
-                dnf -y install git which
-                ;;
-              alpine*)
-                apk update
-                apk add git
-                ;;
-            esac
-
-          # Produce a binary artifact and place it in the mounted volume
-          run: |
-            cd /workspace
-            apt-get install -y cmake ninja-build
-            git clone --recurse-submodules --depth 1 -b v0.10.2 https://github.com/libjxl/libjxl.git
-            cd libjxl
-            cmake -B build -G Ninja -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
-              -DJPEGXL_ENABLE_TOOLS=OFF -DJPEGXL_ENABLE_DOXYGEN=OFF -DJPEGXL_ENABLE_MANPAGES=OFF \
-              -DJPEGXL_ENABLE_BENCHMARKS=OFF -DJPEGXL_ENABLE_EXAMPLES=OFF -DJPEGXL_ENABLE_JNI=OFF \
-              -DJPEGXL_ENABLE_SJPEG=OFF -DJPEGXL_ENABLE_OPENEXR=OFF
-            cmake --build build
-            cmake --install build
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
           container: ${{ matrix.docker_image }}
-          args: --release --out dist --find-interpreter
+          args: --release --out dist --find-interpreter --features dynamic
           manylinux: auto
           docker-options: |
             -e RUST_BACKTRACE=1
-            -e DEP_JXL_LIB=${{ github.workspace }}/libjxl/build/lib
-            -e DEP_BROTLI_LIB=${{ github.workspace }}/libjxl/build/third_party/brotli
-            -e DEP_HWY_LIB=${{ github.workspace }}/libjxl/build/third_party/highway
+            -e DEP_JXL_LIB=${{ github.workspace }}/jpegxl-rs/jpegxl-src/libjxl/build/lib
+            -e DEP_BROTLI_LIB=${{ github.workspace }}/jpegxl-rs/jpegxl-src/libjxl/build/third_party/brotli
+            -e DEP_HWY_LIB=${{ github.workspace }}/jpegxl-rs/jpegxl-src/libjxl/build/third_party/highway
+          before-script-linux: |
+            cd jpegxl-rs/jpegxl-src/libjxl
+            cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
+              -DJPEGXL_ENABLE_TOOLS=OFF -DJPEGXL_ENABLE_DOXYGEN=OFF -DJPEGXL_ENABLE_MANPAGES=OFF \
+              -DJPEGXL_ENABLE_BENCHMARKS=OFF -DJPEGXL_ENABLE_EXAMPLES=OFF -DJPEGXL_ENABLE_JNI=OFF \
+              -DJPEGXL_ENABLE_SJPEG=OFF -DJPEGXL_ENABLE_OPENEXR=OFF
+            cmake --build build
+            cmake --install build
+            cd ../../../
 
       - name: Upload wheels
         uses: actions/upload-artifact@v3
@@ -154,6 +88,9 @@ jobs:
         run: echo "${{ runner.temp }}/msys64/mingw64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
@@ -187,29 +124,27 @@ jobs:
         target: [x86_64, aarch64]
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
       - uses: actions/setup-python@v4
         with:
           architecture: ${{ matrix.target }}
-
-      - name: Build libjxl
+      
+      - name: Install libjxl
         run: |
-          brew install ninja
-          git clone --recurse-submodules --depth 1 -b v0.10.2 https://github.com/libjxl/libjxl.git
-          cd libjxl
-          cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
-            -DJPEGXL_ENABLE_TOOLS=OFF -DJPEGXL_ENABLE_DOXYGEN=OFF -DJPEGXL_ENABLE_MANPAGES=OFF \
-            -DJPEGXL_ENABLE_BENCHMARKS=OFF -DJPEGXL_ENABLE_EXAMPLES=OFF -DJPEGXL_ENABLE_JNI=OFF \
-            -DJPEGXL_ENABLE_SJPEG=OFF -DJPEGXL_ENABLE_OPENEXR=OFF
-          cmake --build build
+          brew reinstall jpeg-xl
+          ls /usr/local/Cellar/jpeg-xl/0.10.2/lib
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         env: 
           RUST_BACKTRACE: 1
           MACOSX_DEPLOYMENT_TARGET: 12.7
-          DEP_JXL_LIB: ${{ github.workspace }}/libjxl/build/lib
-          DEP_BROTLI_LIB: ${{ github.workspace }}/libjxl/build/third_party/brotli
-          DEP_HWY_LIB: ${{ github.workspace }}/libjxl/build/third_party/highway
+          # from homebrew
+          DEP_JXL_LIB: /usr/local/Cellar/jpeg-xl/0.10.2/lib
+          DEP_BROTLI_LIB: /usr/local/Cellar/brotli/1.1.0/lib
+          DEP_HWY_LIB: /usr/local/Cellar/highway/1.1.0/lib
         with:
           target: ${{ matrix.target }}
           args: --release --out dist --find-interpreter --features dynamic
@@ -226,6 +161,8 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: recursive
       - name: Build sdist
         uses: PyO3/maturin-action@v1
         with:
@@ -245,7 +182,7 @@ jobs:
     permissions:
       contents: write
     if: "startsWith(github.ref, 'refs/tags/')"
-    needs: [linux, windows, sdist]
+    needs: [linux, windows, macos, sdist]
     steps:
       - uses: actions/download-artifact@v3
         with:
