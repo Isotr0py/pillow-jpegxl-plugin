@@ -10,7 +10,7 @@ name = "pillow_jxl"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version="0.20.3", features = ["extension-module"] }
+pyo3 = { version="0.21.1", features = ["extension-module"] }
 jpegxl-rs = { path="./jpegxl-rs/jpegxl-rs", default-features = false, features = ["threads"] }
 
 [features]
