@@ -131,16 +131,12 @@ jobs:
         with:
           architecture: ${{ matrix.target }}
 
-      - name: Install libjxl
-        run: |
-          brew install jpeg-xl
-
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         env: 
           RUST_BACKTRACE: 1
           MACOSX_DEPLOYMENT_TARGET: 12.7
-          LIBRARY_PATH: "$LIBRARY_PATH:$(brew --prefix)/lib"
+          DEP_JXL_LIB: /usr/local/opt/
         with:
           target: ${{ matrix.target }}
           args: --release --out dist --find-interpreter --features dynamic
