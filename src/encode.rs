@@ -1,7 +1,6 @@
-use std::collections::HashMap;
+use std::borrow::Cow;
 
 use pyo3::prelude::*;
-use pyo3::types::PyBytes;
 
 use jpegxl_rs::encode::{ColorEncoding, EncoderFrame, EncoderResult, EncoderSpeed, Metadata as EncoderMetadata};
 use jpegxl_rs::parallel::threads_runner::ThreadsRunner;
@@ -35,45 +34,49 @@ impl Encoder {
         use_container: bool,
         use_original_profile: bool,
     ) -> Self {
+        let (num_channels, has_alpha) = match mode {
+            "RGBA" => (4, true),
+            "RGB" => (3, false),
+            "LA" => (2, true),
+            "L" => (1, false),
+            _ => panic!("Only RGB, RGBA, L, LA are supported."),
+        };
+
+        let decoding_speed = match decoding_speed {
+            0..=4 => decoding_speed,
+            _ => panic!("Decoding speed must be between 0 and 4"),
+        };
+
+        let use_original_profile = match lossless {
+            true => true,
+            false => use_original_profile,
+        };
+
         Self {
-            parallel: parallel,
-            num_channels: match mode {
-                "RGBA" => 4,
-                "RGB" => 3,
-                "LA" => 2,
-                "L" => 1,
-                _ => panic!("Only RGB, RGBA, L, LA are supported."),
-            },
-            has_alpha: match mode {
-                "RGBA" | "LA" => true,
-                "RGB" | "L" => false,
-                _ => panic!("Only RGB, RGBA, L, LA are supported."),
-            },
-            lossless: lossless,
-            quality: quality,
-            decoding_speed: match decoding_speed {
-                0...4 => decoding_speed,
-                _ => panic!("Decoding speed must be between 0 and 4"),
-            },
-            effort: effort,
-            use_container: use_container,
-            use_original_profile: match lossless {
-                true => true,
-                false => use_original_profile,
-            },
+            parallel,
+            num_channels,
+            has_alpha,
+            lossless,
+            quality,
+            decoding_speed,
+            effort,
+            use_container,
+            use_original_profile,
         }
     }
 
-    #[pyo3(signature = (data, width, height, jpeg_encode, metadata))]
-    fn __call__<'a>(
-        &'a self,
-        _py: Python<'a>,
+    #[pyo3(signature = (data, width, height, jpeg_encode, exif=None, jumb=None, xmp=None))]
+    fn __call__(
+        &self,
+        _py: Python,
         data: &[u8],
         width: u32,
         height: u32,
         jpeg_encode: bool,
-        metadata: HashMap<String, &[u8]>
-    ) -> &PyBytes {
+        exif: Option<&[u8]>,
+        jumb: Option<&[u8]>,
+        xmp: Option<&[u8]>
+    ) -> Cow<'_, [u8]> {
         let parallel_runner: ThreadsRunner;
         let mut encoder = match self.parallel {
             true => {
@@ -112,11 +115,11 @@ impl Encoder {
             true => encoder.encode_jpeg(&data).unwrap(),
             false => {
                 let frame = EncoderFrame::new(data).num_channels(self.num_channels);
-                let metadata = EncoderMetadata::new().exif(metadata["exif"]).jumb(metadata["jumb"]).xmp(metadata["xmp"]);
+                let metadata = EncoderMetadata::new().exif(exif.unwrap()).jumb(jumb.unwrap()).xmp(xmp.unwrap());
                 encoder.encode_frame_with_metadata(&frame, width, height, metadata).unwrap()
             }
         };
-        PyBytes::new(_py, &buffer.data)
+        Cow::Owned(buffer.data)
     }
 
     fn __repr__(&self) -> PyResult<String> {

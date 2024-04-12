@@ -118,7 +118,7 @@ def _save(im, fp, filename, save_all=False):
     # TODO (Isotr0py): This part should be refactored in the near future
     if im.format == "JPEG" and im.filename:
         with open(im.filename, "rb") as f:
-            data = enc(f.read(), im.width, im.height, jpeg_encode=True, metadata={})
+            data = enc(f.read(), im.width, im.height, jpeg_encode=True)
     else:
         exif = info.get("exif", im.getexif().tobytes())
         if exif and exif.startswith(b"Exif\x00\x00"):
@@ -129,7 +129,7 @@ def _save(im, fp, filename, save_all=False):
             "xmp": info.get("xmp", b""),
         }
         data = enc(
-            im.tobytes(), im.width, im.height, jpeg_encode=False, metadata=metadata
+            im.tobytes(), im.width, im.height, jpeg_encode=False, **metadata
         )
     fp.write(data)
 
