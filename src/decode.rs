@@ -1,5 +1,6 @@
+use std::borrow::Cow;
+
 use pyo3::prelude::*;
-use pyo3::types::PyBytes;
 
 use jpegxl_rs::decode::{Data, Metadata, Pixels};
 use jpegxl_rs::parallel::threads_runner::ThreadsRunner;
@@ -57,7 +58,7 @@ impl Decoder {
     }
 
     #[pyo3(signature = (data))]
-    fn __call__<'a>(&'a self, _py: Python<'a>, data: &[u8]) -> (bool, ImageInfo, &PyBytes) {
+    fn __call__(&self, _py: Python, data: &[u8]) -> (bool, ImageInfo, Cow<'_, [u8]>) {
         let parallel_runner: ThreadsRunner;
         let decoder = match self.parallel {
             true => {
@@ -75,7 +76,7 @@ impl Decoder {
             Data::Pixels(Pixels::Uint8(x)) => (false, x),
             _ => panic!("Unsupported dtype for decoding"),
         };
-        (jpeg, ImageInfo::from(info), PyBytes::new(_py, &img))
+        (jpeg, ImageInfo::from(info), Cow::Owned(img))
     }
 
     fn __repr__(&self) -> PyResult<String> {
