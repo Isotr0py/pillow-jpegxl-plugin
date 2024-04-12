@@ -65,7 +65,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-linux-${{ matrix.target }}
           path: dist
 
   windows:
@@ -114,7 +114,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-windows-${{ matrix.target }}
           path: dist
 
   macos:
@@ -130,11 +130,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           architecture: ${{ matrix.target }}
-      
-      - name: Install libjxl
-        run: |
-          brew reinstall jpeg-xl
-          ls /usr/local/Cellar/jpeg-xl/0.10.2/lib
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
@@ -153,7 +148,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-macos-${{ matrix.target }}
           path: dist
 
   sdist:
@@ -172,7 +167,7 @@ jobs:
       - name: Upload sdist
         uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-sdist
           path: dist
 
   release:
@@ -186,7 +181,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: wheels
+          pattern: wheels-*
       - name: upload to github release
         uses: softprops/action-gh-release@v2
         with:
