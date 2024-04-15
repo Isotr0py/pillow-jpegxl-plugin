@@ -44,7 +44,7 @@ jobs:
           export DEP_BROTLI_LIB=/usr/local/Cellar/brotli/1.1.0/lib
           export DEP_HWY_LIB=/usr/local/Cellar/highway/1.1.0/lib
           source venv/bin/activate
-          pip install maturin[patchelf]
+          pip install maturin
           maturin develop --features dynamic
     
       - name: Test with pytest
