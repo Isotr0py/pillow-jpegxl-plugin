@@ -186,7 +186,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            *.whl
+            wheels-*/*.whl
           prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'dev') }}
       - name: Publish to TestPyPI
         if: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'dev') }}
