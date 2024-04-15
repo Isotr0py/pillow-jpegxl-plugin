@@ -26,9 +26,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Set up Graphviz
-        uses: ts-graphviz/setup-graphviz@v2
-
       - name: Create virtual environment
         env:
           BIN: ${{ matrix.os == 'macos-latest' && 'Scripts' || 'bin' }}
