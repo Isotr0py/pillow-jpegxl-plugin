@@ -2,10 +2,11 @@ use std::borrow::Cow;
 
 use pyo3::prelude::*;
 
-use jpegxl_rs::encode::{ColorEncoding, EncoderFrame, EncoderResult, EncoderSpeed, Metadata as EncoderMetadata};
-use jpegxl_rs::parallel::threads_runner::ThreadsRunner;
+use jpegxl_rs::encode::{
+    ColorEncoding, EncoderFrame, EncoderResult, EncoderSpeed, Metadata as EncoderMetadata,
+};
 use jpegxl_rs::encoder_builder;
-
+use jpegxl_rs::parallel::threads_runner::ThreadsRunner;
 
 #[pyclass(module = "pillow_jxl")]
 pub struct Encoder {
@@ -75,7 +76,7 @@ impl Encoder {
         jpeg_encode: bool,
         exif: Option<&[u8]>,
         jumb: Option<&[u8]>,
-        xmp: Option<&[u8]>
+        xmp: Option<&[u8]>,
     ) -> Cow<'_, [u8]> {
         let parallel_runner: ThreadsRunner;
         let mut encoder = match self.parallel {
@@ -115,8 +116,13 @@ impl Encoder {
             true => encoder.encode_jpeg(&data).unwrap(),
             false => {
                 let frame = EncoderFrame::new(data).num_channels(self.num_channels);
-                let metadata = EncoderMetadata::new().exif(exif.unwrap()).jumb(jumb.unwrap()).xmp(xmp.unwrap());
-                encoder.encode_frame_with_metadata(&frame, width, height, metadata).unwrap()
+                let metadata = EncoderMetadata::new()
+                    .exif(exif.unwrap())
+                    .jumb(jumb.unwrap())
+                    .xmp(xmp.unwrap());
+                encoder
+                    .encode_frame_with_metadata(&frame, width, height, metadata)
+                    .unwrap()
             }
         };
         Cow::Owned(buffer.data)

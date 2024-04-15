@@ -27,13 +27,14 @@ class JXLImageFile(ImageFile.ImageFile):
         self.fc = self.fp.read()
         self._decoder = Decoder()
 
-        self.jpeg, self._jxlinfo, self._data = self._decoder(self.fc)
+        self.jpeg, self._jxlinfo, self._data, icc_profile = self._decoder(self.fc)
         # FIXME (Isotr0py): Maybe slow down jpeg reconstruction
         if self.jpeg:
             with Image.open(BytesIO(self._data)) as im:
                 self._data = im.tobytes()
         self._size = (self._jxlinfo.width, self._jxlinfo.height)
         self.rawmode = self._jxlinfo.mode
+        self.info["icc_profile"] = icc_profile
         # NOTE (Isotr0py): PIL 10.1.0 changed the mode to property, use _mode instead
         if parse(PIL.__version__) >= parse("10.1.0"):
             self._mode = self.rawmode

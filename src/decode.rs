@@ -3,10 +3,9 @@ use std::borrow::Cow;
 use pyo3::prelude::*;
 
 use jpegxl_rs::decode::{Data, Metadata, Pixels};
-use jpegxl_rs::parallel::threads_runner::ThreadsRunner;
 use jpegxl_rs::decoder_builder;
+use jpegxl_rs::parallel::threads_runner::ThreadsRunner;
 // it works even if the item is not documented:
-
 
 #[pyclass(module = "pillow_jxl")]
 struct ImageInfo {
@@ -58,17 +57,18 @@ impl Decoder {
     }
 
     #[pyo3(signature = (data))]
-    fn __call__(&self, _py: Python, data: &[u8]) -> (bool, ImageInfo, Cow<'_, [u8]>) {
+    fn __call__(&self, _py: Python, data: &[u8]) -> (bool, ImageInfo, Cow<'_, [u8]>, Cow<'_, [u8]>) {
         let parallel_runner: ThreadsRunner;
         let decoder = match self.parallel {
             true => {
                 parallel_runner = ThreadsRunner::default();
                 decoder_builder()
+                    .icc_profile(true)
                     .parallel_runner(&parallel_runner)
                     .build()
                     .unwrap()
             }
-            false => decoder_builder().build().unwrap(),
+            false => decoder_builder().icc_profile(true).build().unwrap(),
         };
         let (info, img) = decoder.reconstruct(&data).unwrap();
         let (jpeg, img) = match img {
@@ -76,7 +76,16 @@ impl Decoder {
             Data::Pixels(Pixels::Uint8(x)) => (false, x),
             _ => panic!("Unsupported dtype for decoding"),
         };
-        (jpeg, ImageInfo::from(info), Cow::Owned(img))
+        let icc_profile: Vec<u8> = match &info.icc_profile {
+            Some(x) => x.to_vec(),
+            None => Vec::new(),
+        };
+        (
+            jpeg,
+            ImageInfo::from(info),
+            Cow::Owned(img),
+            Cow::Owned(icc_profile),
+        )
     }
 
     fn __repr__(&self) -> PyResult<String> {
