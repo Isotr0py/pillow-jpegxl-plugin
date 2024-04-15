@@ -196,7 +196,7 @@ jobs:
           MATURIN_REPOSITORY_URL: https://test.pypi.org/legacy/ 
         with:
           command: upload
-          args: --non-interactive --skip-existing *
+          args: --non-interactive --skip-existing wheels-*/*
       - name: Publish to PyPI
         if: ${{ !contains(github.ref, 'alpha') && !contains(github.ref, 'beta') && !contains(github.ref, 'dev') }}
         uses: PyO3/maturin-action@v1
@@ -204,4 +204,4 @@ jobs:
           MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
         with:
           command: upload
-          args: --non-interactive --skip-existing *
+          args: --non-interactive --skip-existing wheels-*/*
