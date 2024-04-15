@@ -30,10 +30,7 @@ jobs:
         env:
           BIN: ${{ matrix.os == 'macos-latest' && 'Scripts' || 'bin' }}
         run: |
-          python -m venv .venv
-
-      - name: Install python dependencies
-        run: pip install -r requirements-dev.txt
+          python -m venv venv
 
       - name: Set up Rust
         run: rustup show
@@ -49,7 +46,10 @@ jobs:
           maturin develop --features dynamic
     
       - name: Test with pytest
-        run: pytest test/ --junitxml=junit/test-results-${{ matrix.python-version }}.xml
+        run: |
+          source venv/bin/activate
+          pip install -r requirements-dev.txt
+          pytest test/ --junitxml=junit/test-results-${{ matrix.python-version }}.xml
 
       - name: Upload pytest test results
         uses: actions/upload-artifact@v3
