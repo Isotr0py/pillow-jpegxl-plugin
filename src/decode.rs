@@ -70,7 +70,7 @@ impl Decoder {
             }
             false => decoder_builder().icc_profile(true).build().unwrap(),
         };
-        let (info, img) = decoder.reconstruct(&data).unwrap();
+        let (info, img) = decoder.reconstruct_with::<u8>(&data).unwrap();
         let (jpeg, img) = match img {
             Data::Jpeg(x) => (true, x),
             Data::Pixels(Pixels::Uint8(x)) => (false, x),
