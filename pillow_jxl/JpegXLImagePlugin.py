@@ -106,6 +106,7 @@ def _save(im, fp, filename, save_all=False):
     decoding_speed = info.get("decoding_speed", 0)
     effort = info.get("effort", 7)
     use_container = info.get("use_container", True)
+    use_original_profile = info.get("use_original_profile", True)
 
     enc = Encoder(
         mode=im.mode,
@@ -114,6 +115,7 @@ def _save(im, fp, filename, save_all=False):
         decoding_speed=decoding_speed,
         effort=effort,
         use_container=use_container,
+        use_original_profile=use_original_profile
     )
     # FIXME (Isotr0py): im.filename maybe None if parse stream
     # TODO (Isotr0py): This part should be refactored in the near future
