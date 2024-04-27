@@ -16,9 +16,21 @@ def test_decode():
 @pytest.mark.parametrize("image", ["test/images/sample.png", "test/images/sample.jpg"])
 def test_encode(image):
     temp = tempfile.mktemp(suffix=".jxl")
-    img_ori = Image.open(image)
+    with open(image, mode="rb") as f:
+        img_ori = Image.open(f)
+        img_ori.save(temp, lossless=True)
+        img_ori.save(temp, quality=98, exif=None)
+
+    img_enc = Image.open(temp)
+    assert img_ori.size == img_enc.size == (40, 50)
+    assert img_ori.mode == img_enc.mode
+    assert img_enc.info["icc_profile"]
+
+
+def test_jpeg_encode():
+    temp = tempfile.mktemp(suffix=".jxl")
+    img_ori = Image.open("test/images/sample.jpg")
     img_ori.save(temp, lossless=True)
-    img_ori.save(temp, quality=98, exif=None)
 
     img_enc = Image.open(temp)
     assert img_ori.size == img_enc.size == (40, 50)
