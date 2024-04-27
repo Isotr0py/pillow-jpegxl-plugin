@@ -1,4 +1,7 @@
 # pillow-jpegxl-plugin
+![PyPI - Version](https://img.shields.io/pypi/v/pillow-jxl-plugin)
+[![CI](https://github.com/isotr0py/pillow-jpegxl-plugin/workflows/CI/badge.svg)](https://github.com/isotr0py/pillow-jpegxl-plugin/actions?query=workflow%3ACI)
+
 Pillow plugin for JPEG-XL, using Rust for bindings.
 
 ## Features
