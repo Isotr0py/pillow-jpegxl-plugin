@@ -133,7 +133,8 @@ jobs:
       
       - name: Install dependencys
         run: |
-          brew reinstall jpeg-xl brotli highway
+          # brew reinstall jpeg-xl brotli highway
+          ls /usr/local
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
