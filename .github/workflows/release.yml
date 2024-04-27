@@ -145,8 +145,8 @@ jobs:
           MACOSX_DEPLOYMENT_TARGET: 12.7
           # from homebrew
           DEP_JXL_LIB: /opt/homebrew/Cellar/jpeg-xl/0.10.2/lib
-          DEP_BROTLI_LIB: /opt/homebrew/Cellar/brotli/
-          DEP_HWY_LIB: /opt/homebrew/Cellar/highway/
+          DEP_BROTLI_LIB: /opt/homebrew/Cellar/brotli/1.1.0/lib
+          DEP_HWY_LIB: /opt/homebrew/Cellar/highway/1.1.0/lib
         with:
           target: ${{ matrix.target }}
           args: --release --out dist --find-interpreter --features dynamic
