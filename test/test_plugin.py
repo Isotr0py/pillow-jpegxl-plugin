@@ -17,7 +17,8 @@ def test_decode():
 def test_encode(image):
     temp = tempfile.mktemp(suffix=".jxl")
     img_ori = Image.open(image)
-    img_ori.save(temp, quality=98)
+    img_ori.save(temp, lossless=True)
+    img_ori.save(temp, quality=98, exif=None)
 
     img_enc = Image.open(temp)
     assert img_ori.size == img_enc.size == (40, 50)
