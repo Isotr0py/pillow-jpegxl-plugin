@@ -130,6 +130,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           architecture: ${{ matrix.target }}
+      
+      - name: Check dependencys
+        run: |
+          brew install jpeg-xl
+          ls /opt/homebrew/Cellar/jpeg-xl/
+          ls /opt/homebrew/Cellar/brotli/
+          ls /opt/homebrew/Cellar/highway/
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
@@ -137,9 +144,9 @@ jobs:
           RUST_BACKTRACE: 1
           MACOSX_DEPLOYMENT_TARGET: 12.7
           # from homebrew
-          DEP_JXL_LIB: /usr/local/Cellar/jpeg-xl/0.10.2/lib
-          DEP_BROTLI_LIB: /usr/local/Cellar/brotli/1.1.0/lib
-          DEP_HWY_LIB: /usr/local/Cellar/highway/1.1.0/lib
+          DEP_JXL_LIB: /opt/homebrew/Cellar/jpeg-xl/0.10.2/lib
+          DEP_BROTLI_LIB: /opt/homebrew/Cellar/brotli/1.1.0/lib
+          DEP_HWY_LIB: /opt/homebrew/Cellar/highway/1.1.0/lib
         with:
           target: ${{ matrix.target }}
           args: --release --out dist --find-interpreter --features dynamic

@@ -40,9 +40,10 @@ jobs:
 
       - name: Install Plugin
         run: |
-          export DEP_JXL_LIB=/usr/local/Cellar/jpeg-xl/0.10.2/lib
-          export DEP_BROTLI_LIB=/usr/local/Cellar/brotli/1.1.0/lib
-          export DEP_HWY_LIB=/usr/local/Cellar/highway/1.1.0/lib
+          brew install jpeg-xl
+          export DEP_JXL_LIB=/opt/homebrew/Cellar/jpeg-xl/0.10.2/lib
+          export DEP_BROTLI_LIB=/opt/homebrew/Cellar/brotli/1.1.0/lib
+          export DEP_HWY_LIB=/opt/homebrew/Cellar/highway/1.1.0/lib
           source venv/bin/activate
           pip install maturin
           maturin develop --features dynamic
