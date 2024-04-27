@@ -133,6 +133,7 @@ jobs:
       
       - name: Check dependencys
         run: |
+          homebrew install jpeg-xl
           ls /opt/homebrew/Cellar/jpeg-xl/
           ls /opt/homebrew/Cellar/brotli/
           ls /opt/homebrew/Cellar/highway/
