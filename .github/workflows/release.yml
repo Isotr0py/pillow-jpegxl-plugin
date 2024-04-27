@@ -133,7 +133,8 @@ jobs:
       
       - name: Install dependencys
         run: |
-          ls /opt/homebrew
+          brew reinstall jpeg-xl brotli highway
+          ls /opt/homebrew/Cellar
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
