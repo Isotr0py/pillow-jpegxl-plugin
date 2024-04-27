@@ -131,9 +131,8 @@ jobs:
         with:
           architecture: ${{ matrix.target }}
       
-      - name: Install dependencys
+      - name: Check dependencys
         run: |
-          brew reinstall jpeg-xl brotli highway
           ls /opt/homebrew/Cellar/jpeg-xl/
           ls /opt/homebrew/Cellar/brotli/
           ls /opt/homebrew/Cellar/highway/
@@ -144,7 +143,7 @@ jobs:
           RUST_BACKTRACE: 1
           MACOSX_DEPLOYMENT_TARGET: 12.7
           # from homebrew
-          DEP_JXL_LIB: /opt/homebrew/Cellar/jpeg-xl/
+          DEP_JXL_LIB: /opt/homebrew/Cellar/jpeg-xl/0.10.2/
           DEP_BROTLI_LIB: /opt/homebrew/Cellar/brotli/
           DEP_HWY_LIB: /opt/homebrew/Cellar/highway/
         with:
