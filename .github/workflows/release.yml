@@ -118,10 +118,14 @@ jobs:
           path: dist
 
   macos:
-    runs-on: macos-latest
+    runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
-        target: [x86_64, aarch64]
+        platform:
+          - runner: macos-latest
+            target: x86_64
+          - runner: macos-14
+            target: aarch64
     steps:
       - uses: actions/checkout@v4
         with:
@@ -129,7 +133,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          architecture: ${{ matrix.target }}
+          python-version: '3.10'
       
       - name: Check dependencys
         run: |
@@ -146,16 +150,16 @@ jobs:
           # from homebrew
           DEP_JXL_LIB: /opt/homebrew/Cellar/jpeg-xl/0.10.2/lib
           DEP_BROTLI_LIB: /opt/homebrew/Cellar/brotli/1.1.0/lib
-          DEP_HWY_LIB: /opt/homebrew/Cellar/highway/1.1.0/lib
+          DEP_HWY_LIB: /opt/homebrew/Cellar/highway/1.2.0/lib
         with:
-          target: ${{ matrix.target }}
+          target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter --features dynamic
           sccache: 'true'
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-macos-${{ matrix.target }}
+          name: wheels-macos-${{ matrix.platform.target }}
           path: dist
 
   sdist:
