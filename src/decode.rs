@@ -5,6 +5,7 @@ use pyo3::prelude::*;
 use jpegxl_rs::decode::{Data, Metadata, Pixels};
 use jpegxl_rs::decoder_builder;
 use jpegxl_rs::parallel::threads_runner::ThreadsRunner;
+
 // it works even if the item is not documented:
 
 #[pyclass(module = "pillow_jxl")]
@@ -43,6 +44,30 @@ impl ImageInfo {
     }
 }
 
+pub fn convert_pixels(pixels: Pixels) -> Vec<u8> {
+    let mut result = Vec::new();
+    match pixels {
+        Pixels::Uint8(pixels) => {
+            for pixel in pixels {
+                result.push(pixel);
+            }
+        }
+        Pixels::Uint16(pixels) => {
+            for pixel in pixels {
+                result.push((pixel >> 8) as u8);
+                result.push(pixel as u8);
+            }
+        }
+        Pixels::Float(pixels) => {
+            for pixel in pixels {
+                result.push((pixel * 255.0) as u8);
+            }
+        }
+        Pixels::Float16(_) => panic!("Float16 is not supported yet"),
+    }
+    result
+}
+
 #[pyclass(module = "pillow_jxl")]
 pub struct Decoder {
     parallel: bool,
@@ -57,7 +82,11 @@ impl Decoder {
     }
 
     #[pyo3(signature = (data))]
-    fn __call__(&self, _py: Python, data: &[u8]) -> (bool, ImageInfo, Cow<'_, [u8]>, Cow<'_, [u8]>) {
+    fn __call__(
+        &self,
+        _py: Python,
+        data: &[u8],
+    ) -> (bool, ImageInfo, Cow<'_, [u8]>, Cow<'_, [u8]>) {
         let parallel_runner: ThreadsRunner;
         let decoder = match self.parallel {
             true => {
@@ -70,11 +99,10 @@ impl Decoder {
             }
             false => decoder_builder().icc_profile(true).build().unwrap(),
         };
-        let (info, img) = decoder.reconstruct_with::<u8>(&data).unwrap();
+        let (info, img) = decoder.reconstruct(&data).unwrap();
         let (jpeg, img) = match img {
             Data::Jpeg(x) => (true, x),
-            Data::Pixels(Pixels::Uint8(x)) => (false, x),
-            _ => panic!("Unsupported dtype for decoding"),
+            Data::Pixels(x) => (false, convert_pixels(x)),
         };
         let icc_profile: Vec<u8> = match &info.icc_profile {
             Some(x) => x.to_vec(),

@@ -80,19 +80,6 @@ class JXLImageFile(ImageFile.ImageFile):
         return self.__frame
 
 
-def _quality_to_frame_distance(q):
-    # Translate quality to frame distance using the same mapping as
-    # libjxl's JxlEncoderDistanceFromQuality, which roughly maps to
-    # jpeg's quality values.
-    if q >= 100:
-        fd = 0
-    elif q >= 30:
-        fd = 0.1 + (100 - q) * 0.09
-    else:
-        fd = 53.0 / 3000.0 * q * q - 23.0 / 20.0 * q + 25.0
-    return fd
-
-
 def _save(im, fp, filename, save_all=False):
     if im.mode not in _VALID_JXL_MODES:
         raise NotImplementedError("Only RGB, RGBA, L, LA are supported.")
@@ -101,7 +88,7 @@ def _save(im, fp, filename, save_all=False):
 
     # default quality is 90
     lossless = info.get("lossless", False)
-    quality = 0 if lossless else _quality_to_frame_distance(info.get("quality", 90))
+    quality = 0 if lossless else info.get("quality", 90)
 
     decoding_speed = info.get("decoding_speed", 0)
     effort = info.get("effort", 7)
