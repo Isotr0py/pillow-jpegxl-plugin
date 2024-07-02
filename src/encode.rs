@@ -2,9 +2,7 @@ use std::borrow::Cow;
 
 use pyo3::prelude::*;
 
-use jpegxl_rs::encode::{
-    ColorEncoding, EncoderFrame, EncoderResult, EncoderSpeed, Metadata as EncoderMetadata,
-};
+use jpegxl_rs::encode::{ColorEncoding, EncoderFrame, EncoderResult, EncoderSpeed, Metadata};
 use jpegxl_rs::encoder_builder;
 use jpegxl_rs::parallel::threads_runner::ThreadsRunner;
 
@@ -79,20 +77,24 @@ impl Encoder {
         xmp: Option<&[u8]>,
     ) -> Cow<'_, [u8]> {
         let parallel_runner: ThreadsRunner;
+        let mut encoder_builder = encoder_builder();
         let mut encoder = match self.parallel {
             true => {
                 parallel_runner = ThreadsRunner::default();
-                encoder_builder()
+                encoder_builder.set_jpeg_quality(self.quality);
+                encoder_builder
                     .parallel_runner(&parallel_runner)
                     .build()
                     .unwrap()
             }
-            false => encoder_builder().build().unwrap(),
+            false => {
+                encoder_builder.set_jpeg_quality(self.quality);
+                encoder_builder.build().unwrap()
+            }
         };
         encoder.uses_original_profile = self.use_original_profile;
         encoder.has_alpha = self.has_alpha;
         encoder.lossless = self.lossless;
-        encoder.quality = self.quality;
         encoder.use_container = self.use_container;
         encoder.decoding_speed = self.decoding_speed;
         encoder.color_encoding = match self.num_channels {
@@ -116,13 +118,16 @@ impl Encoder {
             true => encoder.encode_jpeg(&data).unwrap(),
             false => {
                 let frame = EncoderFrame::new(data).num_channels(self.num_channels);
-                let metadata = EncoderMetadata::new()
-                    .exif(exif.unwrap())
-                    .jumb(jumb.unwrap())
-                    .xmp(xmp.unwrap());
                 encoder
-                    .encode_frame_with_metadata(&frame, width, height, metadata)
-                    .unwrap()
+                    .add_metadata(&Metadata::Exif(exif.unwrap()), true)
+                    .unwrap();
+                encoder
+                    .add_metadata(&Metadata::Xmp(xmp.unwrap()), true)
+                    .unwrap();
+                encoder
+                    .add_metadata(&Metadata::Jumb(jumb.unwrap()), true)
+                    .unwrap();
+                encoder.encode_frame(&frame, width, height).unwrap()
             }
         };
         Cow::Owned(buffer.data)
