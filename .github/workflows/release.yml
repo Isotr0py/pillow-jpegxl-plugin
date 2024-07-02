@@ -53,7 +53,7 @@ jobs:
             -e DEP_BROTLI_LIB=${{ github.workspace }}/libjxl/build/third_party/brotli
             -e DEP_HWY_LIB=${{ github.workspace }}/libjxl/build/third_party/highway
           before-script-linux: |
-            git clone --recurse-submodules --depth 1 -b v0.10.4 \
+            git clone --recurse-submodules --depth 1 -b v0.10.3 \
               https://github.com/libjxl/libjxl.git
             cd libjxl
             cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
