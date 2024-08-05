@@ -88,12 +88,12 @@ def _save(im, fp, filename, save_all=False):
 
     # default quality is 90
     lossless = info.get("lossless", False)
-    quality = 0 if lossless else info.get("quality", 90)
+    quality = 100 if lossless else info.get("quality", 90)
 
     decoding_speed = info.get("decoding_speed", 0)
     effort = info.get("effort", 7)
-    use_container = info.get("use_container", True)
-    use_original_profile = info.get("use_original_profile", True)
+    use_container = info.get("use_container", False)
+    use_original_profile = info.get("use_original_profile", False)
 
     enc = Encoder(
         mode=im.mode,
