@@ -1,0 +1,64 @@
+name: Benchmarks
+
+on: [push, pull_request]
+
+env:
+  RUSTFLAGS: -C debuginfo=0  # Do not produce debug symbols to keep memory usage down
+  RUST_BACKTRACE: 1
+
+jobs:
+  benchmarks:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # we only use macos for fast testing
+        os: [macos-latest]
+        python-version: ['3.11']
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Create virtual environment
+        env:
+          BIN: ${{ matrix.os == 'macos-latest' && 'Scripts' || 'bin' }}
+        run: |
+          python -m venv venv
+
+      - name: Set up Rust
+        run: rustup show
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install Plugin
+        run: |
+          brew install jpeg-xl
+          export DEP_JXL_LIB=/opt/homebrew/Cellar/jpeg-xl/0.10.3/lib
+          export DEP_BROTLI_LIB=/opt/homebrew/Cellar/brotli/1.1.0/lib
+          export DEP_HWY_LIB=/opt/homebrew/Cellar/highway/1.2.0/lib
+          source venv/bin/activate
+          pip install maturin
+          maturin develop --features dynamic
+    
+      - name: Run benchmarks scripts
+        run: |
+          source venv/bin/activate
+          python benchmarks/benchmarks_encode.py -i test/images/bench.png -o benchmarks-results-${{ matrix.python-version }}.json
+
+      - name: Upload pytest test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmarks-results-${{ matrix.python-version }}
+          path: benchmarks-results-${{ matrix.python-version }}.json
+        # Use always() to always run this step to publish test results when there are test failures
+        if: ${{ always() }}
+
+
