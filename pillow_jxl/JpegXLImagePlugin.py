@@ -12,6 +12,7 @@ _VALID_JXL_MODES = {"RGB", "RGBA", "L", "LA"}
 
 logger = getLogger(__name__)
 
+
 def _accept(data):
     return (
         data[:2] == b"\xff\x0a"
