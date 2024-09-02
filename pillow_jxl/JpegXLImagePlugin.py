@@ -1,6 +1,5 @@
-from io import BytesIO
 import warnings
-from logging import getLogger
+from io import BytesIO
 
 import PIL
 from packaging.version import parse
@@ -9,8 +8,6 @@ from PIL import Image, ImageFile
 from pillow_jxl import Decoder, Encoder
 
 _VALID_JXL_MODES = {"RGB", "RGBA", "L", "LA"}
-
-logger = getLogger(__name__)
 
 
 def _accept(data):
