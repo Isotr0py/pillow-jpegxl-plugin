@@ -1,3 +1,4 @@
+import warnings
 from io import BytesIO
 
 import PIL
@@ -94,6 +95,7 @@ def _save(im, fp, filename, save_all=False):
     effort = info.get("effort", 7)
     use_container = info.get("use_container", False)
     use_original_profile = info.get("use_original_profile", False)
+    jpeg_encode = info.get("lossless_jpeg", True)
 
     enc = Encoder(
         mode=im.mode,
@@ -106,7 +108,12 @@ def _save(im, fp, filename, save_all=False):
     )
     # FIXME (Isotr0py): im.filename maybe None if parse stream
     # TODO (Isotr0py): This part should be refactored in the near future
-    if im.format == "JPEG" and im.filename:
+    if im.format == "JPEG" and im.filename and jpeg_encode:
+        warnings.warn(
+            "Using JPEG reconstruction to create lossless JXL image from JPEG. "
+            "This is the default behavior for JPEG encode, if you want to "
+            "disable this, please set 'lossless_jpeg' to False."
+        )
         with open(im.filename, "rb") as f:
             data = enc(f.read(), im.width, im.height, jpeg_encode=True)
     else:
