@@ -121,9 +121,9 @@ def _save(im, fp, filename, save_all=False):
         if exif and exif.startswith(b"Exif\x00\x00"):
             exif = exif[6:]
         metadata = {
-            "exif": exif if exif is not None else b"",
-            "jumb": info.get("jumb", b""),
-            "xmp": info.get("xmp", b""),
+            "exif": exif,
+            "jumb": info.get("jumb"),
+            "xmp": info.get("xmp"),
         }
         data = enc(im.tobytes(), im.width, im.height, jpeg_encode=False, **metadata)
     fp.write(data)
