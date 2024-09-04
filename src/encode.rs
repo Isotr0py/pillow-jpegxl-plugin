@@ -118,15 +118,21 @@ impl Encoder {
             true => encoder.encode_jpeg(&data).unwrap(),
             false => {
                 let frame = EncoderFrame::new(data).num_channels(self.num_channels);
-                encoder
-                    .add_metadata(&Metadata::Exif(exif.unwrap()), true)
-                    .unwrap();
-                encoder
-                    .add_metadata(&Metadata::Xmp(xmp.unwrap()), true)
-                    .unwrap();
-                encoder
-                    .add_metadata(&Metadata::Jumb(jumb.unwrap()), true)
-                    .unwrap();
+                if let Some(exif_data) = exif {
+                    encoder
+                        .add_metadata(&Metadata::Exif(exif_data), true)
+                        .unwrap();
+                }
+                if let Some(xmp_data) = xmp {
+                    encoder
+                        .add_metadata(&Metadata::Xmp(xmp_data), true)
+                        .unwrap();
+                }
+                if let Some(jumb_data) = jumb {
+                    encoder
+                        .add_metadata(&Metadata::Jumb(jumb_data), true)
+                        .unwrap();
+                }
                 encoder.encode_frame(&frame, width, height).unwrap()
             }
         };
