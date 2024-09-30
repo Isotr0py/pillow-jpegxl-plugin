@@ -27,7 +27,7 @@ jobs:
     strategy:
       matrix:
         # target: [x86_64, aarch64, armv7, s390x, ppc64le]
-        target: [x86_64]
+        target: [x86_64, aarch64]
         include:
           - target: x86_64
             docker_image: quay.io/pypa/manylinux_2_28_x86_64:latest
@@ -46,6 +46,7 @@ jobs:
           target: ${{ matrix.target }}
           container: ${{ matrix.docker_image }}
           args: --release --out dist --find-interpreter --features dynamic
+          sccache: 'true'
           manylinux: auto
           docker-options: |
             -e RUST_BACKTRACE=1
@@ -53,7 +54,7 @@ jobs:
             -e DEP_BROTLI_LIB=${{ github.workspace }}/libjxl/build/third_party/brotli
             -e DEP_HWY_LIB=${{ github.workspace }}/libjxl/build/third_party/highway
           before-script-linux: |
-            git clone --recurse-submodules --depth 1 -b v0.10.3 \
+            git clone --recurse-submodules --depth 1 -b v0.11.0 \
               https://github.com/libjxl/libjxl.git
             cd libjxl
             cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
@@ -150,7 +151,7 @@ jobs:
           RUST_BACKTRACE: 1
           MACOSX_DEPLOYMENT_TARGET: 12.7
           # from homebrew
-          DEP_JXL_LIB: /opt/homebrew/Cellar/jpeg-xl/0.10.3/lib
+          DEP_JXL_LIB: /opt/homebrew/Cellar/jpeg-xl/0.11.0/lib
           DEP_BROTLI_LIB: /opt/homebrew/Cellar/brotli/1.1.0/lib
           DEP_HWY_LIB: /opt/homebrew/Cellar/highway/1.2.0/lib
         with:
