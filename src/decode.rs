@@ -69,16 +69,13 @@ pub fn convert_pixels(pixels: Pixels) -> Vec<u8> {
 }
 
 #[pyclass(module = "pillow_jxl")]
-pub struct Decoder {
-    parallel: bool,
-}
+pub struct Decoder;
 
 #[pymethods]
 impl Decoder {
     #[new]
-    #[pyo3(signature = (parallel=true))]
-    fn new(parallel: bool) -> Self {
-        Self { parallel: parallel }
+    fn new() -> Self {
+        Self
     }
 
     #[pyo3(signature = (data))]
@@ -87,18 +84,12 @@ impl Decoder {
         _py: Python,
         data: &[u8],
     ) -> (bool, ImageInfo, Cow<'_, [u8]>, Cow<'_, [u8]>) {
-        let parallel_runner: ThreadsRunner;
-        let decoder = match self.parallel {
-            true => {
-                parallel_runner = ThreadsRunner::default();
-                decoder_builder()
-                    .icc_profile(true)
-                    .parallel_runner(&parallel_runner)
-                    .build()
-                    .unwrap()
-            }
-            false => decoder_builder().icc_profile(true).build().unwrap(),
-        };
+        let parallel_runner = ThreadsRunner::default();
+        let decoder = decoder_builder()
+            .icc_profile(true)
+            .parallel_runner(&parallel_runner)
+            .build()
+            .unwrap();
         let (info, img) = decoder.reconstruct(&data).unwrap();
         let (jpeg, img) = match img {
             Data::Jpeg(x) => (true, x),
@@ -117,6 +108,6 @@ impl Decoder {
     }
 
     fn __repr__(&self) -> PyResult<String> {
-        Ok(format!("Decoder(parallel={})", self.parallel))
+        Ok(format!("Decoder"))
     }
 }
