@@ -8,7 +8,6 @@ use jpegxl_rs::parallel::threads_runner::ThreadsRunner;
 
 #[pyclass(module = "pillow_jxl")]
 pub struct Encoder {
-    parallel: bool,
     num_channels: u32,
     has_alpha: bool,
     lossless: bool,
@@ -22,10 +21,9 @@ pub struct Encoder {
 #[pymethods]
 impl Encoder {
     #[new]
-    #[pyo3(signature = (mode, parallel=true, lossless=false, quality=1.0, decoding_speed=0, effort=7, use_container=true, use_original_profile=false))]
+    #[pyo3(signature = (mode, lossless=false, quality=1.0, decoding_speed=0, effort=7, use_container=true, use_original_profile=false))]
     fn new(
         mode: &str,
-        parallel: bool,
         lossless: bool,
         quality: f32,
         decoding_speed: i64,
@@ -52,7 +50,6 @@ impl Encoder {
         };
 
         Self {
-            parallel,
             num_channels,
             has_alpha,
             lossless,
@@ -76,27 +73,17 @@ impl Encoder {
         jumb: Option<&[u8]>,
         xmp: Option<&[u8]>,
     ) -> Cow<'_, [u8]> {
-        let parallel_runner: ThreadsRunner;
-        let mut encoder_builder = encoder_builder();
-        let mut encoder = match self.parallel {
-            true => {
-                parallel_runner = ThreadsRunner::default();
-                encoder_builder.set_jpeg_quality(self.quality);
-                encoder_builder
-                    .parallel_runner(&parallel_runner)
-                    .build()
-                    .unwrap()
-            }
-            false => {
-                encoder_builder.set_jpeg_quality(self.quality);
-                encoder_builder.build().unwrap()
-            }
-        };
+        let parallel_runner = ThreadsRunner::default();
+        let mut encoder = encoder_builder()
+            .parallel_runner(&parallel_runner)
+            .jpeg_quality(self.quality)
+            .has_alpha(self.has_alpha)
+            .lossless(self.lossless)
+            .use_container(self.use_container)
+            .decoding_speed(self.decoding_speed)
+            .build()
+            .unwrap();
         encoder.uses_original_profile = self.use_original_profile;
-        encoder.has_alpha = self.has_alpha;
-        encoder.lossless = self.lossless;
-        encoder.use_container = self.use_container;
-        encoder.decoding_speed = self.decoding_speed;
         encoder.color_encoding = match self.num_channels {
             1 | 2 => ColorEncoding::SrgbLuma,
             3 | 4 => ColorEncoding::Srgb,
@@ -141,8 +128,8 @@ impl Encoder {
 
     fn __repr__(&self) -> PyResult<String> {
         Ok(format!(
-            "Encoder(parallel={}, has_alpha={}, lossless={}, quality={}, decoding_speed={}, effort={})",
-            self.parallel, self.has_alpha, self.lossless, self.quality, self.decoding_speed, self.effort
+            "Encoder(has_alpha={}, lossless={}, quality={}, decoding_speed={}, effort={})",
+            self.has_alpha, self.lossless, self.quality, self.decoding_speed, self.effort
         ))
     }
 }
