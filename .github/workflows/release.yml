@@ -46,7 +46,6 @@ jobs:
           target: ${{ matrix.target }}
           container: ${{ matrix.docker_image }}
           args: --release --out dist --find-interpreter --features dynamic
-          sccache: 'true'
           manylinux: auto
           docker-options: |
             -e RUST_BACKTRACE=1
