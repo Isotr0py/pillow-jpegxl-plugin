@@ -67,7 +67,29 @@ impl Encoder {
     #[pyo3(signature = (data, width, height, jpeg_encode, exif=None, jumb=None, xmp=None))]
     fn __call__(
         &self,
-        _py: Python,
+        py: Python,
+        data: &[u8],
+        width: u32,
+        height: u32,
+        jpeg_encode: bool,
+        exif: Option<&[u8]>,
+        jumb: Option<&[u8]>,
+        xmp: Option<&[u8]>,
+    ) -> Cow<'_, [u8]> {
+        py.allow_threads(|| self.call_inner(data, width, height, jpeg_encode, exif, jumb, xmp))
+    }
+
+    fn __repr__(&self) -> PyResult<String> {
+        Ok(format!(
+            "Encoder(has_alpha={}, lossless={}, quality={}, decoding_speed={}, effort={}, num_threads={})",
+            self.has_alpha, self.lossless, self.quality, self.decoding_speed, self.effort, self.num_threads
+        ))
+    }
+}
+
+impl Encoder {
+    fn call_inner(
+        &self,
         data: &[u8],
         width: u32,
         height: u32,
@@ -134,12 +156,5 @@ impl Encoder {
             }
         };
         Cow::Owned(buffer.data)
-    }
-
-    fn __repr__(&self) -> PyResult<String> {
-        Ok(format!(
-            "Encoder(has_alpha={}, lossless={}, quality={}, decoding_speed={}, effort={}, num_threads={})",
-            self.has_alpha, self.lossless, self.quality, self.decoding_speed, self.effort, self.num_threads
-        ))
     }
 }
