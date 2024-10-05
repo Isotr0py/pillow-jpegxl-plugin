@@ -7,7 +7,7 @@ from PIL import Image, ImageFile
 
 from pillow_jxl import Decoder, Encoder
 
-_VALID_JXL_MODES = {"RGB", "RGBA", "L", "LA"}
+_VALID_JXL_MODES = {"RGB", "RGBA", "L", "LA", "F", "I;16"}
 
 
 def _accept(data):
