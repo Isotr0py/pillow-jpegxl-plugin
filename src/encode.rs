@@ -16,12 +16,13 @@ pub struct Encoder {
     effort: u32,
     use_container: bool,
     use_original_profile: bool,
+    num_threads: isize,
 }
 
 #[pymethods]
 impl Encoder {
     #[new]
-    #[pyo3(signature = (mode, lossless=false, quality=1.0, decoding_speed=0, effort=7, use_container=true, use_original_profile=false))]
+    #[pyo3(signature = (mode, lossless=false, quality=1.0, decoding_speed=0, effort=7, use_container=false, use_original_profile=false, num_threads=-1))]
     fn new(
         mode: &str,
         lossless: bool,
@@ -30,6 +31,7 @@ impl Encoder {
         effort: u32,
         use_container: bool,
         use_original_profile: bool,
+        num_threads: isize,
     ) -> Self {
         let (num_channels, has_alpha) = match mode {
             "RGBA" => (4, true),
@@ -58,6 +60,7 @@ impl Encoder {
             effort,
             use_container,
             use_original_profile,
+            num_threads,
         }
     }
 
@@ -73,7 +76,14 @@ impl Encoder {
         jumb: Option<&[u8]>,
         xmp: Option<&[u8]>,
     ) -> Cow<'_, [u8]> {
-        let parallel_runner = ThreadsRunner::default();
+        let parallel_runner = ThreadsRunner::new(
+            None,
+            if self.num_threads < 0 {
+                None
+            } else {
+                Some(self.num_threads as usize)
+            },
+        ).unwrap();
         let mut encoder = encoder_builder()
             .parallel_runner(&parallel_runner)
             .jpeg_quality(self.quality)
@@ -128,8 +138,8 @@ impl Encoder {
 
     fn __repr__(&self) -> PyResult<String> {
         Ok(format!(
-            "Encoder(has_alpha={}, lossless={}, quality={}, decoding_speed={}, effort={})",
-            self.has_alpha, self.lossless, self.quality, self.decoding_speed, self.effort
+            "Encoder(has_alpha={}, lossless={}, quality={}, decoding_speed={}, effort={}, num_threads={})",
+            self.has_alpha, self.lossless, self.quality, self.decoding_speed, self.effort, self.num_threads
         ))
     }
 }
