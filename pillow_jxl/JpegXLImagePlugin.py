@@ -33,9 +33,15 @@ class JXLImageFile(ImageFile.ImageFile):
         if self.jpeg:
             with Image.open(BytesIO(self._data)) as im:
                 self._data = im.tobytes()
-        self._size = (self._jxlinfo.width, self._jxlinfo.height)
-        self.rawmode = self._jxlinfo.mode
-        self.info["icc_profile"] = icc_profile
+                self._size = im.size
+                self.rawmode = im.mode
+                self.info = im.info
+                icc_profile = im.info.get("icc_profile", icc_profile)
+        else:
+            self._size = (self._jxlinfo.width, self._jxlinfo.height)
+            self.rawmode = self._jxlinfo.mode
+        if icc_profile:
+            self.info["icc_profile"] = icc_profile
         # NOTE (Isotr0py): PIL 10.1.0 changed the mode to property, use _mode instead
         if parse(PIL.__version__) >= parse("10.1.0"):
             self._mode = self.rawmode
