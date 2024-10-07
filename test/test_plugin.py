@@ -7,12 +7,25 @@ import pillow_jxl
 
 
 def test_decode():
-    img = Image.open("test/images/sample.jxl")
+    img_jxl = Image.open("test/images/sample.jxl")
+    img_png = Image.open("test/images/sample.png")
 
-    assert img.size == (40, 50)
-    assert img.mode == "RGBA"
-    assert not img.is_animated
-    assert img.n_frames == 1
+    assert img_jxl.size == img_png.size
+    assert img_jxl.mode == img_png.mode == "RGBA"
+    assert not img_jxl.is_animated
+    assert img_jxl.n_frames == 1
+    assert list(img_jxl.getdata()) == list(img_png.getdata())
+
+
+def test_decode_I16():
+    img_jxl = Image.open("test/images/sample_grey.jxl")
+    img_png = Image.open("test/images/sample_grey.png")
+
+    assert img_jxl.size == img_png.size
+    assert img_jxl.mode == img_png.mode == "I;16"
+    assert not img_jxl.is_animated
+    assert img_jxl.n_frames == 1
+    assert list(img_jxl.getdata()) == list(img_png.getdata())
 
 
 @pytest.mark.parametrize("image", ["test/images/sample.png", "test/images/sample.jpg"])
