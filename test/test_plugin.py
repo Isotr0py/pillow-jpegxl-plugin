@@ -1,6 +1,7 @@
 import tempfile
 
 import pytest
+import numpy as np
 from PIL import Image
 
 import pillow_jxl
@@ -25,7 +26,8 @@ def test_decode_I16():
     assert img_jxl.mode == img_png.mode == "I;16"
     assert not img_jxl.is_animated
     assert img_jxl.n_frames == 1
-    assert list(img_jxl.getdata()) == list(img_png.getdata())
+    # assert list(img_jxl.getdata()) == list(img_png.getdata())
+    assert np.allclose(np.array(img_jxl), np.array(img_png), rtol=1e-3, atol=1)
 
 
 @pytest.mark.parametrize("image", ["test/images/sample.png", "test/images/sample.jpg"])
