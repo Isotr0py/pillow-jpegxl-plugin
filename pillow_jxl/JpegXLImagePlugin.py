@@ -41,6 +41,9 @@ class JXLImageFile(ImageFile.ImageFile):
             self._mode = self.rawmode
         else:
             self.mode = self.rawmode
+        # FIXME (Isotr0py): animation JXL hasn't supported yet
+        self.is_animated = False
+        self.n_frames = 1
 
         self.tile = []
 
