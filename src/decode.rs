@@ -1,10 +1,11 @@
 use std::borrow::Cow;
 
+use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 
 use jpegxl_rs::decode::{Data, Metadata, Pixels};
-use jpegxl_rs::decoder_builder;
 use jpegxl_rs::parallel::threads_runner::ThreadsRunner;
+use jpegxl_rs::{decoder_builder, DecodeError};
 
 // it works even if the item is not documented:
 
@@ -86,7 +87,7 @@ impl Decoder {
         &self,
         _py: Python,
         data: &[u8],
-    ) -> (bool, ImageInfo, Cow<'_, [u8]>, Cow<'_, [u8]>) {
+    ) -> PyResult<(bool, ImageInfo, Cow<'_, [u8]>, Cow<'_, [u8]>)> {
         _py.allow_threads(|| self.call_inner(data))
     }
 
@@ -96,7 +97,7 @@ impl Decoder {
 }
 
 impl Decoder {
-    fn call_inner(&self, data: &[u8]) -> (bool, ImageInfo, Cow<'_, [u8]>, Cow<'_, [u8]>) {
+    fn call_inner(&self, data: &[u8]) -> PyResult<(bool, ImageInfo, Cow<'_, [u8]>, Cow<'_, [u8]>)> {
         let parallel_runner = ThreadsRunner::new(
             None,
             if self.num_threads < 0 {
@@ -104,13 +105,14 @@ impl Decoder {
             } else {
                 Some(self.num_threads as usize)
             },
-        ).unwrap();
+        )
+        .ok_or_else(|| PyRuntimeError::new_err("Could not create JxlThreadsRunner"))?;
         let decoder = decoder_builder()
             .icc_profile(true)
             .parallel_runner(&parallel_runner)
             .build()
-            .unwrap();
-        let (info, img) = decoder.reconstruct(&data).unwrap();
+            .map_err(to_pyjxlerror)?;
+        let (info, img) = decoder.reconstruct(&data).map_err(to_pyjxlerror)?;
         let (jpeg, img) = match img {
             Data::Jpeg(x) => (true, x),
             Data::Pixels(x) => (false, convert_pixels(x)),
@@ -119,11 +121,15 @@ impl Decoder {
             Some(x) => x.to_vec(),
             None => Vec::new(),
         };
-        (
+        Ok((
             jpeg,
             ImageInfo::from(info),
             Cow::Owned(img),
             Cow::Owned(icc_profile),
-        )
+        ))
     }
+}
+
+fn to_pyjxlerror(e: DecodeError) -> PyErr {
+    PyRuntimeError::new_err(e.to_string())
 }
