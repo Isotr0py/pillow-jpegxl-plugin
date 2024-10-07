@@ -96,6 +96,7 @@ def _save(im, fp, filename, save_all=False):
     use_container = info.get("use_container", False)
     use_original_profile = info.get("use_original_profile", False)
     jpeg_encode = info.get("lossless_jpeg", True)
+    num_threads = info.get("num_threads", -1)
 
     enc = Encoder(
         mode=im.mode,
@@ -105,6 +106,7 @@ def _save(im, fp, filename, save_all=False):
         effort=effort,
         use_container=use_container,
         use_original_profile=use_original_profile,
+        num_threads=num_threads,
     )
     # FIXME (Isotr0py): im.filename maybe None if parse stream
     # TODO (Isotr0py): This part should be refactored in the near future
