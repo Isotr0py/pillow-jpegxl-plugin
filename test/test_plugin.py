@@ -11,6 +11,8 @@ def test_decode():
 
     assert img.size == (40, 50)
     assert img.mode == "RGBA"
+    assert not img.is_animated
+    assert img.n_frames == 1
 
 
 @pytest.mark.parametrize("image", ["test/images/sample.png", "test/images/sample.jpg"])
