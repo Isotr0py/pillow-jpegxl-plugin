@@ -27,7 +27,18 @@ def test_decode_I16():
     assert not img_jxl.is_animated
     assert img_jxl.n_frames == 1
     # we need to use atol=1 here otherwise the test will fail on MacOS
-    assert np.allclose(np.array(img_jxl), np.array(img_png), rtol=1e-3, atol=1)
+    assert np.allclose(np.array(img_jxl), np.array(img_png), atol=1)
+
+
+def test_decode_F():
+    img_jxl = Image.open("test/images/sample_float.jxl")
+    img_ppm = Image.open("test/images/sample_float.ppm")
+
+    assert img_jxl.size == img_ppm.size
+    assert img_jxl.mode == img_ppm.mode == "F"
+    assert not img_jxl.is_animated
+    assert img_jxl.n_frames == 1
+    assert np.allclose(np.array(img_jxl), np.array(img_ppm), atol=3e-2)
 
 
 @pytest.mark.parametrize("image", ["test/images/sample.png", "test/images/sample.jpg"])
