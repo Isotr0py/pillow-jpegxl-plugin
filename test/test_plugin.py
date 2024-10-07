@@ -15,7 +15,7 @@ def test_decode():
     assert img_jxl.mode == img_png.mode == "RGBA"
     assert not img_jxl.is_animated
     assert img_jxl.n_frames == 1
-    assert list(img_jxl.getdata()) == list(img_png.getdata())
+    assert np.allclose(np.array(img_jxl), np.array(img_png))
 
 
 def test_decode_I16():
@@ -26,7 +26,7 @@ def test_decode_I16():
     assert img_jxl.mode == img_png.mode == "I;16"
     assert not img_jxl.is_animated
     assert img_jxl.n_frames == 1
-    # assert list(img_jxl.getdata()) == list(img_png.getdata())
+    # we need to use atol=1 here otherwise the test will fail on MacOS
     assert np.allclose(np.array(img_jxl), np.array(img_png), rtol=1e-3, atol=1)
 
 
