@@ -1,6 +1,14 @@
 name: Benchmarks
 
-on: [push, pull_request]
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the main branch
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 env:
   RUSTFLAGS: -C debuginfo=0  # Do not produce debug symbols to keep memory usage down
@@ -41,13 +49,12 @@ jobs:
       - name: Install Plugin
         run: |
           brew install jpeg-xl
-          brew --prefix jpeg-xl
-          brew --prefix highway
-          brew --prefix brotli
+          export DEP_JXL_LIB=$(brew --prefix jpeg-xl)'/lib'
+          export DEP_BROTLI_LIB=$(brew --prefix brotli)'/lib'
+          export DEP_HWY_LIB=$(brew --prefix highway)'/lib'
 
           source venv/bin/activate
           pip install maturin
-
           maturin develop --features dynamic
     
       - name: Run benchmarks scripts
