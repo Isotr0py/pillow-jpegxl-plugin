@@ -41,15 +41,15 @@ jobs:
       - name: Install Plugin
         run: |
           brew install jpeg-xl
-          brew info jpeg-xl
-          brew info highway
-          brew info brotli
+          brew --prefix jpeg-xl
+          brew --prefix highway
+          brew --prefix brotli
 
           source venv/bin/activate
           pip install maturin
 
           maturin develop --features dynamic
-
+    
       - name: Run benchmarks scripts
         run: |
           source venv/bin/activate
