@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use pyo3::exceptions::PyRuntimeError;
+use pyo3::exceptions::{PyNotImplementedError, PyRuntimeError, PyValueError};
 use pyo3::prelude::*;
 
 use jpegxl_rs::decode::{Data, Metadata, Pixels};
@@ -30,7 +30,7 @@ impl ImageInfo {
             Data::Jpeg(_) => None,
         };
         ImageInfo {
-            mode: Self::mode(item.num_color_channels, item.has_alpha_channel, pixel_type),
+            mode: Self::mode(item.num_color_channels, item.has_alpha_channel, pixel_type).unwrap(),
             width: item.width,
             height: item.height,
             num_channels: item.num_color_channels,
@@ -38,25 +38,29 @@ impl ImageInfo {
         }
     }
 
-    fn mode(num_channels: u32, has_alpha_channel: bool, pixel_type: Option<&Pixels>) -> String {
+    fn mode(
+        num_channels: u32,
+        has_alpha_channel: bool,
+        pixel_type: Option<&Pixels>,
+    ) -> PyResult<String> {
         let mode = match (num_channels, has_alpha_channel) {
             (1, false) => "L".to_string(),
             (1, true) => "LA".to_string(),
             (3, false) => "RGB".to_string(),
             (3, true) => "RGBA".to_string(),
-            _ => panic!("Unsupported number of channels"),
+            _ => return Err(PyNotImplementedError::new_err("Unsupported color mode")),
         };
         if let Some(Pixels::Uint16(_)) = pixel_type {
             if mode == "L" {
-                return "I;16".to_string();
+                return Ok("I;16".to_string());
             }
         }
         if let Some(Pixels::Float(_)) = pixel_type {
             if mode == "L" {
-                return "F".to_string();
+                return Ok("F".to_string());
             }
         }
-        mode
+        Ok(mode)
     }
 }
 
@@ -88,12 +92,12 @@ impl Decoder {
 }
 
 impl Decoder {
-    fn pixels_to_bytes_8bit(&self, pixels: Pixels) -> Vec<u8> {
+    fn pixels_to_bytes_8bit(&self, pixels: Pixels) -> PyResult<Vec<u8>> {
         // Convert pixels to bytes with 8-bit casting
         let mut result = Vec::new();
         match pixels {
             Pixels::Uint8(pixels) => {
-                return pixels;
+                return Ok(pixels);
             }
             Pixels::Uint16(pixels) => {
                 for pixel in pixels {
@@ -105,17 +109,21 @@ impl Decoder {
                     result.push((pixel * 255.0) as u8);
                 }
             }
-            Pixels::Float16(_) => panic!("Float16 is not supported yet"),
+            Pixels::Float16(_) => {
+                return Err(PyNotImplementedError::new_err(
+                    "Float16 is not supported yet",
+                ))
+            }
         }
-        result
+        Ok(result)
     }
 
-    fn pixels_to_bytes(&self, pixels: Pixels) -> Vec<u8> {
+    fn pixels_to_bytes(&self, pixels: Pixels) -> PyResult<Vec<u8>> {
         // Convert pixels to bytes without casting
         let mut result = Vec::new();
         match pixels {
             Pixels::Uint8(pixels) => {
-                return pixels;
+                return Ok(pixels);
             }
             Pixels::Uint16(pixels) => {
                 for pixel in pixels {
@@ -133,18 +141,22 @@ impl Decoder {
                     }
                 }
             }
-            Pixels::Float16(_) => panic!("Float16 is not supported yet"),
+            Pixels::Float16(_) => {
+                return Err(PyNotImplementedError::new_err(
+                    "Float16 is not supported yet",
+                ))
+            }
         }
-        result
+        Ok(result)
     }
 
-    fn convert_pil_pixels(&self, pixels: Pixels, num_channels: u32) -> Vec<u8> {
+    fn convert_pil_pixels(&self, pixels: Pixels, num_channels: u32) -> PyResult<Vec<u8>> {
         let result = match num_channels {
-            1 => self.pixels_to_bytes(pixels),
-            3 => self.pixels_to_bytes_8bit(pixels),
-            _ => panic!("Unsupported number of channels"),
+            1 => self.pixels_to_bytes(pixels)?,
+            3 => self.pixels_to_bytes_8bit(pixels)?,
+            _ => return Err(PyValueError::new_err("image color channels must be 1 or 3")),
         };
-        result
+        Ok(result)
     }
 }
 
@@ -172,7 +184,7 @@ impl Decoder {
         let img_info = ImageInfo::from(info, &img);
         let (jpeg, img) = match img {
             Data::Jpeg(x) => (true, x),
-            Data::Pixels(x) => (false, self.convert_pil_pixels(x, img_info.num_channels)),
+            Data::Pixels(x) => (false, self.convert_pil_pixels(x, img_info.num_channels)?),
         };
         Ok((jpeg, img_info, Cow::Owned(img), Cow::Owned(icc_profile)))
     }
