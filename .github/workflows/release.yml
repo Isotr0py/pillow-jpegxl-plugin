@@ -140,7 +140,9 @@ jobs:
       - name: Check dependencys
         run: |
           brew install jpeg-xl
-          brew link jpeg-xl
+          brew unlink jpeg-xl && brew link jpeg-xl
+          brew unlink highway && brew link highway
+          brew unlink brotli && brew link brotli
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
