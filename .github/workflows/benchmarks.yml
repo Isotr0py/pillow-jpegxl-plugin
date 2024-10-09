@@ -40,9 +40,16 @@ jobs:
 
       - name: Install Plugin
         run: |
-          brew install jpeg-xl highway brotli
+          brew install jpeg-xl
+          brew unlink jpeg-xl && brew link jpeg-xl
+          brew unlink highway && brew link highway
+          brew unlink brotli && brew link brotli
+
           source venv/bin/activate
           pip install maturin
+
+          export LDFLAGS="-L/opt/homebrew/lib"
+          export CPPFLAGS="-I/opt/homebrew/include"
           maturin develop --features dynamic
     
       - name: Run benchmarks scripts
