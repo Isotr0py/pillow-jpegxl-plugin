@@ -139,17 +139,16 @@ jobs:
       
       - name: Check dependencys
         run: |
-          brew install jpeg-xl highway brotli
+          brew install jpeg-xl
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         env: 
           RUST_BACKTRACE: 1
           MACOSX_DEPLOYMENT_TARGET: 12.7
-          # from homebrew
-          # DEP_JXL_LIB: $(brew --prefix jpeg-xl)'/lib
-          # DEP_BROTLI_LIB: /opt/homebrew/Cellar/brotli/1.1.0/lib
-          # DEP_HWY_LIB: /opt/homebrew/Cellar/highway/1.2.0/lib
+          DEP_JXL_LIB: $(brew --prefix jpeg-xl)'/lib'
+          DEP_BROTLI_LIB: $(brew --prefix brotli)'/lib'
+          DEP_HWY_LIB: $(brew --prefix highway)'/lib'
         with:
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter --features dynamic
