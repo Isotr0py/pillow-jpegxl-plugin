@@ -41,7 +41,7 @@ jobs:
       - name: Install Plugin
         run: |
           brew install jpeg-xl
-          export DEP_JXL_LIB=/opt/homebrew/Cellar/jpeg-xl/0.11.0_1/lib
+          export DEP_JXL_LIB=/opt/homebrew/Cellar/jpeg-xl/0.11.0/lib
           export DEP_BROTLI_LIB=/opt/homebrew/Cellar/brotli/1.1.0/lib
           export DEP_HWY_LIB=/opt/homebrew/Cellar/highway/1.2.0/lib
           source venv/bin/activate
