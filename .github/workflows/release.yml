@@ -140,9 +140,9 @@ jobs:
       - name: Check dependencys
         run: |
           brew install jpeg-xl
-          echo DEP_JXL_LIB="$(brew --prefix jpeg-xl)'/lib' >> $GITHUB_ENV
-          echo DEP_BROTLI_LIB="$(brew --prefix brotli)'/lib' >> $GITHUB_ENV
-          echo DEP_HWY_LIB="$(brew --prefix highway)'/lib' >> $GITHUB_ENV
+          echo DEP_JXL_LIB=$(brew --prefix jpeg-xl)'/lib' >> $GITHUB_ENV
+          echo DEP_BROTLI_LIB=$(brew --prefix brotli)'/lib' >> $GITHUB_ENV
+          echo DEP_HWY_LIB=$(brew --prefix highway)'/lib' >> $GITHUB_ENV
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
