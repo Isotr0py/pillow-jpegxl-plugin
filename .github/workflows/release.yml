@@ -140,15 +140,15 @@ jobs:
       - name: Check dependencys
         run: |
           brew install jpeg-xl
+          export DEP_JXL_LIB=$(brew --prefix jpeg-xl)'/lib'
+          export DEP_BROTLI_LIB=$(brew --prefix brotli)'/lib'
+          export DEP_HWY_LIB=$(brew --prefix highway)'/lib'
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         env: 
           RUST_BACKTRACE: 1
           MACOSX_DEPLOYMENT_TARGET: 12.7
-          DEP_JXL_LIB: $(brew --prefix jpeg-xl)'/lib'
-          DEP_BROTLI_LIB: $(brew --prefix brotli)'/lib'
-          DEP_HWY_LIB: $(brew --prefix highway)'/lib'
         with:
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter --features dynamic
