@@ -8,6 +8,7 @@ from PIL import Image, ImageFile
 from pillow_jxl import Decoder, Encoder
 
 _VALID_JXL_MODES = {"RGB", "RGBA", "L", "LA"}
+DECODE_THREADS = -1 # -1 detect available cpu cores, 0 disables parallelism
 
 
 def _accept(data):
@@ -26,7 +27,7 @@ class JXLImageFile(ImageFile.ImageFile):
 
     def _open(self):
         self.fc = self.fp.read()
-        self._decoder = Decoder()
+        self._decoder = Decoder(num_threads=DECODE_THREADS)
 
         self.jpeg, self._jxlinfo, self._data, icc_profile = self._decoder(self.fc)
         # FIXME (Isotr0py): Maybe slow down jpeg reconstruction
