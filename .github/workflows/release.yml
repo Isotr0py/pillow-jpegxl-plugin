@@ -149,6 +149,9 @@ jobs:
         env: 
           RUST_BACKTRACE: 1
           MACOSX_DEPLOYMENT_TARGET: 12.7
+          DEP_JXL_LIB: ${{ env.DEP_JXL_LIB }}
+          DEP_BROTLI_LIB: ${{ env.DEP_BROTLI_LIB }}
+          DEP_HWY_LIB: ${{ env.DEP_HWY_LIB }}
         with:
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter --features dynamic
