@@ -33,9 +33,15 @@ class JXLImageFile(ImageFile.ImageFile):
         if self.jpeg:
             with Image.open(BytesIO(self._data)) as im:
                 self._data = im.tobytes()
-        self._size = (self._jxlinfo.width, self._jxlinfo.height)
-        self.rawmode = self._jxlinfo.mode
-        self.info["icc_profile"] = icc_profile
+                self._size = im.size
+                self.rawmode = im.mode
+                self.info = im.info
+                icc_profile = im.info.get("icc_profile", icc_profile)
+        else:
+            self._size = (self._jxlinfo.width, self._jxlinfo.height)
+            self.rawmode = self._jxlinfo.mode
+        if icc_profile:
+            self.info["icc_profile"] = icc_profile
         # NOTE (Isotr0py): PIL 10.1.0 changed the mode to property, use _mode instead
         if parse(PIL.__version__) >= parse("10.1.0"):
             self._mode = self.rawmode
@@ -98,7 +104,7 @@ def _save(im, fp, filename, save_all=False):
     effort = info.get("effort", 7)
     use_container = info.get("use_container", False)
     use_original_profile = info.get("use_original_profile", False)
-    jpeg_encode = info.get("lossless_jpeg", True)
+    jpeg_encode = info.get("lossless_jpeg", None)
     num_threads = info.get("num_threads", -1)
 
     enc = Encoder(
@@ -113,12 +119,13 @@ def _save(im, fp, filename, save_all=False):
     )
     # FIXME (Isotr0py): im.filename maybe None if parse stream
     # TODO (Isotr0py): This part should be refactored in the near future
-    if im.format == "JPEG" and im.filename and jpeg_encode:
-        warnings.warn(
-            "Using JPEG reconstruction to create lossless JXL image from JPEG. "
-            "This is the default behavior for JPEG encode, if you want to "
-            "disable this, please set 'lossless_jpeg' to False."
-        )
+    if im.format == "JPEG" and im.filename and (jpeg_encode or jpeg_encode is None):
+        if jpeg_encode is None:
+            warnings.warn(
+                "Using JPEG reconstruction to create lossless JXL image from JPEG. "
+                "This is the default behavior for JPEG encode, if you want to "
+                "disable this, please set 'lossless_jpeg'."
+            )
         with open(im.filename, "rb") as f:
             data = enc(f.read(), im.width, im.height, jpeg_encode=True)
     else:
