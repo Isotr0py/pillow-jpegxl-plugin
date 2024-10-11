@@ -130,7 +130,10 @@ def _save(im, fp, filename, save_all=False):
         with open(im.filename, "rb") as f:
             data = enc(f.read(), im.width, im.height, jpeg_encode=True)
     else:
-        exif = info.get("exif", im.getexif().tobytes())
+        exif = info.get("exif")
+        if exif is None:
+            exif = im.getexif()
+            exif = exif.tobytes() if exif else None
         if exif and exif.startswith(b"Exif\x00\x00"):
             exif = exif[6:]
         metadata = {
