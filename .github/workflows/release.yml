@@ -49,7 +49,7 @@ jobs:
         with:
           profile: minimal
           rust-version: stable
-          targets: ${{ runner.os == 'Windows' && 'x86_64-pc-windows-gnu, i686-pc-windows-gnu' || 'stable'}}
+          targets: ${{ runner.os == 'Windows' && 'x86_64-pc-windows-gnu, i686-pc-windows-gnu' || ''}}
 
       - name: Setup Rust in containers  
         if: runner.os == 'Linux'
