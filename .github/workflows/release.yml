@@ -96,7 +96,7 @@ jobs:
             cargo_target: x86_64-pc-windows-gnu
           - runner: windows-latest
             target: x86
-            cargo_target: i868-pc-windows-gnu
+            cargo_target: i686-pc-windows-gnu
     steps:
       - name: Install dependencys
         uses: msys2/setup-msys2@v2
@@ -119,6 +119,10 @@ jobs:
           target: ${{ matrix.platform.cargo_target }}
           args: --release --out dist --find-interpreter --features dynamic
           sccache: 'true'
+      - name: Fix wheels with delvewheel
+        run: |
+          pip install delvewheel
+          Get-ChildItem ${{ github.workspace }}/wheels/*win_amd64.whl | ForEach-Object -Process {delvewheel repair $PSItem -w dist}
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
