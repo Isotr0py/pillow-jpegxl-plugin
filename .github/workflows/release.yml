@@ -26,49 +26,45 @@ jobs:
     timeout-minutes: 60
     strategy:
       matrix:
-        # target: [x86_64, aarch64, armv7, s390x, ppc64le]
-        target: [x86_64]
-        include:
-          - target: x86_64
-            docker_image: quay.io/pypa/manylinux_2_28_x86_64:latest
+        # todo: enable aarch64, armv7, s390x, ppc64le
+        target: [auto]
 
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
+      # todo: enable for aarch64, armv7, s390x, ppc64le
+      # - name: Set up QEMU
+      #   if: runner.os == 'Linux'
+      #   uses: docker/setup-qemu-action@v3
+      #   with:
+      #     platforms: all
+
+      - name: Setup Rust in containers  
+        if: runner.os == 'Linux'
+        run: |  
+          echo "CIBW_BEFORE_ALL=curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal" >> $GITHUB_ENV  
+          echo "CARGO_HOME=/usr/local/" >> $GITHUB_ENV
+
       - name: Build wheels
-        uses: PyO3/maturin-action@v1
-        with:
-          target: ${{ matrix.target }}
-          container: ${{ matrix.docker_image }}
-          args: --release --out dist --find-interpreter --features dynamic
-          manylinux: auto
-          docker-options: |
-            -e RUST_BACKTRACE=1
-            -e DEP_JXL_LIB=${{ github.workspace }}/libjxl/build/lib
-            -e DEP_BROTLI_LIB=${{ github.workspace }}/libjxl/build/third_party/brotli
-            -e DEP_HWY_LIB=${{ github.workspace }}/libjxl/build/third_party/highway
-          before-script-linux: |
-            git clone --recurse-submodules --depth 1 -b v0.11.0 \
-              https://github.com/libjxl/libjxl.git
-            cd libjxl
-            cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
-              -DJPEGXL_ENABLE_TOOLS=OFF -DJPEGXL_ENABLE_DOXYGEN=OFF -DJPEGXL_ENABLE_MANPAGES=OFF \
-              -DJPEGXL_ENABLE_BENCHMARKS=OFF -DJPEGXL_ENABLE_EXAMPLES=OFF -DJPEGXL_ENABLE_JNI=OFF \
-              -DJPEGXL_ENABLE_SJPEG=OFF -DJPEGXL_ENABLE_OPENEXR=OFF
-            cmake --build build
-            cmake --install build
-            cd ..
+        uses: pypa/cibuildwheel@v2.21.2
+        env:
+          CIBW_SKIP: '*-musllinux_i686'
+          CIBW_ARCHS_LINUX: ${{ matrix.target }}
+          CIBW_ENVIRONMENT_PASS_LINUX: CARGO_HOME
+          CIBW_BUILD_VERBOSITY: 1
+          CIBW_BUILD_FRONTEND: "pip; args: --config-settings=build-args='--features=vendored'"
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
           name: wheels-linux-${{ matrix.target }}
-          path: dist
+          path: ./wheelhouse/*.whl
 
   windows:
     runs-on: windows-latest
@@ -84,7 +80,7 @@ jobs:
           install: >-
             mingw-w64-x86_64-toolchain
             mingw-w64-x86_64-libjxl
-      
+
       - name: Put MSYS2_MinGW64 on PATH
         # there is not yet an environment variable for this path from msys2/setup-msys2
         run: echo "${{ runner.temp }}/msys64/mingw64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
