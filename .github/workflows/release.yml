@@ -81,7 +81,9 @@ jobs:
           CIBW_SKIP: '*-musllinux_i686'
           CIBW_ARCHS_LINUX: ${{ matrix.target }}
           CIBW_ENVIRONMENT_PASS_LINUX: CARGO_HOME
-          CIBW_BEFORE_BUILD_WINDOWS: echo "${{ runner.temp }}/msys64/mingw64/bin" >> $GITHUB_ENV
+          CIBW_BEFORE_BUILD_WINDOWS: |
+            echo "${{ runner.temp }}/msys64/mingw64/bin" >> $GITHUB_ENV
+            rustup default stable-x86_64-pc-windows-gnu
           CIBW_CONFIG_SETTINGS_MACOS: build-args=--features=dynamic
           CIBW_CONFIG_SETTINGS_WINDOWS: build-args=--features=dynamic
           CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: "delvewheel repair {wheel} -w {dest_dir}"
