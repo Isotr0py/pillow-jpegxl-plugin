@@ -92,9 +92,11 @@ jobs:
       matrix:
         platform:
           - runner: windows-latest
-            target: x86_64-pc-windows-gnu
+            target: x64
+            cargo_target: x86_64-pc-windows-gnu
           - runner: windows-latest
-            target: i868-pc-windows-gnu
+            target: x86
+            cargo_target: i868-pc-windows-gnu
     steps:
       - name: Install dependencys
         uses: msys2/setup-msys2@v2
@@ -114,7 +116,7 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
-          target: ${{ matrix.platform.target }}
+          target: ${{ matrix.platform.cargo_target }}
           args: --release --out dist --find-interpreter --features dynamic
           sccache: 'true'
       - name: Upload wheels
