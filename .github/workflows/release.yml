@@ -103,6 +103,8 @@ jobs:
         with:
           update: true
           install: >-
+              mingw-w64-i686-toolchain
+              mingw-w64-x86_64-toolchain
               mingw-w64-i686-libjxl	
               mingw-w64-x86_64-libjxl
       - name: Put MSYS2_MinGW64 on PATH
