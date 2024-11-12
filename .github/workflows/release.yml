@@ -48,7 +48,8 @@ jobs:
         uses: hecrj/setup-rust-action@v2
         with:
           profile: minimal
-          rust-version: ${{ runner.os == 'Windows' && 'stable-gnu' || 'stable'}}
+          rust-version: stable
+          targets: ${{ runner.os == 'Windows' && 'x86_64-pc-windows-gnu, i686-pc-windows-gnu' || 'stable'}}
 
       - name: Setup Rust in containers  
         if: runner.os == 'Linux'
@@ -81,9 +82,10 @@ jobs:
           CIBW_ARCHS_LINUX: ${{ matrix.target }}
           CIBW_ENVIRONMENT_PASS_LINUX: CARGO_HOME
           CIBW_BEFORE_BUILD_WINDOWS: echo "${{ runner.temp }}/msys64/mingw64/bin" >> $GITHUB_ENV
+          CIBW_CONFIG_SETTINGS_MACOS: build-args=--features=dynamic
+          CIBW_CONFIG_SETTINGS_WINDOWS: build-args=--features=dynamic
           CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: "delvewheel repair {wheel} -w {dest_dir}"
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: ""
-          CIBW_BUILD_FRONTEND: "${{ runner.os == 'Linux' && 'pip' || 'pip; args: --config-settings=build-args=\"--features=dynamic\"' }}"
           CIBW_TEST_REQUIRES: pytest
           CIBW_TEST_COMMAND: |
             mkdir ./tests && mkdir ./tests/images && mkdir ./tests/images/icc_profile
