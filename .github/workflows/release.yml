@@ -99,10 +99,10 @@ jobs:
       - name: Install dependencys
         uses: msys2/setup-msys2@v2
         with:
-        update: true
-        install: >-
-            mingw-w64-i686-libjxl	
-            mingw-w64-x86_64-libjxl
+          update: true
+          install: >-
+              mingw-w64-i686-libjxl	
+              mingw-w64-x86_64-libjxl
       - name: Put MSYS2_MinGW64 on PATH
         # there is not yet an environment variable for this path from msys2/setup-msys2
         run: echo "${{ runner.temp }}/msys64/mingw64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
