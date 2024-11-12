@@ -98,18 +98,6 @@ jobs:
             target: x86
             cargo_target: i686-pc-windows-gnu
     steps:
-      - name: Install dependencys
-        uses: msys2/setup-msys2@v2
-        with:
-          update: true
-          install: >-
-              mingw-w64-i686-toolchain
-              mingw-w64-x86_64-toolchain
-              mingw-w64-i686-libjxl	
-              mingw-w64-x86_64-libjxl
-      - name: Put MSYS2_MinGW64 on PATH
-        # there is not yet an environment variable for this path from msys2/setup-msys2
-        run: echo "${{ runner.temp }}/msys64/mingw64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
@@ -119,12 +107,8 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.cargo_target }}
-          args: --release --out dist --find-interpreter --features dynamic
+          args: --release --out dist --find-interpreter --features vendored
           sccache: 'true'
-      - name: Fix wheels with delvewheel
-        run: |
-          pip install delvewheel
-          Get-ChildItem ${{ github.workspace }}/wheels/*win_amd64.whl | ForEach-Object -Process {delvewheel repair $PSItem -w dist}
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
