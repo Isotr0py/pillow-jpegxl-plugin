@@ -81,7 +81,10 @@ jobs:
           CIBW_ARCHS_LINUX: ${{ matrix.target }}
           CIBW_ENVIRONMENT_PASS_LINUX: CARGO_HOME
           CIBW_BEFORE_BUILD_WINDOWS: echo "${{ runner.temp }}/msys64/mingw64/bin" >> $GITHUB_ENV
+          CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: "delvewheel repair {wheel} -w {dest_dir}"
+          CIBW_REPAIR_WHEEL_COMMAND_MACOS: ""
           CIBW_BUILD_FRONTEND: "${{ runner.os == 'Linux' && 'pip' || 'pip; args: --config-settings=build-args=\"--features=dynamic\"' }}"
+          CIBW_TEST_COMMAND: pytest {package}/tests
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
