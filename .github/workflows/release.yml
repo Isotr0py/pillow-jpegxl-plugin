@@ -93,10 +93,8 @@ jobs:
         platform:
           - runner: windows-latest
             target: x64
-            cargo_target: x86_64-pc-windows-gnu
           - runner: windows-latest
             target: x86
-            cargo_target: i686-pc-windows-gnu
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -106,7 +104,7 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
-          target: ${{ matrix.platform.cargo_target }}
+          target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter --features vendored
           sccache: 'true'
       - name: Upload wheels
