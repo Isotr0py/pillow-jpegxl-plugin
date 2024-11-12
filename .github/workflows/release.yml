@@ -52,7 +52,7 @@ jobs:
         uses: hecrj/setup-rust-action@v2
         with:
           profile: minimal
-          rust-version: "stable-gnu"
+          rust-version: stable-gnu
 
       - name: Setup Rust in containers  
         if: runner.os == 'Linux'
