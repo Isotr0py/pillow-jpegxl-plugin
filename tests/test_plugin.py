@@ -7,7 +7,7 @@ import pillow_jxl
 
 
 def test_decode():
-    img = Image.open("test/images/sample.jxl")
+    img = Image.open("tests/images/sample.jxl")
 
     assert img.size == (40, 50)
     assert img.mode == "RGBA"
@@ -15,7 +15,7 @@ def test_decode():
     assert img.n_frames == 1
 
 
-@pytest.mark.parametrize("image", ["test/images/sample.png", "test/images/sample.jpg"])
+@pytest.mark.parametrize("image", ["tests/images/sample.png", "tests/images/sample.jpg"])
 def test_encode(image):
     temp = tempfile.mktemp(suffix=".jxl")
     with open(image, mode="rb") as f:
@@ -31,7 +31,7 @@ def test_encode(image):
 
 def test_jpeg_encode():
     temp = tempfile.mktemp(suffix=".jxl")
-    img_ori = Image.open("test/images/sample.jpg")
+    img_ori = Image.open("tests/images/sample.jpg")
     img_ori.save(temp, lossless=True, lossless_jpeg=True)
 
     img_enc = Image.open(temp)
@@ -42,8 +42,8 @@ def test_jpeg_encode():
 
 def test_icc_profile():
     # Load a JPEG image
-    img_ori = Image.open("test/images/icc_profile/62AHB.jpg")
-    img_jxl = Image.open("test/images/icc_profile/62AHB.jxl")
+    img_ori = Image.open("tests/images/icc_profile/62AHB.jpg")
+    img_jxl = Image.open("tests/images/icc_profile/62AHB.jxl")
 
     # Compare the two images
     assert img_ori.size == img_jxl.size
