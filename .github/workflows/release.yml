@@ -85,7 +85,10 @@ jobs:
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: ""
           CIBW_BUILD_FRONTEND: "${{ runner.os == 'Linux' && 'pip' || 'pip; args: --config-settings=build-args=\"--features=dynamic\"' }}"
           CIBW_TEST_REQUIRES: pytest
-          CIBW_TEST_COMMAND: cp -rf {project}/tests/images ./tests/images && pytest {package}/tests
+          CIBW_TEST_COMMAND: |
+            mkdir ./tests/images && mkdir ./tests/images/icc_profile
+            cp -r {project}/tests/images/* ./tests/images
+            pytest {package}/tests
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
