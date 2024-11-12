@@ -15,16 +15,16 @@ pip install pillow-jxl-plugin
 ```
 
 ## Build from source
-Make sure `Rust` and [maturin](https://github.com/PyO3/maturin) installed, then run:
+Make sure `Rust` installed, then run:
 ```
 git clone https://github.com/Isotr0py/pillow-jpegxl-plugin
 cd pillow-jpegxl-plugin
 
-maturin build --release --features vendored
+pip install -e .
 ```
 If you have `libjxl` installed and want to use dynamic link, run:
 ```
-maturin build --release --features dynamic
+pip install -e . --config-settings=build-args="--features=dynamic"
 ```
 
 ## Plugin Usage

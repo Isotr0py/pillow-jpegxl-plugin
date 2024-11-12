@@ -27,4 +27,4 @@ dependencies = [
 "Releases" = "https://github.com/Isotr0py/pillow-jpegxl-plugin/releases"
 
 [tool.maturin]
-features = ["pyo3/extension-module"]
+features = ["pyo3/extension-module", "vendored"]
