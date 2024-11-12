@@ -29,8 +29,8 @@ jobs:
             target: x86_64
           - runner: ubuntu-latest
             target: x86
-          # - runner: ubuntu-latest
-          #   target: aarch64
+          - runner: ubuntu-latest
+            target: aarch64
           # - runner: ubuntu-latest
           #   target: armv7
           # - runner: ubuntu-latest
@@ -64,8 +64,8 @@ jobs:
             target: x86_64
           - runner: ubuntu-latest
             target: x86
-          # - runner: ubuntu-latest
-          #   target: aarch64
+          - runner: ubuntu-latest
+            target: aarch64
           # - runner: ubuntu-latest
           #   target: armv7
     steps:
@@ -93,21 +93,19 @@ jobs:
         platform:
           - runner: windows-latest
             target: x64
-            interpreter: 3.9 3.10 3.11 3.12 3.13 pypy3.9 pypy3.10
           - runner: windows-latest
             target: x86
-            interpreter: 3.9 3.10 3.11 3.12 3.13
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.x
+          python-version: 3.13
           architecture: ${{ matrix.platform.target }}
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --interpreter ${{ matrix.platform.interpreter }} --features vendored
+          args: --release --out dist --interpreter 3.9 3.10 3.11 3.12 3.13 --features vendored
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -122,10 +120,8 @@ jobs:
         platform:
           - runner: macos-12
             target: x86_64
-            interpreter: 3.9 3.10 3.11 3.12 3.13 pypy3.9 pypy3.10
           - runner: macos-14
             target: aarch64
-            interpreter: 3.9 3.10 3.11 3.12 3.13 pypy3.9 pypy3.10
     steps:
       - name: Check dependencys
         run: |
@@ -141,7 +137,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --interpreter ${{ matrix.platform.interpreter }} --features dynamic
+          args: --release --out dist --interpreter 3.9 3.10 3.11 3.12 3.13 pypy3.9 pypy3.10 --features dynamic
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v4
