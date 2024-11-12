@@ -82,7 +82,7 @@ jobs:
           CIBW_BUILD_VERBOSITY: 1
           CIBW_SKIP: '*-musllinux_i686'
           CIBW_ARCHS_LINUX: ${{ matrix.target }}
-          CIBW_ENVIRONMENT_PASS_LINUX: CARGO_HOME, DEP_JXL_LIB, DEP_BROTLI_LIB, DEP_HWY_LIB
+          CIBW_ENVIRONMENT_PASS_LINUX: CARGO_HOME
           CIBW_BEFORE_BUILD_WINDOWS: echo "${{ runner.temp }}/msys64/mingw64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
           CIBW_BUILD_FRONTEND: "${{ runner.os == 'Linux' && 'pip' || 'pip; args: --config-settings=build-args=\"--features=dynamic\"' }}"
 
