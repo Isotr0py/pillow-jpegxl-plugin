@@ -44,11 +44,12 @@ fn main() {
     dynamic_link();
 
     // Dynamic link c++
-    // TODO: Support MSVC and use Cargo
-    let platform = env::consts::OS;
-    match platform {
-        "linux" => println!("cargo:rustc-link-lib=stdc++"),
-        "macos" => println!("cargo:rustc-link-lib=c++"),
-        _ => panic!("Not implemented c++ link on {}", platform),
+    #[cfg(target_os = "linux")]
+    {
+        println!("cargo:rustc-link-lib=stdc++");
+    }
+    #[cfg(target_os = "macos")]
+    {
+        println!("cargo:rustc-link-lib=c++");
     }
 }
