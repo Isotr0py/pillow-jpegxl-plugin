@@ -184,8 +184,23 @@ jobs:
         uses: actions/attest-build-provenance@v1
         with:
           subject-path: 'wheels-*/*'
+      - name: upload to github release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            wheels-*/*.whl
+          prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'dev') }}
+      - name: Publish to TestPyPI
+        if: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'dev') }}
+        uses: PyO3/maturin-action@v1
+        env:
+          MATURIN_PYPI_TOKEN: ${{ secrets.TESTPYPI_API_TOKEN }}
+          MATURIN_REPOSITORY_URL: https://test.pypi.org/legacy/ 
+        with:
+          command: upload
+          args: --non-interactive --skip-existing wheels-*/*
       - name: Publish to PyPI
-        if: "startsWith(github.ref, 'refs/tags/')"
+        if: ${{ !contains(github.ref, 'alpha') && !contains(github.ref, 'beta') && !contains(github.ref, 'dev') }}
         uses: PyO3/maturin-action@v1
         env:
           MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
