@@ -95,7 +95,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '>=3.9 <=3.13'
           architecture: ${{ matrix.target }}
 
       - name: Build wheels
@@ -135,24 +135,23 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '>=3.9 <=3.13'
       
       - name: Check dependencys
         run: |
           brew install jpeg-xl
-          ls /opt/homebrew/Cellar/jpeg-xl/
-          ls /opt/homebrew/Cellar/brotli/
-          ls /opt/homebrew/Cellar/highway/
+          echo DEP_JXL_LIB=$(brew --prefix jpeg-xl)'/lib' >> $GITHUB_ENV
+          echo DEP_BROTLI_LIB=$(brew --prefix brotli)'/lib' >> $GITHUB_ENV
+          echo DEP_HWY_LIB=$(brew --prefix highway)'/lib' >> $GITHUB_ENV
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         env: 
           RUST_BACKTRACE: 1
           MACOSX_DEPLOYMENT_TARGET: 12.7
-          # from homebrew
-          DEP_JXL_LIB: /opt/homebrew/Cellar/jpeg-xl/0.11.0/lib
-          DEP_BROTLI_LIB: /opt/homebrew/Cellar/brotli/1.1.0/lib
-          DEP_HWY_LIB: /opt/homebrew/Cellar/highway/1.2.0/lib
+          DEP_JXL_LIB: ${{ env.DEP_JXL_LIB }}
+          DEP_BROTLI_LIB: ${{ env.DEP_BROTLI_LIB }}
+          DEP_HWY_LIB: ${{ env.DEP_HWY_LIB }}
         with:
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter --features dynamic
