@@ -21,10 +21,13 @@ dependencies = [
     "Pillow",
 ]
 
+[project.optional-dependencies]
+dev = ["numpy", "pytest"]
+
 [project.urls]
 "Homepage" = "https://github.com/Isotr0py/pillow-jpegxl-plugin"
 "Bug Tracker" = "https://github.com/Isotr0py/pillow-jpegxl-plugin/issues"
 "Releases" = "https://github.com/Isotr0py/pillow-jpegxl-plugin/releases"
 
 [tool.maturin]
-features = ["pyo3/extension-module"]
+features = ["pyo3/extension-module", "vendored"]
