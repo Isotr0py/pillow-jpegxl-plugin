@@ -15,14 +15,14 @@ pip install pillow-jxl-plugin
 ```
 
 ## Build from source
-Make sure `Rust` installed, then run:
+Make sure [`Rust`](https://www.rust-lang.org/tools/install) installed, then run:
 ```
 git clone https://github.com/Isotr0py/pillow-jpegxl-plugin
 cd pillow-jpegxl-plugin
 
 pip install -e .[dev] -v
 ```
-If you have `libjxl` installed and want to use dynamic link, run:
+If you have [`libjxl`](https://github.com/libjxl/libjxl) installed and want to use dynamic link, run:
 ```
 pip install -e .[dev] -v --config-settings=build-args="--features=dynamic"
 ```
