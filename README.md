@@ -15,16 +15,16 @@ pip install pillow-jxl-plugin
 ```
 
 ## Build from source
-Make sure `Rust` and [maturin](https://github.com/PyO3/maturin) installed, then run:
+Make sure [`Rust`](https://www.rust-lang.org/tools/install) installed, then run:
 ```
 git clone https://github.com/Isotr0py/pillow-jpegxl-plugin
 cd pillow-jpegxl-plugin
 
-maturin build --release --features vendored
+pip install -e .[dev] -v
 ```
-If you have `libjxl` installed and want to use dynamic link, run:
+If you have [`libjxl`](https://github.com/libjxl/libjxl) installed and want to use dynamic link, run:
 ```
-maturin build --release --features dynamic
+pip install -e .[dev] -v --config-settings=build-args="--features=dynamic"
 ```
 
 ## Plugin Usage
@@ -53,17 +53,15 @@ with Image.open("example.jxl") as img:
 ```
 
 ## Wheels status
-| Wheels      | Windows 64-bit | MacOS | manylinux |
-|-------------|:--------------:|:-----:|:---------:|
-| CPython3.8  |        ✔       |   ✔   |     ✔     |
-| CPython3.9  |        ✔       |   ✔   |     ✔     |
-| CPython3.10 |        ✔       |   ✔   |     ✔     |
-| CPython3.11 |        ✔       |   ✔   |     ✔     |
-| CPython3.12 |        ✔       |   ✔   |     ✔     |
-| CPython3.13 |        ❌       |   ❌   |     ✔     |
-| PyPy3.8     |        ❌       |   ❌   |     ✔     |
-| PyPy3.9     |        ❌       |   ❌   |     ✔     |
-| PyPy3.10    |        ❌       |   ❌   |     ✔     |
+|    Wheels   	| Windows 64-bit 	| MacOS 	| manylinux 	| musllinux 	|
+|:-----------:	|:--------------:	|:-----:	|:---------:	|:---------:	|
+|  CPython3.9 	|        ✔       	|   ✔   	|     ✔     	|     ✔     	|
+| CPython3.10 	|        ✔       	|   ✔   	|     ✔     	|     ✔     	|
+| CPython3.11 	|        ✔       	|   ✔   	|     ✔     	|     ✔     	|
+| CPython3.12 	|        ✔       	|   ✔   	|     ✔     	|     ✔     	|
+| CPython3.13 	|        ✔       	|   ✔   	|     ✔     	|     ✔     	|
+|   PyPy3.9   	|        ✔       	|   ✔   	|     ✔     	|     ✔     	|
+|   PyPy3.10  	|        ✔       	|   ✔   	|     ✔     	|     ✔     	|
 
 ## Credits
 - [inflation/jpegxl-rs](https://github.com/inflation/jpegxl-rs)
