@@ -59,6 +59,7 @@ jobs:
     
       - name: Test with pytest
         run: |
+          brew install inih
           source venv/bin/activate
           pip install -e .[dev]
           pytest test/ --junitxml=junit/test-results-${{ matrix.python-version }}.xml

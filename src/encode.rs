@@ -73,7 +73,7 @@ impl Encoder {
         })
     }
 
-    #[pyo3(signature = (data, width, height, jpeg_encode, exif=None, jumb=None, xmp=None))]
+    #[pyo3(signature = (data, width, height, jpeg_encode, exif=None, jumb=None, xmp=None, compress=false))]
     fn __call__(
         &self,
         py: Python,
@@ -84,8 +84,11 @@ impl Encoder {
         exif: Option<&[u8]>,
         jumb: Option<&[u8]>,
         xmp: Option<&[u8]>,
+        compress: bool,
     ) -> PyResult<Cow<'_, [u8]>> {
-        py.allow_threads(|| self.call_inner(data, width, height, jpeg_encode, exif, jumb, xmp))
+        py.allow_threads(|| {
+            self.call_inner(data, width, height, jpeg_encode, exif, jumb, xmp, compress)
+        })
     }
 
     fn __repr__(&self) -> PyResult<String> {
@@ -106,6 +109,7 @@ impl Encoder {
         exif: Option<&[u8]>,
         jumb: Option<&[u8]>,
         xmp: Option<&[u8]>,
+        compress: bool,
     ) -> PyResult<Cow<'_, [u8]>> {
         let parallel_runner = ThreadsRunner::new(
             None,
@@ -149,17 +153,17 @@ impl Encoder {
                 let frame = EncoderFrame::new(data).num_channels(self.num_channels);
                 if let Some(exif_data) = exif {
                     encoder
-                        .add_metadata(&Metadata::Exif(exif_data), true)
+                        .add_metadata(&Metadata::Exif(exif_data), compress)
                         .map_err(to_pyjxlerror)?
                 }
                 if let Some(xmp_data) = xmp {
                     encoder
-                        .add_metadata(&Metadata::Xmp(xmp_data), true)
+                        .add_metadata(&Metadata::Xmp(xmp_data), compress)
                         .map_err(to_pyjxlerror)?
                 }
                 if let Some(jumb_data) = jumb {
                     encoder
-                        .add_metadata(&Metadata::Jumb(jumb_data), true)
+                        .add_metadata(&Metadata::Jumb(jumb_data), compress)
                         .map_err(to_pyjxlerror)?
                 }
                 encoder

@@ -1,5 +1,6 @@
 import tempfile
 
+import pyexiv2
 import pytest
 import numpy as np
 from PIL import Image
@@ -75,3 +76,51 @@ def test_icc_profile():
     assert img_ori.size == img_jxl.size
     assert img_ori.mode == img_jxl.mode
     assert img_ori.info["icc_profile"] == img_jxl.info["icc_profile"]
+
+
+def test_metadata_decode():
+    # Load a JPEG image
+    img_ori = Image.open("test/images/metadata/1x1_exif_xmp.jpg")
+    img_jxl = Image.open("test/images/metadata/1x1_exif_xmp.jxl")
+    assert img_ori.getexif() == img_jxl.getexif()
+
+
+def test_metadata_encode_from_jpg():
+    # Load a JPEG image
+    ref_img_path = "test/images/metadata/1x1_exif_xmp.jpg"
+    temp = tempfile.mktemp(suffix=".jxl")
+    img_ori = Image.open(ref_img_path)
+    img_ori.save(temp, use_container=True)
+
+    img_enc = Image.open(temp)
+    img_enc_exiv2 = pyexiv2.Image(temp)
+    img_ori_exiv2 = pyexiv2.Image(ref_img_path)
+    assert img_ori.getexif() == img_enc.getexif()
+    assert img_ori_exiv2.read_exif() == img_enc_exiv2.read_exif()
+
+
+def test_metadata_encode_from_raw_exif():
+    with open("test/images/metadata/sample.exif", "rb") as f:
+        ref_exif = f.read()
+    img_ori = Image.open("test/images/sample.png")
+    temp = tempfile.mktemp(suffix=".jxl")
+    img_ori.save(temp, exif=ref_exif)
+
+    ref_exif = pyexiv2.ImageData(ref_exif).read_exif()
+    jxl_exif = pyexiv2.Image(temp).read_exif()
+    assert ref_exif == jxl_exif
+
+
+def test_metadata_encode_from_pil_exif():
+    exif_img_path = "test/images/metadata/1x1_exif_xmp.jpg"
+    dummy_img = Image.open("test/images/sample.png")
+    exif_img = Image.open(exif_img_path)
+    temp = tempfile.mktemp(suffix=".jxl")
+    dummy_img.save(temp, exif=exif_img.getexif().tobytes())
+
+    ref_exif = pyexiv2.Image(exif_img_path).read_exif()
+    jxl_exif = pyexiv2.Image(temp).read_exif()
+    for key in ref_exif:
+        # Skip UserComment and GPSAltitude as they are broken
+        if key not in ("Exif.Photo.UserComment", 'Exif.GPSInfo.GPSAltitude'):
+            assert ref_exif[key] == jxl_exif[key]
