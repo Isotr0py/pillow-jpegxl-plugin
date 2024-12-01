@@ -11,6 +11,6 @@ create_exception!(my_module, JxlException, PyRuntimeError, "Jxl Error");
 fn pillow_jxl(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<decode::Decoder>()?;
     m.add_class::<encode::Encoder>()?;
-    m.add("JxlException", m.py().get_type_bound::<JxlException>())?;
+    m.add("JxlException", m.py().get_type::<JxlException>())?;
     Ok(())
 }

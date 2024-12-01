@@ -75,3 +75,42 @@ def test_icc_profile():
     assert img_ori.size == img_jxl.size
     assert img_ori.mode == img_jxl.mode
     assert img_ori.info["icc_profile"] == img_jxl.info["icc_profile"]
+
+
+def test_metadata_decode():
+    # Load a JPEG image
+    img_ori = Image.open("test/images/metadata/1x1_exif_xmp.jpg")
+    img_jxl = Image.open("test/images/metadata/1x1_exif_xmp.jxl")
+    assert img_ori.getexif() == img_jxl.getexif()
+
+
+def test_metadata_encode_from_jpg():
+    # Load a JPEG image
+    img_ori = Image.open("test/images/metadata/1x1_exif_xmp.jpg")
+    temp = tempfile.mktemp(suffix=".jxl")
+    img_ori.save(temp, use_container=True)
+
+    img_enc = Image.open(temp)
+    assert img_ori.getexif() == img_enc.getexif()
+
+
+@pytest.mark.skip(reason="Broken test")
+def test_metadata_encode_from_raw_exif():
+    with open("test/images/metadata/sample.exif", "rb") as f:
+        ref_exif = f.read()
+    img_ori = Image.open("test/images/sample.png")
+    temp = tempfile.mktemp(suffix=".jxl")
+    img_ori.save(temp, exif=ref_exif, use_container=True)
+
+    img_enc = Image.open(temp)
+    assert ref_exif == img_enc.getexif().tobytes()
+
+
+@pytest.mark.skip(reason="Broken test")
+def test_metadata_encode_from_pil_exif():
+    img_ori = Image.open("test/images/metadata/1x1_exif_xmp.png")
+    temp = tempfile.mktemp(suffix=".jxl")
+    img_ori.save(temp, exif=img_ori.getexif().tobytes(), use_container=True)
+
+    img_enc = Image.open(temp)
+    assert img_ori.getexif().tobytes() == img_enc.getexif().tobytes()
