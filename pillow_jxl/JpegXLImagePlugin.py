@@ -107,6 +107,7 @@ def _save(im, fp, filename, save_all=False):
     use_original_profile = info.get("use_original_profile", False)
     jpeg_encode = info.get("lossless_jpeg", None)
     num_threads = info.get("num_threads", -1)
+    compress_metadata = info.get("compress_metadata", False)
 
     enc = Encoder(
         mode=im.mode,
@@ -140,6 +141,7 @@ def _save(im, fp, filename, save_all=False):
             "exif": exif or None,
             "jumb": info.get("jumb") or None,
             "xmp": info.get("xmp") or None,
+            "compress": compress_metadata,
         }
         data = enc(im.tobytes(), im.width, im.height, jpeg_encode=False, **metadata)
     fp.write(data)

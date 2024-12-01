@@ -22,7 +22,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["numpy", "pytest"]
+dev = ["numpy", "pytest", "pyexiv2"]
 
 [project.urls]
 "Homepage" = "https://github.com/Isotr0py/pillow-jpegxl-plugin"
