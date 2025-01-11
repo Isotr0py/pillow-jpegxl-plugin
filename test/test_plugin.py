@@ -1,3 +1,4 @@
+import os
 import tempfile
 
 import pyexiv2
@@ -6,6 +7,11 @@ import numpy as np
 from PIL import Image
 
 import pillow_jxl
+
+
+def test_debug_mode():
+    exit_code = os.system('python -Xdev -c "from pillow_jxl import JpegXLImagePlugin"')
+    assert exit_code == 0
 
 
 def test_decode():
@@ -122,5 +128,5 @@ def test_metadata_encode_from_pil_exif():
     jxl_exif = pyexiv2.Image(temp).read_exif()
     for key in ref_exif:
         # Skip UserComment and GPSAltitude as they are broken
-        if key not in ("Exif.Photo.UserComment", 'Exif.GPSInfo.GPSAltitude'):
+        if key not in ("Exif.Photo.UserComment", "Exif.GPSInfo.GPSAltitude"):
             assert ref_exif[key] == jxl_exif[key]
