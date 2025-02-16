@@ -129,12 +129,12 @@ jobs:
           - runner: macos-14
             target: aarch64
     steps:
-      - name: Check dependencys
-        run: |
-          brew install jpeg-xl
-          echo DEP_JXL_LIB=$(brew --prefix jpeg-xl)'/lib' >> $GITHUB_ENV
-          echo DEP_BROTLI_LIB=$(brew --prefix brotli)'/lib' >> $GITHUB_ENV
-          echo DEP_HWY_LIB=$(brew --prefix highway)'/lib' >> $GITHUB_ENV
+      # - name: Check dependencys
+      #   run: |
+      #     brew install jpeg-xl
+      #     echo DEP_JXL_LIB=$(brew --prefix jpeg-xl)'/lib' >> $GITHUB_ENV
+      #     echo DEP_BROTLI_LIB=$(brew --prefix brotli)'/lib' >> $GITHUB_ENV
+      #     echo DEP_HWY_LIB=$(brew --prefix highway)'/lib' >> $GITHUB_ENV
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
@@ -143,7 +143,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --interpreter 3.9 3.10 3.11 3.12 3.13 pypy3.9 pypy3.10 --features dynamic
+          args: --release --out dist --interpreter 3.9 3.10 3.11 3.12 3.13 pypy3.9 pypy3.10 --features vendored
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v4
