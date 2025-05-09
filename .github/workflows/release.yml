@@ -128,12 +128,14 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: Build wheels
         uses: PyO3/maturin-action@v1
+        if: ${{ matrix.platform.target != 'aarch64' }}
         with:
           target: ${{ matrix.platform.target }}
           args: --release --out dist --interpreter 3.9 3.10 3.11 3.12 3.13 --features vendored
           sccache: 'true'
       - name: Build wheels (aarch64)
         uses: PyO3/maturin-action@v1
+        if: ${{ matrix.platform.target == 'aarch64' }}
         with:
           target: ${{ matrix.platform.target }}
           args: --release --out dist --interpreter 3.11 3.12 3.13 --features vendored
