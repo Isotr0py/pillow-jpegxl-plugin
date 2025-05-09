@@ -103,7 +103,6 @@ jobs:
             target: x86
           - runner: windows-11-arm
             target: aarch64
-            python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
@@ -119,7 +118,12 @@ jobs:
         if: ${{ matrix.platform.target == 'aarch64' }}
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.platform.python-version }}
+          python-version: |
+            3.9
+            3.10
+            3.11
+            3.12
+            3.13
           architecture: arm64
       - name: Setup Rust toolchain
         if: ${{ matrix.platform.target == 'aarch64' }}
