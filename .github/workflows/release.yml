@@ -109,6 +109,9 @@ jobs:
         with:
           python-version: 3.13
           architecture: ${{ matrix.platform.target }}
+      - name: Setup Rust toolchain
+        if: ${{ matrix.platform.target == 'arm64' }}
+        uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
