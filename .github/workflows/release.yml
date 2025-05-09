@@ -99,10 +99,13 @@ jobs:
         platform:
           - runner: windows-latest
             target: x64
+            python-version: 3.9 3.10 3.11 3.12 3.13
           - runner: windows-latest
             target: x86
+            python-version: 3.9 3.10 3.11 3.12 3.13
           - runner: windows-11-arm
             target: aarch64
+            python-version: 3.11 3.12 3.13
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
@@ -118,21 +121,16 @@ jobs:
         if: ${{ matrix.platform.target == 'aarch64' }}
         uses: actions/setup-python@v5
         with:
-          python-version: |
-            3.9
-            3.10
-            3.11
-            3.12
-            3.13
+          python-version: ${{ matrix.platform.python-version }}
           architecture: arm64
-      - name: Setup Rust toolchain
+      - name: Setup Rust toolchain (aarch64)
         if: ${{ matrix.platform.target == 'aarch64' }}
         uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --interpreter 3.9 3.10 3.11 3.12 3.13 --features vendored
+          args: --release --out dist --interpreter ${{ matrix.platform.python-version }} --features vendored
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v4
