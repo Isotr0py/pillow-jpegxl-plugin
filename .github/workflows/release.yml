@@ -102,7 +102,7 @@ jobs:
           - runner: windows-latest
             target: x86
           - runner: windows-11-arm
-            target: aarch64
+            target: arm64
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
