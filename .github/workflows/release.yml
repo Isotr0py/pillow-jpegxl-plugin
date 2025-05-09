@@ -103,6 +103,7 @@ jobs:
             target: x86
           - runner: windows-11-arm
             target: aarch64
+            python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
@@ -113,10 +114,12 @@ jobs:
           architecture: ${{ matrix.platform.target }}
       - name: Setup Python (aarch64)
         # aarch64 uses arm64 name on Windows for setup-python
+        # pre-installed python on windows-arm is x64, we need to install aarch64 python
+        # to build wheels for aarch64 manually
         if: ${{ matrix.platform.target == 'aarch64' }}
         uses: actions/setup-python@v5
         with:
-          python-version: 3.13
+          python-version: ${{ matrix.platform.python-version }}
           architecture: arm64
       - name: Setup Rust toolchain
         if: ${{ matrix.platform.target == 'aarch64' }}
