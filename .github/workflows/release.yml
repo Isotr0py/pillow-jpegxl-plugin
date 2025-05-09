@@ -111,21 +111,6 @@ jobs:
         with:
           python-version: 3.13
           architecture: ${{ matrix.platform.target }}
-      - name: Setup Python (aarch64)
-        # aarch64 uses arm64 name on Windows for setup-python
-        # pre-installed python on windows-arm is x64, we need to install aarch64 python
-        # to build wheels for aarch64 manually
-        if: ${{ matrix.platform.target == 'aarch64' }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: |
-            3.11
-            3.12
-            3.13
-          architecture: arm64
-      - name: Setup Rust toolchain
-        if: ${{ matrix.platform.target == 'aarch64' }}
-        uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         if: ${{ matrix.platform.target != 'aarch64' }}
@@ -133,12 +118,51 @@ jobs:
           target: ${{ matrix.platform.target }}
           args: --release --out dist --interpreter 3.9 3.10 3.11 3.12 3.13 --features vendored
           sccache: 'true'
-      - name: Build wheels (aarch64)
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-windows-${{ matrix.platform.target }}
+          path: dist
+    
+  windows-arm:
+    runs-on: ${{ matrix.platform.runner }}
+    strategy:
+      matrix:
+        platform:
+          - runner: windows-11-arm
+            target: aarch64
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python (cp311)
+        uses: actions/setup-python@v5
+        id: cp311
+        with:
+          python-version: 3.11
+          allow-prereleases: true
+          architecture: arm64
+      - name: Setup Python (cp312)
+        uses: actions/setup-python@v5
+        id: cp312
+        with:
+          python-version: 3.12
+          allow-prereleases: true
+          architecture: arm64
+      - name: Setup Python (cp313)
+        uses: actions/setup-python@v5
+        id: cp313
+        with:
+          python-version: 3.13
+          allow-prereleases: true
+          architecture: arm64
+      # rust toolchain is not currently installed on windopws arm64 images https://github.com/actions/partner-runner-images/issues/77
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Build wheels
         uses: PyO3/maturin-action@v1
         if: ${{ matrix.platform.target == 'aarch64' }}
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --interpreter 3.11 3.12 3.13 --features vendored
+          args: --release --out dist --interpreter ${{ steps.cp311.outputs.python-path }} ${{ steps.cp312.outputs.python-path }} ${{ steps.cp313.outputs.python-path }} --features vendored
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v4
