@@ -102,15 +102,24 @@ jobs:
           - runner: windows-latest
             target: x86
           - runner: windows-11-arm
-            target: arm64
+            target: aarch64
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Setup Python
+        if: ${{ matrix.platform.target == 'x64' || matrix.platform.target == 'x86' }}
+        uses: actions/setup-python@v5
         with:
           python-version: 3.13
           architecture: ${{ matrix.platform.target }}
+      - name: Setup Python (aarch64)
+        # aarch64 uses arm64 name on Windows for setup-python
+        if: ${{ matrix.platform.target == 'aarch64' }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.13
+          architecture: arm64
       - name: Setup Rust toolchain
-        if: ${{ matrix.platform.target == 'arm64' }}
+        if: ${{ matrix.platform.target == 'aarch64' }}
         uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: Build wheels
         uses: PyO3/maturin-action@v1
