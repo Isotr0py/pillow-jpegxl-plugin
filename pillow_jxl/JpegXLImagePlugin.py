@@ -75,6 +75,8 @@ class JXLImageFile(ImageFile.ImageFile):
                     box = parse_jxl_box(self.fc, container_pointer, file_size)
                     if box["type"] == b'Exif':
                         self.info["exif"] = self.fc[container_pointer + box["offset"] : box["length"]]
+                        if len(self.info["exif"]) > 4 and self.info["exif"][:4] == b"\x00\x00\x00\x00":
+                            self.info["exif"] = self.info["exif"][4:]
                         data_offset_not_found = False
                     else:
                         container_pointer += box["length"]
