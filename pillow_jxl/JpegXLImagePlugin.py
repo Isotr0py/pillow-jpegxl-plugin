@@ -66,9 +66,8 @@ class JXLImageFile(ImageFile.ImageFile):
             self.rawmode = self._jxlinfo.mode
 
             # Read the exif data from the file
-            # Check if it is a JXL container, first 32 bytes in hex should be:
-            # 0000000C 4A584C20 0D0A870A 00000014 66747970 6A786C20 00000000 6A786C20
-            if self.fc[:32] == b"\x00\x00\x00\x0cJXL \r\n\x87\n\x00\x00\x00\x14ftypjxl \x00\x00\x00\x00jxl ":
+            # Check if it is a JXL container first:
+            if self.fc[:32] == b"\x00\x00\x00\x0C\x4A\x58\x4C\x20\x0D\x0A\x87\x0A\x00\x00\x00\x14\x66\x74\x79\x70\x6A\x78\x6C\x20\x00\x00\x00\x00\x6A\x78\x6C\x20":
                 file_size = len(self.fc)
                 container_pointer = 32
                 data_offset_not_found = True
