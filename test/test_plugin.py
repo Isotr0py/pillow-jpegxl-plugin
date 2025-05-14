@@ -84,10 +84,17 @@ def test_icc_profile():
     assert img_ori.info["icc_profile"] == img_jxl.info["icc_profile"]
 
 
-def test_metadata_decode():
+def test_metadata_decode_from_jpeg_reconstruct():
     # Load a JPEG image
     img_ori = Image.open("test/images/metadata/1x1_exif_xmp.jpg")
-    img_jxl = Image.open("test/images/metadata/1x1_exif_xmp.jxl")
+    img_jxl = Image.open("test/images/metadata/1x1_exif_xmp.jpg.jxl")
+    assert img_ori.getexif() == img_jxl.getexif()
+
+
+def test_metadata_decode_from_direct_decoding():
+    # Load a PNG image
+    img_ori = Image.open("test/images/metadata/1x1_exif_xmp.png")
+    img_jxl = Image.open("test/images/metadata/1x1_exif_xmp.png.jxl")
     assert img_ori.getexif() == img_jxl.getexif()
 
 
