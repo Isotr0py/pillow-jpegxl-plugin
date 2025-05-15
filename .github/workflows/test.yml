@@ -52,16 +52,12 @@ jobs:
           export DEP_JXL_LIB=$(brew --prefix jpeg-xl)'/lib'
           export DEP_BROTLI_LIB=$(brew --prefix brotli)'/lib'
           export DEP_HWY_LIB=$(brew --prefix highway)'/lib'
-
-          source venv/bin/activate
-          pip install maturin
-          maturin develop --features dynamic
     
       - name: Test with pytest
         run: |
           brew install inih
           source venv/bin/activate
-          pip install -e .[dev]
+          pip install -e .[dev] --config-settings=build-args="--features=dynamic"
           pytest test/ --junitxml=junit/test-results-${{ matrix.python-version }}.xml
 
       - name: Upload pytest test results
