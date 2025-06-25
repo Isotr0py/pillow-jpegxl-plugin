@@ -49,7 +49,7 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
           venv/Scripts/activate
-          python -m pip install -e . -v --config-settings=build-args="--features=dynamic --target=x86_64-pc-windows-gnu"
+          python -m pip install -e . -v --config-settings=build-args="--features=dynamic"
           python benchmarks/benchmarks_encode.py -i test/images/bench.png -o benchmarks-results-${{ matrix.os }}-py${{ matrix.python-version }}.json
 
       - name: Run benchmarks scripts (MacOS)
