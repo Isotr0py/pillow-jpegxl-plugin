@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         # we only use macos for fast testing
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [macos-latest, windows-latest]
         python-version: ['3.13']
 
     steps:
@@ -39,17 +39,25 @@ jobs:
 
       - name: Cache Rust
         uses: Swatinem/rust-cache@v2
+      
+      - name: Set up libjxl
+        run: |
+          if [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            brew install jpeg-xl
+          elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            vcpkg install libjxl
+          fi
 
       - name: Run benchmarks scripts
         run: |
           pip install -e .
-          python benchmarks/benchmarks_encode.py -i test/images/bench.png -o benchmarks-results-${{ matrix.python-version }}.json
+          python benchmarks/benchmarks_encode.py -i test/images/bench.png -o benchmarks-results-${{ matrix.os }}-py${{ matrix.python-version }}.json
 
       - name: Upload pytest test results
         uses: actions/upload-artifact@v4
         with:
-          name: benchmarks-results-${{ matrix.python-version }}
-          path: benchmarks-results-${{ matrix.python-version }}.json
+          name: benchmarks-results-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: benchmarks-results-${{ matrix.os }}-py${{ matrix.python-version }}.json
         # Use always() to always run this step to publish test results when there are test failures
         if: ${{ always() }}
 
