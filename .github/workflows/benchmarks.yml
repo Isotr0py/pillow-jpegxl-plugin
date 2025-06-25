@@ -51,6 +51,7 @@ jobs:
         with:
           update: true
           install: >-
+            mingw-w64-x86_64-toolchain
             mingw-w64-x86_64-libjxl
 
       - name: Set up libjxl (MacOS)
@@ -62,7 +63,7 @@ jobs:
         run: python -m pip install -e . -v --config-settings=build-args="--features=dynamic"
 
       - name: Install Plugin
-        run: python -m pip install -e . -v"
+        run: python -m pip install -e . -v
 
       - name: Run benchmarks scripts
         run: |
