@@ -40,26 +40,36 @@ jobs:
       - name: Cache Rust
         uses: Swatinem/rust-cache@v2
       
-      - name: Put MSYS2_MinGW64 on PATH
-        if: ${{ matrix.os == 'windows-latest' }}
-        # there is not yet an environment variable for this path from msys2/setup-msys2
-        run: echo "${{ runner.temp }}/msys64/mingw64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      # - name: Put MSYS2_MinGW64 on PATH
+      #   if: ${{ matrix.os == 'windows-latest' }}
+      #   # there is not yet an environment variable for this path from msys2/setup-msys2
+      #   run: echo "${{ runner.temp }}/msys64/mingw64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      # - name: Set up libjxl (Windows)
+      #   uses: msys2/setup-msys2@v2
+      #   if: ${{ matrix.os == 'windows-latest' }}
+      #   with:
+      #     update: true
+      #     install: >-
+      #       mingw-w64-x86_64-libjxl
 
       - name: Set up libjxl (Windows)
-        uses: msys2/setup-msys2@v2
         if: ${{ matrix.os == 'windows-latest' }}
-        with:
-          update: true
-          install: >-
-            mingw-w64-x86_64-libjxl
+        run: vcpkg install libjxl
 
       - name: Set up libjxl (MacOS)
         if: ${{ matrix.os == 'macos-latest' }}
         run: brew install jpeg-xl
 
+      - name: Install Plugin (Windows)
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: python -m pip install -e . -v --config-settings=build-args="--features=dynamic"
+
+      - name: Install Plugin
+        run: python -m pip install -e . -v"
+
       - name: Run benchmarks scripts
         run: |
-          python -m pip install -e .
           python benchmarks/benchmarks_encode.py -i test/images/bench.png -o benchmarks-results-${{ matrix.os }}-py${{ matrix.python-version }}.json
 
       - name: Upload pytest test results
