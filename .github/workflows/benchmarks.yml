@@ -59,7 +59,7 @@ jobs:
 
       - name: Run benchmarks scripts
         run: |
-          pip install -e .
+          python -m pip install -e .
           python benchmarks/benchmarks_encode.py -i test/images/bench.png -o benchmarks-results-${{ matrix.os }}-py${{ matrix.python-version }}.json
 
       - name: Upload pytest test results
