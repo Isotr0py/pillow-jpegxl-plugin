@@ -21,8 +21,8 @@ jobs:
       fail-fast: false
       matrix:
         # we only use macos for fast testing
-        os: [macos-latest]
-        python-version: ['3.11']
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        python-version: ['3.13']
 
     steps:
       - uses: actions/checkout@v4
@@ -34,32 +34,15 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Create virtual environment
-        env:
-          BIN: ${{ matrix.os == 'macos-latest' && 'Scripts' || 'bin' }}
-        run: |
-          python -m venv venv
-
       - name: Set up Rust
         run: rustup show
 
       - name: Cache Rust
         uses: Swatinem/rust-cache@v2
 
-      - name: Install Plugin
-        run: |
-          brew install jpeg-xl
-          export DEP_JXL_LIB=$(brew --prefix jpeg-xl)'/lib'
-          export DEP_BROTLI_LIB=$(brew --prefix brotli)'/lib'
-          export DEP_HWY_LIB=$(brew --prefix highway)'/lib'
-
-          source venv/bin/activate
-          pip install maturin
-          maturin develop --features dynamic
-    
       - name: Run benchmarks scripts
         run: |
-          source venv/bin/activate
+          pip install -e .
           python benchmarks/benchmarks_encode.py -i test/images/bench.png -o benchmarks-results-${{ matrix.python-version }}.json
 
       - name: Upload pytest test results
