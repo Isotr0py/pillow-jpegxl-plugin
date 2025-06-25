@@ -40,13 +40,13 @@ jobs:
       - name: Cache Rust
         uses: Swatinem/rust-cache@v2
       
-      - name: Set up libjxl
-        run: |
-          if [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            brew install jpeg-xl
-          elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            vcpkg install libjxl
-          fi
+      - name: Set up libjxl (Windows)
+        if: ${{ matrix.os != 'windows-latest' }}
+        run: vcpkg install libjxl
+
+      - name: Set up libjxl (MacOS)
+        if: ${{ matrix.os != 'windows-latest' }}
+        run: brew install libjxl
 
       - name: Run benchmarks scripts
         run: |
