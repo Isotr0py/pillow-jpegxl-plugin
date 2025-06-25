@@ -37,12 +37,6 @@ jobs:
       - name: Create virtual environment
         run: python -m venv venv
 
-      - name: Set up Rust
-        run: rustup show
-
-      - name: Cache Rust
-        uses: Swatinem/rust-cache@v2
-      
       - name: Put MSYS2_MinGW64 on PATH
         if: ${{ matrix.os == 'windows-latest' }}
         # there is not yet an environment variable for this path from msys2/setup-msys2
@@ -65,9 +59,10 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
           source venv/bin/activate
-          python -m pip install -e . -v --config-settings=build-args="--features=dynamic"
+          python -m pip install -e . -v --config-settings=build-args="--features=dynamic --target=x86_64-pc-windows-gnu"
 
-      - name: Install Plugin
+      - name: Install Plugin (MacOS)
+        if: ${{ matrix.os == 'macos-latest' }}
         run: python -m pip install -e . -v
 
       - name: Run benchmarks scripts
