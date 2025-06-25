@@ -41,11 +41,11 @@ jobs:
         uses: Swatinem/rust-cache@v2
       
       - name: Set up libjxl (Windows)
-        if: ${{ matrix.os != 'windows-latest' }}
+        if: ${{ matrix.os == 'windows-latest' }}
         run: vcpkg install libjxl
 
       - name: Set up libjxl (MacOS)
-        if: ${{ matrix.os != 'windows-latest' }}
+        if: ${{ matrix.os == 'macos-latest' }}
         run: brew install libjxl
 
       - name: Run benchmarks scripts
