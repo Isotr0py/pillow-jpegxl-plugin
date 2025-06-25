@@ -42,6 +42,7 @@ jobs:
       
       - name: Install dependencys
         uses: msys2/setup-msys2@v2
+        if: ${{ matrix.os == 'windows-latest' }}
         with:
           update: true
           install: >-
@@ -52,10 +53,6 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         # there is not yet an environment variable for this path from msys2/setup-msys2
         run: echo "${{ runner.temp }}/msys64/mingw64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-
-      - name: Set up libjxl (Windows)
-        if: ${{ matrix.os == 'windows-latest' }}
-        run: vcpkg install libjxl
 
       - name: Set up libjxl (MacOS)
         if: ${{ matrix.os == 'macos-latest' }}
