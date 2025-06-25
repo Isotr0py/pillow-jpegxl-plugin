@@ -55,11 +55,21 @@ jobs:
         if: ${{ matrix.os == 'macos-latest' }}
         run: brew install jpeg-xl
 
+      - name: Build Plugin (Windows)
+        uses: PyO3/maturin-action@v1
+        if: ${{ matrix.os == 'windows-latest' }}
+        env: 
+          RUST_BACKTRACE: 1
+        with:
+          command: develop
+          rust-toolchain: stable-x86_64-pc-windows-gnu
+          target: x86_64-pc-windows-gnu
+          args: --release --features dynamic
+          sccache: 'true'
+
       - name: Run benchmarks scripts (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
-          venv/Scripts/activate
-          python -m pip install -e . -v --config-settings=build-args="--features=dynamic --target=x86_64-pc-windows-gnu"
           python benchmarks/benchmarks_encode.py -i test/images/bench.png -o benchmarks-results-${{ matrix.os }}-py${{ matrix.python-version }}.json
 
       - name: Run benchmarks scripts (MacOS)
