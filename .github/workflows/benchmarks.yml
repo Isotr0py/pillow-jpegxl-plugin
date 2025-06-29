@@ -30,7 +30,6 @@ jobs:
 
       - name: Install libjxl
         uses: msys2/setup-msys2@v2
-        if: ${{ matrix.features == 'dynamic' }}
         with:
           update: true
           install: >-
