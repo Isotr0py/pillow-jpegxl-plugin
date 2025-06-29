@@ -29,14 +29,6 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-      
-      - name: Create virtual environment
-        run: python -m venv venv
-
       - name: Install dependencys
         if: ${{ matrix.os == 'windows-latest' }}
         uses: msys2/setup-msys2@v2
@@ -55,28 +47,31 @@ jobs:
         if: ${{ matrix.os == 'macos-latest' }}
         run: brew install jpeg-xl
       
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
       - name: Build windows wheel
         if: ${{ matrix.os == 'windows-latest' }}
         uses: PyO3/maturin-action@v1
         env: 
           RUST_BACKTRACE: 1
         with:
+          command: develop
           rust-toolchain: stable-x86_64-pc-windows-gnu
           target: x86_64-pc-windows-gnu
-          args: --release --out wheels --interpreter 3.13 --features dynamic
+          args: --release --features dynamic
           sccache: 'true'
 
       - name: Run benchmarks scripts (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
-          venv/Scripts/activate
-          python -m pip install -e wheels/*.whl
           python benchmarks/benchmarks_encode.py -i test/images/bench.png -o benchmarks-results-${{ matrix.os }}-py${{ matrix.python-version }}.json
 
       - name: Run benchmarks scripts (MacOS)
         if: ${{ matrix.os == 'macos-latest' }}
         run: |
-          source venv/bin/activate
           python -m pip install -e . -v
           python benchmarks/benchmarks_encode.py -i test/images/bench.png -o benchmarks-results-${{ matrix.os }}-py${{ matrix.python-version }}.json
 
