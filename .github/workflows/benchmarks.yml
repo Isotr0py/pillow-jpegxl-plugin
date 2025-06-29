@@ -52,6 +52,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Create virtual environment
+        run: python -m venv .venv
+
       - name: Build windows wheel
         if: ${{ matrix.os == 'windows-latest' }}
         uses: PyO3/maturin-action@v1
@@ -67,11 +70,13 @@ jobs:
       - name: Run benchmarks scripts (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
+          .venv/Scripts/activate
           python benchmarks/benchmarks_encode.py -i test/images/bench.png -o benchmarks-results-${{ matrix.os }}-py${{ matrix.python-version }}.json
 
       - name: Run benchmarks scripts (MacOS)
         if: ${{ matrix.os == 'macos-latest' }}
         run: |
+          source .venv/bin/activate
           python -m pip install -e . -v
           python benchmarks/benchmarks_encode.py -i test/images/bench.png -o benchmarks-results-${{ matrix.os }}-py${{ matrix.python-version }}.json
 
