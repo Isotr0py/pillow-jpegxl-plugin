@@ -61,10 +61,9 @@ jobs:
         env: 
           RUST_BACKTRACE: 1
         with:
-          command: develop
           rust-toolchain: stable-x86_64-pc-windows-gnu
           target: x86_64-pc-windows-gnu
-          args: --release --features dynamic
+          args: --release --out ./ -i 3.13 --features dynamic
           sccache: 'true'
 
       - name: Run benchmarks scripts (Windows)
