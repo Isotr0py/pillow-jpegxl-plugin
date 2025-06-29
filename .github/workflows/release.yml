@@ -125,6 +125,7 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
+          rust-toolchain: stable-${{ matrix.platform.toolchain }}
           target: ${{ matrix.platform.toolchain }}
           args: --release --out dist --interpreter 3.9 3.10 3.11 3.12 3.13 --features ${{ matrix.platform.features }}
           sccache: 'true'
@@ -132,7 +133,7 @@ jobs:
         if: ${{ matrix.platform.features == 'dynamic' }}
         run: |
           pip install delvewheel
-          Get-ChildItem ${{ github.workspace }}/wheels/*win_amd64.whl | ForEach-Object -Process {delvewheel repair $PSItem -w dist}
+          Get-ChildItem ${{ github.workspace }}/dist/*win_amd64.whl | ForEach-Object -Process {delvewheel repair $PSItem -w dist}
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
