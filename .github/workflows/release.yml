@@ -100,9 +100,11 @@ jobs:
           - runner: windows-latest
             target: x64
             toolchain: x86_64-pc-windows-gnu
+            features: dynamic
           - runner: windows-latest
             target: x86
-            toolchain: i686-pc-windows-gnu
+            toolchain: i686-pc-windows-msvc
+            features: vendored
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencys
@@ -124,9 +126,10 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.toolchain }}
-          args: --release --out dist --interpreter 3.9 3.10 3.11 3.12 3.13 --features dynamic
+          args: --release --out dist --interpreter 3.9 3.10 3.11 3.12 3.13 --features ${{ matrix.platform.features }}
           sccache: 'true'
       - name: Fix wheels with delvewheel
+        if: ${{ matrix.platform.features == 'dynamic' }}
         run: |
           pip install delvewheel
           Get-ChildItem ${{ github.workspace }}/wheels/*win_amd64.whl | ForEach-Object -Process {delvewheel repair $PSItem -w dist}
