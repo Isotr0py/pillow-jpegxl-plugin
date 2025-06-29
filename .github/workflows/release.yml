@@ -105,6 +105,16 @@ jobs:
             target: aarch64
     steps:
       - uses: actions/checkout@v4
+      - name: Install dependencys
+        uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-libjxl
+      - name: Put MSYS2_MinGW64 on PATH
+        # there is not yet an environment variable for this path from msys2/setup-msys2
+        run: echo "${{ runner.temp }}/msys64/mingw64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: Setup Python
         if: ${{ matrix.platform.target == 'x64' || matrix.platform.target == 'x86' }}
         uses: actions/setup-python@v5
@@ -116,8 +126,12 @@ jobs:
         if: ${{ matrix.platform.target != 'aarch64' }}
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --interpreter 3.9 3.10 3.11 3.12 3.13 --features vendored
+          args: --release --out dist --interpreter 3.9 3.10 3.11 3.12 3.13 --features dynamic
           sccache: 'true'
+      - name: Fix wheels with delvewheel
+        run: |
+          pip install delvewheel
+          Get-ChildItem ${{ github.workspace }}/wheels/*win_amd64.whl | ForEach-Object -Process {delvewheel repair $PSItem -w dist}
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
