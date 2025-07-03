@@ -64,8 +64,8 @@ jobs:
         run: |
           .venv/Scripts/activate
           python -m pip install delvewheel
-          delvewheel repair pillow_jxl_plugin-1.3.3-cp313-cp313-win_amd64.whl
-          python -m pip install ./wheelhouse/pillow_jxl_plugin-1.3.3-cp313-cp313-win_amd64.whl
+          delvewheel repair pillow_jxl_plugin-1.3.4-cp313-cp313-win_amd64.whl
+          python -m pip install ./wheelhouse/pillow_jxl_plugin-1.3.4-cp313-cp313-win_amd64.whl
           python benchmarks/benchmarks_encode.py -i test/images/bench.png -o benchmarks-results-${{ matrix.os }}-${{ matrix.features }}-py${{ matrix.python-version }}.json
 
       - name: Run benchmarks scripts (vendored)
