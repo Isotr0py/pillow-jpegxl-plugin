@@ -24,7 +24,7 @@ jobs:
         features: ["vendored", "dynamic"]
         python-version: ['3.13']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
 
@@ -90,7 +90,7 @@ jobs:
       matrix:
         python-version: ['3.13']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
 

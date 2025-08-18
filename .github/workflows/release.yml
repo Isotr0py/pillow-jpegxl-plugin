@@ -38,7 +38,7 @@ jobs:
           # - runner: ubuntu-latest
           #   target: ppc64le
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-python@v5
         with:
           python-version: 3.x
@@ -72,7 +72,7 @@ jobs:
           - runner: ubuntu-latest
             target: armv7
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-python@v5
         with:
           python-version: 3.x
@@ -106,7 +106,7 @@ jobs:
             toolchain: i686-pc-windows-msvc
             features: vendored
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install dependencys
         uses: msys2/setup-msys2@v2
         with:
@@ -148,7 +148,7 @@ jobs:
           - runner: windows-11-arm
             target: aarch64
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Setup Python (cp311)
         uses: actions/setup-python@v5
         id: cp311
@@ -196,7 +196,7 @@ jobs:
           - runner: macos-14
             target: aarch64
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-python@v5
         with:
           python-version: 3.x
@@ -215,7 +215,7 @@ jobs:
   sdist:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build sdist
         uses: PyO3/maturin-action@v1
         with:
