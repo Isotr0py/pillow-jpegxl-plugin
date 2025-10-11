@@ -22,6 +22,8 @@ permissions:
 jobs:
   linux:
     runs-on: ${{ matrix.platform.runner }}
+    env:
+      MATURIN_INTERPRETERS: "3.10 3.11 3.12 3.13 3.14 pypy3.9 pypy3.10 pypy3.11"
     strategy:
       matrix:
         platform:
@@ -49,7 +51,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --interpreter 3.9 3.10 3.11 3.12 3.13 pypy3.9 pypy3.10 --features vendored
+          args: --release --out dist --interpreter ${{ env.MATURIN_INTERPRETERS }} --features vendored
           sccache: 'true'
           manylinux: auto
       - name: Upload wheels
@@ -60,6 +62,8 @@ jobs:
 
   musllinux:
     runs-on: ${{ matrix.platform.runner }}
+    env:
+      MATURIN_INTERPRETERS: "3.10 3.11 3.12 3.13 3.14 pypy3.9 pypy3.10 pypy3.11"
     strategy:
       matrix:
         platform:
@@ -83,7 +87,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --interpreter 3.9 3.10 3.11 3.12 3.13 pypy3.9 pypy3.10 --features vendored
+          args: --release --out dist --interpreter ${{ env.MATURIN_INTERPRETERS }} --features vendored
           sccache: 'true'
           manylinux: musllinux_1_2
       - name: Upload wheels
@@ -94,6 +98,8 @@ jobs:
 
   windows:
     runs-on: ${{ matrix.platform.runner }}
+    env:
+      MATURIN_INTERPRETERS: "3.10 3.11 3.12 3.13 3.14"
     strategy:
       matrix:
         platform:
@@ -120,14 +126,14 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: 3.13
+          python-version: 3.14
           architecture: ${{ matrix.platform.target }}
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
           rust-toolchain: stable-${{ matrix.platform.toolchain }}
           target: ${{ matrix.platform.toolchain }}
-          args: --release --out dist --interpreter 3.9 3.10 3.11 3.12 3.13 --features ${{ matrix.platform.features }}
+          args: --release --out dist --interpreter ${{ env.MATURIN_INTERPRETERS }} --features ${{ matrix.platform.features }}
           sccache: 'true'
       - name: Fix wheels with delvewheel
         if: ${{ matrix.platform.features == 'dynamic' }}
@@ -149,6 +155,13 @@ jobs:
             target: aarch64
     steps:
       - uses: actions/checkout@v5
+      - name: Setup Python (cp310)
+        uses: actions/setup-python@v6
+        id: cp310
+        with:
+          python-version: 3.10
+          allow-prereleases: true
+          architecture: arm64
       - name: Setup Python (cp311)
         uses: actions/setup-python@v6
         id: cp311
@@ -170,6 +183,13 @@ jobs:
           python-version: 3.13
           allow-prereleases: true
           architecture: arm64
+      - name: Setup Python (cp314)
+        uses: actions/setup-python@v6
+        id: cp313
+        with:
+          python-version: 3.14
+          allow-prereleases: true
+          architecture: arm64
       # rust toolchain is not currently installed on windopws arm64 images https://github.com/actions/partner-runner-images/issues/77
       - name: Setup Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -178,7 +198,7 @@ jobs:
         if: ${{ matrix.platform.target == 'aarch64' }}
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --interpreter ${{ steps.cp311.outputs.python-path }} ${{ steps.cp312.outputs.python-path }} ${{ steps.cp313.outputs.python-path }} --features vendored
+          args: --release --out dist --interpreter ${{ steps.cp310.outputs.python-path }} ${{ steps.cp311.outputs.python-path }} ${{ steps.cp312.outputs.python-path }} ${{ steps.cp313.outputs.python-path }} ${{ steps.cp314.outputs.python-path }} --features vendored
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -188,6 +208,8 @@ jobs:
 
   macos:
     runs-on: ${{ matrix.platform.runner }}
+    env:
+      MATURIN_INTERPRETERS: "3.10 3.11 3.12 3.13 3.14 pypy3.9 pypy3.10 pypy3.11"
     strategy:
       matrix:
         platform:
@@ -204,7 +226,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --interpreter 3.9 3.10 3.11 3.12 3.13 pypy3.9 pypy3.10 --features vendored
+          args: --release --out dist --interpreter ${{ env.MATURIN_INTERPRETERS }} --features vendored
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v4
