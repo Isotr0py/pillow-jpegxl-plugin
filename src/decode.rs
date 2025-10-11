@@ -83,7 +83,7 @@ impl Decoder {
         _py: Python,
         data: &[u8],
     ) -> PyResult<(bool, ImageInfo, Cow<'_, [u8]>, Cow<'_, [u8]>)> {
-        _py.allow_threads(|| self.call_inner(data))
+        _py.detach(|| self.call_inner(data))
     }
 
     fn __repr__(&self) -> PyResult<String> {
