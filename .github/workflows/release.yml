@@ -185,7 +185,7 @@ jobs:
           architecture: arm64
       - name: Setup Python (cp314)
         uses: actions/setup-python@v6
-        id: cp313
+        id: cp314
         with:
           python-version: 3.14
           allow-prereleases: true
