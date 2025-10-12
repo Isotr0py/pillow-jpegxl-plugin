@@ -81,9 +81,9 @@ impl JxlBox {
             self.data.len()
         ))
     }
-    
 }
 
+// refer to https://github.com/Fraetor/jxl_decode/blob/902cd5d479f89f93df6105a22dc92f297ab77541/src/jxl_decode/jxl.py#L88-L110
 fn extract_boxes(data: &[u8]) -> PyResult<Vec<JxlBox>> {
     let mut boxes = Vec::new();
     let mut pos = 32;
@@ -122,7 +122,6 @@ fn extract_boxes(data: &[u8]) -> PyResult<Vec<JxlBox>> {
             box_type: box_type,
             data: box_data,
         });
-        println!("Found box: {:?}, size: {}", String::from_utf8_lossy(&box_type), box_length);
         pos += box_length;
     }
     Ok(boxes)
@@ -225,7 +224,10 @@ impl Decoder {
 }
 
 impl Decoder {
-    fn call_inner(&self, data: &[u8]) -> PyResult<(bool, ImageInfo, Cow<'_, [u8]>, Cow<'_, [u8]>, Vec<JxlBox>)> {
+    fn call_inner(
+        &self,
+        data: &[u8],
+    ) -> PyResult<(bool, ImageInfo, Cow<'_, [u8]>, Cow<'_, [u8]>, Vec<JxlBox>)> {
         let parallel_runner = ThreadsRunner::new(
             None,
             if self.num_threads < 0 {
@@ -251,7 +253,13 @@ impl Decoder {
             Data::Jpeg(x) => (true, x),
             Data::Pixels(x) => (false, self.convert_pil_pixels(x, img_info.num_channels)?),
         };
-        Ok((jpeg, img_info, Cow::Owned(img), Cow::Owned(icc_profile), boxes))
+        Ok((
+            jpeg,
+            img_info,
+            Cow::Owned(img),
+            Cow::Owned(icc_profile),
+            boxes,
+        ))
     }
 }
 

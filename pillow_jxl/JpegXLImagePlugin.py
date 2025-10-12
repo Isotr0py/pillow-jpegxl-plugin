@@ -19,29 +19,6 @@ def _accept(data):
     )
 
 
-# parse_jxl_box is modified from https://github.com/Fraetor/jxl_decode/blob/902cd5d479f89f93df6105a22dc92f297ab77541/src/jxl_decode/jxl.py#L88-L110
-def parse_jxl_box(file, file_start: int, file_size: int) -> dict:
-    LBox = int.from_bytes(file[file_start : file_start + 4], "big")
-    XLBox = None
-    if 1 < LBox <= 8:
-        raise ValueError(f"Invalid LBox at byte {file_start}.")
-    if LBox == 1:
-        XLBox = int.from_bytes(file[file_start + 8 : file_start + 16], "big")
-        if XLBox <= 16:
-            raise ValueError(f"Invalid XLBox at byte {file_start}.")
-    if XLBox:
-        header_length = 16
-        box_length = XLBox
-    else:
-        header_length = 8
-        if LBox == 0:
-            box_length = file_size - file_start
-        else:
-            box_length = LBox
-    box_type = file[file_start + 4 : file_start + 8]
-    return {"length": box_length, "type": box_type, "offset": header_length}
-
-
 class JXLImageFile(ImageFile.ImageFile):
     format = "JXL"
     format_description = "Jpeg XL image"
@@ -65,36 +42,13 @@ class JXLImageFile(ImageFile.ImageFile):
             self._size = (self._jxlinfo.width, self._jxlinfo.height)
             self.rawmode = self._jxlinfo.mode
             # Read the exif data from the file
-            print(jxl_boxes)
             for box in jxl_boxes:
-                print(box, box["type"], box["data"])
-                if box["type"] == b"Exif":
-                    exif_data = box["data"]
-                    if len(exif_data) > 8:
-                        if exif_data[4:8] in (b"II\x2A\x00", b"MM\x00\x2A"):
-                            exif_data = exif_data[4:]
+                if box.box_type == b"Exif":
+                    exif_data = box.data
+                    if len(exif_data) > 8 and exif_data[4:8] in (b"II\x2A\x00", b"MM\x00\x2A"):
+                        exif_data = exif_data[4:]
                     self.info["exif"] = exif_data
                     break
-
-            # Read the exif data from the file
-            # Check if it is a JXL container first:
-            # if self.fc[:32] == b"\x00\x00\x00\x0C\x4A\x58\x4C\x20\x0D\x0A\x87\x0A\x00\x00\x00\x14\x66\x74\x79\x70\x6A\x78\x6C\x20\x00\x00\x00\x00\x6A\x78\x6C\x20":
-            #     file_size = len(self.fc)
-            #     container_pointer = 32
-            #     data_offset_not_found = True
-            #     while data_offset_not_found:
-            #         box = parse_jxl_box(self.fc, container_pointer, file_size)
-            #         if box["type"] == b'Exif':
-            #             exif_container_start = container_pointer + box["offset"]
-            #             self.info["exif"] = self.fc[exif_container_start : exif_container_start + box["length"]]
-            #             if len(self.info["exif"]) > 8:
-            #                 if self.info["exif"][4:8] == b"II\x2A\x00" or self.info["exif"][4:8] == b"MM\x00\x2A":
-            #                     self.info["exif"] = self.info["exif"][4:]
-            #             data_offset_not_found = False
-            #         else:
-            #             container_pointer += box["length"]
-            #             if container_pointer >= file_size:
-            #                 data_offset_not_found = False
 
         if icc_profile:
             self.info["icc_profile"] = icc_profile
