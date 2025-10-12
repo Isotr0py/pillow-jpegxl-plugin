@@ -52,7 +52,7 @@ class JXLImageFile(ImageFile.ImageFile):
         self.fc = self.fp.read()
         self._decoder = Decoder(num_threads=DECODE_THREADS)
 
-        self.jpeg, self._jxlinfo, self._data, icc_profile = self._decoder(self.fc)
+        self.jpeg, self._jxlinfo, self._data, icc_profile, jxl_boxes = self._decoder(self.fc)
         # FIXME (Isotr0py): Maybe slow down jpeg reconstruction
         if self.jpeg:
             with Image.open(BytesIO(self._data)) as im:
@@ -64,26 +64,37 @@ class JXLImageFile(ImageFile.ImageFile):
         else:
             self._size = (self._jxlinfo.width, self._jxlinfo.height)
             self.rawmode = self._jxlinfo.mode
+            # Read the exif data from the file
+            print(jxl_boxes)
+            for box in jxl_boxes:
+                print(box, box["type"], box["data"])
+                if box["type"] == b"Exif":
+                    exif_data = box["data"]
+                    if len(exif_data) > 8:
+                        if exif_data[4:8] in (b"II\x2A\x00", b"MM\x00\x2A"):
+                            exif_data = exif_data[4:]
+                    self.info["exif"] = exif_data
+                    break
 
             # Read the exif data from the file
             # Check if it is a JXL container first:
-            if self.fc[:32] == b"\x00\x00\x00\x0C\x4A\x58\x4C\x20\x0D\x0A\x87\x0A\x00\x00\x00\x14\x66\x74\x79\x70\x6A\x78\x6C\x20\x00\x00\x00\x00\x6A\x78\x6C\x20":
-                file_size = len(self.fc)
-                container_pointer = 32
-                data_offset_not_found = True
-                while data_offset_not_found:
-                    box = parse_jxl_box(self.fc, container_pointer, file_size)
-                    if box["type"] == b'Exif':
-                        exif_container_start = container_pointer + box["offset"]
-                        self.info["exif"] = self.fc[exif_container_start : exif_container_start + box["length"]]
-                        if len(self.info["exif"]) > 8:
-                            if self.info["exif"][4:8] == b"II\x2A\x00" or self.info["exif"][4:8] == b"MM\x00\x2A":
-                                self.info["exif"] = self.info["exif"][4:]
-                        data_offset_not_found = False
-                    else:
-                        container_pointer += box["length"]
-                        if container_pointer >= file_size:
-                            data_offset_not_found = False
+            # if self.fc[:32] == b"\x00\x00\x00\x0C\x4A\x58\x4C\x20\x0D\x0A\x87\x0A\x00\x00\x00\x14\x66\x74\x79\x70\x6A\x78\x6C\x20\x00\x00\x00\x00\x6A\x78\x6C\x20":
+            #     file_size = len(self.fc)
+            #     container_pointer = 32
+            #     data_offset_not_found = True
+            #     while data_offset_not_found:
+            #         box = parse_jxl_box(self.fc, container_pointer, file_size)
+            #         if box["type"] == b'Exif':
+            #             exif_container_start = container_pointer + box["offset"]
+            #             self.info["exif"] = self.fc[exif_container_start : exif_container_start + box["length"]]
+            #             if len(self.info["exif"]) > 8:
+            #                 if self.info["exif"][4:8] == b"II\x2A\x00" or self.info["exif"][4:8] == b"MM\x00\x2A":
+            #                     self.info["exif"] = self.info["exif"][4:]
+            #             data_offset_not_found = False
+            #         else:
+            #             container_pointer += box["length"]
+            #             if container_pointer >= file_size:
+            #                 data_offset_not_found = False
 
         if icc_profile:
             self.info["icc_profile"] = icc_profile

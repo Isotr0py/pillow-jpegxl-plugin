@@ -65,6 +65,70 @@ impl ImageInfo {
 }
 
 #[pyclass(module = "pillow_jxl")]
+pub struct JxlBox {
+    #[pyo3(get, set)]
+    box_type: [u8; 4],
+    #[pyo3(get, set)]
+    data: Vec<u8>,
+}
+
+#[pymethods]
+impl JxlBox {
+    fn __repr__(&self) -> PyResult<String> {
+        Ok(format!(
+            "JxlBox(type={:?}, size={})",
+            String::from_utf8_lossy(&self.box_type),
+            self.data.len()
+        ))
+    }
+    
+}
+
+fn extract_boxes(data: &[u8]) -> PyResult<Vec<JxlBox>> {
+    let mut boxes = Vec::new();
+    let mut pos = 32;
+    while pos + 4 <= data.len() {
+        let box_size = u32::from_be_bytes(data[pos..pos + 4].try_into().unwrap()) as usize;
+        if pos + box_size > data.len() {
+            break;
+        }
+        if 1 < box_size && box_size <= 8 {
+            pos += 4;
+            continue;
+        }
+        let header_length;
+        let box_length;
+        if box_size == 1 {
+            header_length = 16;
+            box_length = u32::from_be_bytes(data[pos + 8..pos + 16].try_into().unwrap()) as usize;
+            if box_length <= 16 {
+                pos += 4;
+                continue;
+            }
+        } else {
+            header_length = 8;
+            box_length = if box_size == 0 {
+                data.len() - pos
+            } else {
+                box_size
+            };
+        }
+        if pos + header_length + box_length > data.len() {
+            break;
+        }
+        let box_type = data[pos + 4..pos + 8].try_into().unwrap();
+        let box_data = data[pos + header_length..pos + header_length + box_length].to_vec();
+        boxes.push(JxlBox {
+            box_type: box_type,
+            data: box_data,
+        });
+        println!("Found box: {:?}, size: {}", String::from_utf8_lossy(&box_type), box_length);
+        pos += box_length;
+    }
+    Ok(boxes)
+}
+
+#[pyclass(module = "pillow_jxl")]
 pub struct Decoder {
     num_threads: isize,
 }
@@ -82,7 +146,7 @@ impl Decoder {
         &self,
         _py: Python,
         data: &[u8],
-    ) -> PyResult<(bool, ImageInfo, Cow<'_, [u8]>, Cow<'_, [u8]>)> {
+    ) -> PyResult<(bool, ImageInfo, Cow<'_, [u8]>, Cow<'_, [u8]>, Vec<JxlBox>)> {
         _py.detach(|| self.call_inner(data))
     }
 
@@ -161,7 +225,7 @@ impl Decoder {
 }
 
 impl Decoder {
-    fn call_inner(&self, data: &[u8]) -> PyResult<(bool, ImageInfo, Cow<'_, [u8]>, Cow<'_, [u8]>)> {
+    fn call_inner(&self, data: &[u8]) -> PyResult<(bool, ImageInfo, Cow<'_, [u8]>, Cow<'_, [u8]>, Vec<JxlBox>)> {
         let parallel_runner = ThreadsRunner::new(
             None,
             if self.num_threads < 0 {
@@ -177,6 +241,7 @@ impl Decoder {
             .build()
             .map_err(to_pyjxlerror)?;
         let (info, img) = decoder.reconstruct(&data).map_err(to_pyjxlerror)?;
+        let boxes = extract_boxes(&data)?;
         let icc_profile: Vec<u8> = match &info.icc_profile {
             Some(x) => x.to_vec(),
             None => Vec::new(),
@@ -186,7 +251,7 @@ impl Decoder {
             Data::Jpeg(x) => (true, x),
             Data::Pixels(x) => (false, self.convert_pil_pixels(x, img_info.num_channels)?),
         };
-        Ok((jpeg, img_info, Cow::Owned(img), Cow::Owned(icc_profile)))
+        Ok((jpeg, img_info, Cow::Owned(img), Cow::Owned(icc_profile), boxes))
     }
 }
 
