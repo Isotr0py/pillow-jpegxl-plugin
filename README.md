@@ -53,15 +53,14 @@ with Image.open("example.jxl") as img:
 ```
 
 ## Wheels status
-|    Wheels   	| Windows 64-bit 	| MacOS 	| manylinux 	| musllinux 	|
-|:-----------:	|:--------------:	|:-----:	|:---------:	|:---------:	|
-|  CPython3.9 	|        ✔       	|   ✔   	|     ✔     	|     ✔     	|
-| CPython3.10 	|        ✔       	|   ✔   	|     ✔     	|     ✔     	|
-| CPython3.11 	|        ✔       	|   ✔   	|     ✔     	|     ✔     	|
-| CPython3.12 	|        ✔       	|   ✔   	|     ✔     	|     ✔     	|
-| CPython3.13 	|        ✔       	|   ✔   	|     ✔     	|     ✔     	|
-|   PyPy3.9   	|        ✔       	|   ✔   	|     ✔     	|     ✔     	|
-|   PyPy3.10  	|        ✔       	|   ✔   	|     ✔     	|     ✔     	|
+|    Wheels   | Windows (x86/x64) | Windows (ARM) | MacOS (x64/aarch64) | manylinux (x86/x64/aarch64) | musllinux |
+|:-----------:|:-----------------:|:-------------:|:-------------------:|:---------------------------:|:---------:|
+| CP3.10 |         ✔         |       ❌       |          ✔          |              ✔              |     ✔     |
+| CP3.11 |         ✔         |       ✔       |          ✔          |              ✔              |     ✔     |
+| CP3.12 |         ✔         |       ✔       |          ✔          |              ✔              |     ✔     |
+| CP3.13 |         ✔         |       ✔       |          ✔          |              ✔              |     ✔     |
+|   PyPy3.10  |         ✔         |       ❌       |          ✔          |              ✔              |     ✔     |
+|   PyPy3.11  |         ✔         |       ❌       |          ✔          |              ✔              |     ✔     |
 
 ## Credits
 - [inflation/jpegxl-rs](https://github.com/inflation/jpegxl-rs)
