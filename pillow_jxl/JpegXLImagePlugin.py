@@ -53,6 +53,9 @@ class JXLImageFile(ImageFile.ImageFile):
         self._decoder = Decoder(num_threads=DECODE_THREADS)
 
         self.jpeg, self._jxlinfo, self._data, icc_profile = self._decoder(self.fc)
+        if self._jxlinfo.mode == "F;16":
+            warnings.warn("Pillow doesn't support 16 bit floats, upcasting to 32 bits.")
+            self._jxlinfo.mode = "F"
         # FIXME (Isotr0py): Maybe slow down jpeg reconstruction
         if self.jpeg:
             with Image.open(BytesIO(self._data)) as im:
