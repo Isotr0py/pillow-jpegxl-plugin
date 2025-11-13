@@ -23,7 +23,14 @@ dependencies = [
 dynamic = ["version"]
 
 [project.optional-dependencies]
-dev = ["numpy", "OpenEXR", "pytest", "pyexiv2"]
+dev = [
+    "numpy",
+    "OpenEXR",
+    "pre-commit",
+    "pytest",
+    "pyexiv2",
+    "ruff",
+]
 
 [project.urls]
 "Homepage" = "https://github.com/Isotr0py/pillow-jpegxl-plugin"
@@ -32,3 +39,10 @@ dev = ["numpy", "OpenEXR", "pytest", "pyexiv2"]
 
 [tool.maturin]
 features = ["pyo3/extension-module", "vendored"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
