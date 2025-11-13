@@ -1,6 +1,7 @@
 import os
 import tempfile
 
+import OpenEXR
 import pyexiv2
 import pytest
 import numpy as np
@@ -46,6 +47,20 @@ def test_decode_F():
     assert not img_jxl.is_animated
     assert img_jxl.n_frames == 1
     assert np.allclose(np.array(img_jxl), np.array(img_ppm), atol=3e-2)
+
+
+def test_decode_F16():
+    img_jxl = Image.open("test/images/random_image_f16.jxl")
+    with OpenEXR.File("test/images/random_image_f16.exr") as infile:
+        img_exr = infile.channels()["RGB"].pixels
+        height, width = img_exr.shape[0:2]
+
+    assert img_jxl.size == (width, height)
+    assert not img_jxl.is_animated
+    assert img_jxl.n_frames == 1
+
+    img_jxl_f16 = (np.array(img_jxl).astype(np.float32) / 255.0)
+    np.testing.assert_allclose(img_jxl_f16, img_exr, atol=5e-1, rtol=7e-1)
 
 
 @pytest.mark.parametrize("image", ["test/images/sample.png", "test/images/sample.jpg"])

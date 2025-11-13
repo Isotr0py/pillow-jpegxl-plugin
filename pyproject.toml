@@ -23,7 +23,7 @@ dependencies = [
 dynamic = ["version"]
 
 [project.optional-dependencies]
-dev = ["numpy", "pytest", "pyexiv2"]
+dev = ["numpy", "OpenEXR", "pytest", "pyexiv2"]
 
 [project.urls]
 "Homepage" = "https://github.com/Isotr0py/pillow-jpegxl-plugin"
