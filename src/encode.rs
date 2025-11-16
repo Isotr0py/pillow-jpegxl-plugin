@@ -86,9 +86,7 @@ impl Encoder {
         xmp: Option<&[u8]>,
         compress: bool,
     ) -> PyResult<Cow<'_, [u8]>> {
-        py.detach(|| {
-            self.call_inner(data, width, height, jpeg_encode, exif, jumb, xmp, compress)
-        })
+        py.detach(|| self.call_inner(data, width, height, jpeg_encode, exif, jumb, xmp, compress))
     }
 
     fn __repr__(&self) -> PyResult<String> {

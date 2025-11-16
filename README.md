@@ -33,7 +33,7 @@ pip install -e .[dev] -v --config-settings=build-args="--features=dynamic"
 - Run the suite manually with `pre-commit run --all-files` before opening a pull request.
 
 ## Plugin Usage
-Use `import pillow_jxl` to register the plugin in your code. 
+Use `import pillow_jxl` to register the plugin in your code.
 
 ### Example:
 ```python

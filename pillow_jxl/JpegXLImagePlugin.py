@@ -8,7 +8,7 @@ from PIL import Image, ImageFile
 from pillow_jxl import Decoder, Encoder
 
 _VALID_JXL_MODES = {"RGB", "RGBA", "L", "LA"}
-DECODE_THREADS = -1 # -1 detect available cpu cores, 0 disables parallelism
+DECODE_THREADS = -1  # -1 detect available cpu cores, 0 disables parallelism
 
 
 def _accept(data):
@@ -70,17 +70,25 @@ class JXLImageFile(ImageFile.ImageFile):
 
             # Read the exif data from the file
             # Check if it is a JXL container first:
-            if self.fc[:32] == b"\x00\x00\x00\x0C\x4A\x58\x4C\x20\x0D\x0A\x87\x0A\x00\x00\x00\x14\x66\x74\x79\x70\x6A\x78\x6C\x20\x00\x00\x00\x00\x6A\x78\x6C\x20":
+            if (
+                self.fc[:32]
+                == b"\x00\x00\x00\x0c\x4a\x58\x4c\x20\x0d\x0a\x87\x0a\x00\x00\x00\x14\x66\x74\x79\x70\x6a\x78\x6c\x20\x00\x00\x00\x00\x6a\x78\x6c\x20"
+            ):
                 file_size = len(self.fc)
                 container_pointer = 32
                 data_offset_not_found = True
                 while data_offset_not_found:
                     box = parse_jxl_box(self.fc, container_pointer, file_size)
-                    if box["type"] == b'Exif':
+                    if box["type"] == b"Exif":
                         exif_container_start = container_pointer + box["offset"]
-                        self.info["exif"] = self.fc[exif_container_start : exif_container_start + box["length"]]
+                        self.info["exif"] = self.fc[
+                            exif_container_start : exif_container_start + box["length"]
+                        ]
                         if len(self.info["exif"]) > 8:
-                            if self.info["exif"][4:8] == b"II\x2A\x00" or self.info["exif"][4:8] == b"MM\x00\x2A":
+                            if (
+                                self.info["exif"][4:8] == b"II\x2a\x00"
+                                or self.info["exif"][4:8] == b"MM\x00\x2a"
+                            ):
                                 self.info["exif"] = self.info["exif"][4:]
                         data_offset_not_found = False
                     else:
