@@ -72,11 +72,102 @@ impl ImageInfo {
 }
 
 #[pyclass(module = "pillow_jxl")]
+pub struct JxlBox {
+    #[pyo3(get, set)]
+    box_type: [u8; 4],
+    #[pyo3(get, set)]
+    data: Vec<u8>,
+}
+
+#[pymethods]
+impl JxlBox {
+    fn __repr__(&self) -> PyResult<String> {
+        Ok(format!(
+            "JxlBox(type={:?}, size={})",
+            String::from_utf8_lossy(&self.box_type),
+            self.data.len()
+        ))
+    }
+}
+
+// refer to https://github.com/Fraetor/jxl_decode/blob/902cd5d479f89f93df6105a22dc92f297ab77541/src/jxl_decode/jxl.py#L88-L110
+fn extract_boxes(data: &[u8]) -> PyResult<Vec<JxlBox>> {
+    const JXL_CONTAINER_SIGNATURE: &[u8] = b"\x00\x00\x00\x0c\x4a\x58\x4c\x20\x0d\x0a\x87\x0a";
+    if !data.starts_with(JXL_CONTAINER_SIGNATURE) {
+        return Ok(Vec::new());
+    }
+
+    const JXL_CONTAINER_HEADER_SIZE: usize = 32;
+    let mut boxes = Vec::new();
+    let mut pos = JXL_CONTAINER_HEADER_SIZE;
+
+    while pos + 8 <= data.len() {
+        // A box has at least a 4-byte size and 4-byte type.
+        let box_size = u32::from_be_bytes(data[pos..pos + 4].try_into().unwrap()) as usize;
+
+        let (header_length, box_length) = if box_size == 1 {
+            // 64-bit box size
+            if pos + 16 > data.len() {
+                // Not enough data for a large box header
+                break;
+            }
+            let large_box_size = u64::from_be_bytes(data[pos + 8..pos + 16].try_into().unwrap());
+            let large_box_size = usize::try_from(large_box_size).map_err(|_| {
+                PyValueError::new_err(format!(
+                    "Box size at position {pos} is too large for this platform"
+                ))
+            })?;
+            if large_box_size < 16 {
+                // The box is smaller than its own header, which is invalid.
+                return Err(PyValueError::new_err(format!(
+                    "Invalid large box size at position {pos}",
+                )));
+            }
+            (16, large_box_size)
+        } else {
+            // 32-bit box size
+            if (2..=7).contains(&box_size) {
+                return Err(PyValueError::new_err(format!(
+                    "Invalid box size at position {pos}",
+                )));
+            }
+            (
+                8,
+                if box_size == 0 {
+                    data.len() - pos
+                } else {
+                    box_size
+                },
+            )
+        };
+
+        if pos
+            .checked_add(box_length)
+            .is_none_or(|end| end > data.len())
+        {
+            // Box extends beyond the end of the data, which indicates a corrupt file.
+            break;
+        }
+
+        let box_type = data[pos + 4..pos + 8].try_into().unwrap();
+        let box_data = data[pos + header_length..pos + box_length].to_vec();
+
+        boxes.push(JxlBox {
+            box_type,
+            data: box_data,
+        });
+
+        pos += box_length;
+    }
+    Ok(boxes)
+}
+
+#[pyclass(module = "pillow_jxl")]
 pub struct Decoder {
     num_threads: isize,
 }
 
-type DecodeResult<'a> = (bool, ImageInfo, Cow<'a, [u8]>, Cow<'a, [u8]>);
+type DecodeResult<'a> = (bool, ImageInfo, Cow<'a, [u8]>, Cow<'a, [u8]>, Vec<JxlBox>);
 
 #[pymethods]
 impl Decoder {
@@ -186,6 +277,13 @@ impl Decoder {
             .build()
             .map_err(to_pyjxlerror)?;
         let (info, img) = decoder.reconstruct(data).map_err(to_pyjxlerror)?;
+        let boxes = match extract_boxes(data) {
+            Ok(b) => b,
+            Err(e) => {
+                eprintln!("Warning: Failed to extract JXL boxes: {e}");
+                Vec::new()
+            }
+        };
         let icc_profile: Vec<u8> = match &info.icc_profile {
             Some(x) => x.to_vec(),
             None => Vec::new(),
@@ -195,7 +293,13 @@ impl Decoder {
             Data::Jpeg(x) => (true, x),
             Data::Pixels(x) => (false, self.convert_pil_pixels(x, img_info.num_channels)?),
         };
-        Ok((jpeg, img_info, Cow::Owned(img), Cow::Owned(icc_profile)))
+        Ok((
+            jpeg,
+            img_info,
+            Cow::Owned(img),
+            Cow::Owned(icc_profile),
+            boxes,
+        ))
     }
 }
 

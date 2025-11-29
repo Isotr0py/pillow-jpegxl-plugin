@@ -10,8 +10,6 @@ from pillow_jxl import Decoder, Encoder
 _VALID_JXL_MODES = {"RGB", "RGBA", "L", "LA"}
 DECODE_THREADS = -1  # -1 detect available cpu cores, 0 disables parallelism
 
-JXL_HEADER_WITH_EXIF = b"\x00\x00\x00\x0c\x4a\x58\x4c\x20\x0d\x0a\x87\x0a\x00\x00\x00\x14\x66\x74\x79\x70\x6a\x78\x6c\x20\x00\x00\x00\x00\x6a\x78\x6c\x20"  # noqa: E501
-
 
 def _accept(data):
     return (
@@ -19,29 +17,6 @@ def _accept(data):
         or data[:12] == b"\x00\x00\x00\x0c\x4a\x58\x4c\x20\x0d\x0a\x87\x0a"
         or data[4:7] == b"JXL"
     )
-
-
-# parse_jxl_box is modified from https://github.com/Fraetor/jxl_decode/blob/902cd5d479f89f93df6105a22dc92f297ab77541/src/jxl_decode/jxl.py#L88-L110
-def parse_jxl_box(file, file_start: int, file_size: int) -> dict:
-    LBox = int.from_bytes(file[file_start : file_start + 4], "big")
-    XLBox = None
-    if 1 < LBox <= 8:
-        raise ValueError(f"Invalid LBox at byte {file_start}.")
-    if LBox == 1:
-        XLBox = int.from_bytes(file[file_start + 8 : file_start + 16], "big")
-        if XLBox <= 16:
-            raise ValueError(f"Invalid XLBox at byte {file_start}.")
-    if XLBox:
-        header_length = 16
-        box_length = XLBox
-    else:
-        header_length = 8
-        if LBox == 0:
-            box_length = file_size - file_start
-        else:
-            box_length = LBox
-    box_type = file[file_start + 4 : file_start + 8]
-    return {"length": box_length, "type": box_type, "offset": header_length}
 
 
 class JXLImageFile(ImageFile.ImageFile):
@@ -54,7 +29,9 @@ class JXLImageFile(ImageFile.ImageFile):
         self.fc = self.fp.read()
         self._decoder = Decoder(num_threads=DECODE_THREADS)
 
-        self.jpeg, self._jxlinfo, self._data, icc_profile = self._decoder(self.fc)
+        (self.jpeg, self._jxlinfo, self._data, icc_profile, jxl_boxes) = self._decoder(
+            self.fc
+        )
         if self._jxlinfo.mode == "F;16":
             warnings.warn(
                 "Pillow doesn't support 16 bit floats, upcasting to 32 bits.",
@@ -72,31 +49,17 @@ class JXLImageFile(ImageFile.ImageFile):
         else:
             self._size = (self._jxlinfo.width, self._jxlinfo.height)
             self.rawmode = self._jxlinfo.mode
-
             # Read the exif data from the file
-            # Check if it is a JXL container first:
-            if self.fc[:32] == JXL_HEADER_WITH_EXIF:
-                file_size = len(self.fc)
-                container_pointer = 32
-                data_offset_not_found = True
-                while data_offset_not_found:
-                    box = parse_jxl_box(self.fc, container_pointer, file_size)
-                    if box["type"] == b"Exif":
-                        exif_container_start = container_pointer + box["offset"]
-                        self.info["exif"] = self.fc[
-                            exif_container_start : exif_container_start + box["length"]
-                        ]
-                        if len(self.info["exif"]) > 8:
-                            if (
-                                self.info["exif"][4:8] == b"II\x2a\x00"
-                                or self.info["exif"][4:8] == b"MM\x00\x2a"
-                            ):
-                                self.info["exif"] = self.info["exif"][4:]
-                        data_offset_not_found = False
-                    else:
-                        container_pointer += box["length"]
-                        if container_pointer >= file_size:
-                            data_offset_not_found = False
+            for box in jxl_boxes:
+                if box.box_type == b"Exif":
+                    exif_data = box.data
+                    if len(exif_data) > 8 and exif_data[4:8] in (
+                        b"II\x2a\x00",
+                        b"MM\x00\x2a",
+                    ):
+                        exif_data = exif_data[4:]
+                    self.info["exif"] = exif_data
+                    break
 
         if icc_profile:
             self.info["icc_profile"] = icc_profile
