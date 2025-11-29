@@ -64,7 +64,6 @@ with Image.open("example.jxl") as img:
 | CP3.11 |         ✔         |       ✔       |          ✔          |              ✔              |     ✔     |
 | CP3.12 |         ✔         |       ✔       |          ✔          |              ✔              |     ✔     |
 | CP3.13 |         ✔         |       ✔       |          ✔          |              ✔              |     ✔     |
-|   PyPy3.10  |         ✔         |       ❌       |          ✔          |              ✔              |     ✔     |
 |   PyPy3.11  |         ✔         |       ❌       |          ✔          |              ✔              |     ✔     |
 
 ## Credits
