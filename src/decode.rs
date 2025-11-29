@@ -111,8 +111,12 @@ fn extract_boxes(data: &[u8]) -> PyResult<Vec<JxlBox>> {
                 // Not enough data for a large box header
                 break;
             }
-            let large_box_size =
-                u64::from_be_bytes(data[pos + 8..pos + 16].try_into().unwrap()) as usize;
+            let large_box_size = u64::from_be_bytes(data[pos + 8..pos + 16].try_into().unwrap());
+            let large_box_size = usize::try_from(large_box_size).map_err(|_| {
+                PyValueError::new_err(format!(
+                    "Box size at position {pos} is too large for this platform"
+                ))
+            })?;
             if large_box_size < 16 {
                 // The box is smaller than its own header, which is invalid.
                 return Err(PyValueError::new_err(format!(
@@ -145,9 +149,8 @@ fn extract_boxes(data: &[u8]) -> PyResult<Vec<JxlBox>> {
             break;
         }
 
-        let data_start = pos + header_length;
         let box_type = data[pos + 4..pos + 8].try_into().unwrap();
-        let box_data = data[data_start..pos + box_length].to_vec();
+        let box_data = data[pos + header_length..pos + box_length].to_vec();
 
         boxes.push(JxlBox {
             box_type,
