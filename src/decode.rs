@@ -123,8 +123,9 @@ fn extract_boxes(data: &[u8]) -> PyResult<Vec<JxlBox>> {
         if pos + header_length + box_length > data.len() {
             break;
         }
+        let data_start = pos + header_length;
         let box_type = data[pos + 4..pos + 8].try_into().unwrap();
-        let box_data = data[pos + header_length..pos + header_length + box_length].to_vec();
+        let box_data = data[data_start..data_start + box_length].to_vec();
         boxes.push(JxlBox {
             box_type,
             data: box_data,
