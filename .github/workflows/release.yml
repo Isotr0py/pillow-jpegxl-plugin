@@ -40,7 +40,7 @@ jobs:
           # - runner: ubuntu-latest
           #   target: ppc64le
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: 3.x
@@ -76,7 +76,7 @@ jobs:
           - runner: ubuntu-latest
             target: armv7
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: 3.x
@@ -112,7 +112,7 @@ jobs:
             toolchain: i686-pc-windows-msvc
             features: vendored
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Install dependencys
         uses: msys2/setup-msys2@v2
         with:
@@ -145,7 +145,7 @@ jobs:
         with:
           name: wheels-windows-${{ matrix.platform.target }}
           path: dist
-    
+
   windows-arm:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
@@ -154,7 +154,7 @@ jobs:
           - runner: windows-11-arm
             target: aarch64
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup Python (cp311)
         uses: actions/setup-python@v6
         id: cp311
@@ -211,7 +211,7 @@ jobs:
           - runner: macos-14
             target: aarch64
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: 3.x
@@ -230,7 +230,7 @@ jobs:
   sdist:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Build sdist
         uses: PyO3/maturin-action@v1
         with:
@@ -271,7 +271,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         env:
           MATURIN_PYPI_TOKEN: ${{ secrets.TESTPYPI_API_TOKEN }}
-          MATURIN_REPOSITORY_URL: https://test.pypi.org/legacy/ 
+          MATURIN_REPOSITORY_URL: https://test.pypi.org/legacy/
         with:
           command: upload
           args: --non-interactive --skip-existing wheels-*/*
