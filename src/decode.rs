@@ -76,6 +76,13 @@ pub struct Decoder {
     num_threads: isize,
 }
 
+type DecodeResult<'a> = (
+    bool,
+    ImageInfo,
+    Cow<'a, [u8]>,
+    Cow<'a, [u8]>,
+);
+
 #[pymethods]
 impl Decoder {
     #[new]
@@ -89,12 +96,12 @@ impl Decoder {
         &self,
         _py: Python,
         data: &[u8],
-    ) -> PyResult<(bool, ImageInfo, Cow<'_, [u8]>, Cow<'_, [u8]>)> {
+    ) -> PyResult<DecodeResult<'_>> {
         _py.detach(|| self.call_inner(data))
     }
 
     fn __repr__(&self) -> PyResult<String> {
-        Ok(format!("Decoder"))
+        Ok("Decoder".to_string())
     }
 }
 
@@ -172,7 +179,7 @@ impl Decoder {
 }
 
 impl Decoder {
-    fn call_inner(&self, data: &[u8]) -> PyResult<(bool, ImageInfo, Cow<'_, [u8]>, Cow<'_, [u8]>)> {
+    fn call_inner(&self, data: &[u8]) -> PyResult<DecodeResult<'_>> {
         let parallel_runner = ThreadsRunner::new(
             None,
             if self.num_threads < 0 {
@@ -187,7 +194,7 @@ impl Decoder {
             .parallel_runner(&parallel_runner)
             .build()
             .map_err(to_pyjxlerror)?;
-        let (info, img) = decoder.reconstruct(&data).map_err(to_pyjxlerror)?;
+        let (info, img) = decoder.reconstruct(data).map_err(to_pyjxlerror)?;
         let icc_profile: Vec<u8> = match &info.icc_profile {
             Some(x) => x.to_vec(),
             None => Vec::new(),
