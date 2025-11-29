@@ -126,7 +126,7 @@ fn extract_boxes(data: &[u8]) -> PyResult<Vec<JxlBox>> {
         let box_type = data[pos + 4..pos + 8].try_into().unwrap();
         let box_data = data[pos + header_length..pos + header_length + box_length].to_vec();
         boxes.push(JxlBox {
-            box_type: box_type,
+            box_type,
             data: box_data,
         });
         pos += box_length;
@@ -249,7 +249,7 @@ impl Decoder {
             .build()
             .map_err(to_pyjxlerror)?;
         let (info, img) = decoder.reconstruct(data).map_err(to_pyjxlerror)?;
-        let boxes = extract_boxes(&data)?;
+        let boxes = extract_boxes(data)?;
         let icc_profile: Vec<u8> = match &info.icc_profile {
             Some(x) => x.to_vec(),
             None => Vec::new(),
