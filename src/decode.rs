@@ -60,6 +60,13 @@ impl ImageInfo {
                 return Ok("F".to_string());
             }
         }
+        // HACK: Pillow doesn't natively support float16 mode.
+        // Therefore, you have to upcast
+        if let Some(Pixels::Float16(_)) = pixel_type {
+            if mode == "L" {
+                return Ok("F;16".to_string());
+            }
+        }
         Ok(mode)
     }
 }
@@ -132,6 +139,8 @@ pub struct Decoder {
     num_threads: isize,
 }
 
+type DecodeResult<'a> = (bool, ImageInfo, Cow<'a, [u8]>, Cow<'a, [u8]>, Vec<JxlBox>);
+
 #[pymethods]
 impl Decoder {
     #[new]
@@ -141,16 +150,12 @@ impl Decoder {
     }
 
     #[pyo3(signature = (data))]
-    fn __call__(
-        &self,
-        _py: Python,
-        data: &[u8],
-    ) -> PyResult<(bool, ImageInfo, Cow<'_, [u8]>, Cow<'_, [u8]>, Vec<JxlBox>)> {
+    fn __call__(&self, _py: Python, data: &[u8]) -> PyResult<DecodeResult<'_>> {
         _py.detach(|| self.call_inner(data))
     }
 
     fn __repr__(&self) -> PyResult<String> {
-        Ok(format!("Decoder"))
+        Ok("Decoder".to_string())
     }
 }
 
@@ -172,10 +177,11 @@ impl Decoder {
                     result.push((pixel * 255.0) as u8);
                 }
             }
-            Pixels::Float16(_) => {
-                return Err(PyNotImplementedError::new_err(
-                    "Float16 is not supported yet",
-                ))
+            Pixels::Float16(pixels) => {
+                for pixel in pixels {
+                    // PERF: use native f16 ops
+                    result.push((pixel.to_f32() * 255.0) as u8);
+                }
             }
         }
         Ok(result)
@@ -204,10 +210,13 @@ impl Decoder {
                     }
                 }
             }
-            Pixels::Float16(_) => {
-                return Err(PyNotImplementedError::new_err(
-                    "Float16 is not supported yet",
-                ))
+            Pixels::Float16(pixels) => {
+                // HACK: Pillow doesn't natively support float16 mode.
+                // Therefore, you have to upcast
+                for pixel in pixels {
+                    let pix_bytes = pixel.to_f32().to_ne_bytes();
+                    result.extend_from_slice(&pix_bytes);
+                }
             }
         }
         Ok(result)
@@ -224,10 +233,7 @@ impl Decoder {
 }
 
 impl Decoder {
-    fn call_inner(
-        &self,
-        data: &[u8],
-    ) -> PyResult<(bool, ImageInfo, Cow<'_, [u8]>, Cow<'_, [u8]>, Vec<JxlBox>)> {
+    fn call_inner(&self, data: &[u8]) -> PyResult<DecodeResult<'_>> {
         let parallel_runner = ThreadsRunner::new(
             None,
             if self.num_threads < 0 {
@@ -242,7 +248,7 @@ impl Decoder {
             .parallel_runner(&parallel_runner)
             .build()
             .map_err(to_pyjxlerror)?;
-        let (info, img) = decoder.reconstruct(&data).map_err(to_pyjxlerror)?;
+        let (info, img) = decoder.reconstruct(data).map_err(to_pyjxlerror)?;
         let boxes = extract_boxes(&data)?;
         let icc_profile: Vec<u8> = match &info.icc_profile {
             Some(x) => x.to_vec(),

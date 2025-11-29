@@ -8,7 +8,9 @@ from PIL import Image, ImageFile
 from pillow_jxl import Decoder, Encoder
 
 _VALID_JXL_MODES = {"RGB", "RGBA", "L", "LA"}
-DECODE_THREADS = -1 # -1 detect available cpu cores, 0 disables parallelism
+DECODE_THREADS = -1  # -1 detect available cpu cores, 0 disables parallelism
+
+JXL_HEADER_WITH_EXIF = b"\x00\x00\x00\x0c\x4a\x58\x4c\x20\x0d\x0a\x87\x0a\x00\x00\x00\x14\x66\x74\x79\x70\x6a\x78\x6c\x20\x00\x00\x00\x00\x6a\x78\x6c\x20"  # noqa: E501
 
 
 def _accept(data):
@@ -29,7 +31,15 @@ class JXLImageFile(ImageFile.ImageFile):
         self.fc = self.fp.read()
         self._decoder = Decoder(num_threads=DECODE_THREADS)
 
-        self.jpeg, self._jxlinfo, self._data, icc_profile, jxl_boxes = self._decoder(self.fc)
+        (self.jpeg, self._jxlinfo, self._data, icc_profile, jxl_boxes) = self._decoder(
+            self.fc
+        )
+        if self._jxlinfo.mode == "F;16":
+            warnings.warn(
+                "Pillow doesn't support 16 bit floats, upcasting to 32 bits.",
+                stacklevel=2,
+            )
+            self._jxlinfo.mode = "F"
         # FIXME (Isotr0py): Maybe slow down jpeg reconstruction
         if self.jpeg:
             with Image.open(BytesIO(self._data)) as im:
@@ -45,7 +55,10 @@ class JXLImageFile(ImageFile.ImageFile):
             for box in jxl_boxes:
                 if box.box_type == b"Exif":
                     exif_data = box.data
-                    if len(exif_data) > 8 and exif_data[4:8] in (b"II\x2A\x00", b"MM\x00\x2A"):
+                    if len(exif_data) > 8 and exif_data[4:8] in (
+                        b"II\x2a\x00",
+                        b"MM\x00\x2a",
+                    ):
                         exif_data = exif_data[4:]
                     self.info["exif"] = exif_data
                     break
@@ -135,7 +148,8 @@ def _save(im, fp, filename, save_all=False):
             warnings.warn(
                 "Using JPEG reconstruction to create lossless JXL image from JPEG. "
                 "This is the default behavior for JPEG encode, if you want to "
-                "disable this, please set 'lossless_jpeg'."
+                "disable this, please set 'lossless_jpeg'.",
+                stacklevel=2,
             )
         with open(im.filename, "rb") as f:
             data = enc(f.read(), im.width, im.height, jpeg_encode=True)

@@ -1,6 +1,6 @@
 # pillow-jpegxl-plugin
 ![PyPI - Version](https://img.shields.io/pypi/v/pillow-jxl-plugin)
-[![CI](https://github.com/isotr0py/pillow-jpegxl-plugin/workflows/CI/badge.svg)](https://github.com/isotr0py/pillow-jpegxl-plugin/actions?query=workflow%3ACI)
+[![CI](https://github.com/Isotr0py/pillow-jpegxl-plugin/actions/workflows/test.yml/badge.svg)](https://github.com/Isotr0py/pillow-jpegxl-plugin/actions/workflows/test.yml)
 
 Pillow plugin for JPEG-XL, using Rust for bindings.
 
@@ -27,8 +27,13 @@ If you have [`libjxl`](https://github.com/libjxl/libjxl) installed and want to u
 pip install -e .[dev] -v --config-settings=build-args="--features=dynamic"
 ```
 
+## Development
+- Python code is formatted and linted with `ruff`, while Rust code is checked with `cargo fmt` and `cargo clippy` via [pre-commit](https://pre-commit.com/).
+- Install the tooling once with `pip install -e .[dev]` and then `pre-commit install`.
+- Run the suite manually with `pre-commit run --all-files` before opening a pull request.
+
 ## Plugin Usage
-Use `import pillow_jxl` to register the plugin in your code. 
+Use `import pillow_jxl` to register the plugin in your code.
 
 ### Example:
 ```python
@@ -53,15 +58,14 @@ with Image.open("example.jxl") as img:
 ```
 
 ## Wheels status
-|    Wheels   	| Windows 64-bit 	| MacOS 	| manylinux 	| musllinux 	|
-|:-----------:	|:--------------:	|:-----:	|:---------:	|:---------:	|
-|  CPython3.9 	|        ✔       	|   ✔   	|     ✔     	|     ✔     	|
-| CPython3.10 	|        ✔       	|   ✔   	|     ✔     	|     ✔     	|
-| CPython3.11 	|        ✔       	|   ✔   	|     ✔     	|     ✔     	|
-| CPython3.12 	|        ✔       	|   ✔   	|     ✔     	|     ✔     	|
-| CPython3.13 	|        ✔       	|   ✔   	|     ✔     	|     ✔     	|
-|   PyPy3.9   	|        ✔       	|   ✔   	|     ✔     	|     ✔     	|
-|   PyPy3.10  	|        ✔       	|   ✔   	|     ✔     	|     ✔     	|
+|    Wheels   | Windows (x86/x64) | Windows (ARM) | MacOS (x64/aarch64) | manylinux (x86/x64/aarch64) | musllinux |
+|:-----------:|:-----------------:|:-------------:|:-------------------:|:---------------------------:|:---------:|
+| CP3.10 |         ✔         |       ❌       |          ✔          |              ✔              |     ✔     |
+| CP3.11 |         ✔         |       ✔       |          ✔          |              ✔              |     ✔     |
+| CP3.12 |         ✔         |       ✔       |          ✔          |              ✔              |     ✔     |
+| CP3.13 |         ✔         |       ✔       |          ✔          |              ✔              |     ✔     |
+|   PyPy3.10  |         ✔         |       ❌       |          ✔          |              ✔              |     ✔     |
+|   PyPy3.11  |         ✔         |       ❌       |          ✔          |              ✔              |     ✔     |
 
 ## Credits
 - [inflation/jpegxl-rs](https://github.com/inflation/jpegxl-rs)

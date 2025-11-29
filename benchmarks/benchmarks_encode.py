@@ -7,7 +7,7 @@ from time import time
 
 from PIL import Image
 
-import pillow_jxl
+import pillow_jxl  # noqa: F401
 
 
 def encode_plugin(filename, quality, effort):
@@ -60,7 +60,9 @@ def main(args):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("-i", "--image", help="Image file for encode benchmark", required=True)
+    parser.add_argument(
+        "-i", "--image", help="Image file for encode benchmark", required=True
+    )
     parser.add_argument("-q", "--quality", type=int, default=98, help="Quality level")
     parser.add_argument("-o", "--output-json", help="Output JSON file")
     args = parser.parse_args()
