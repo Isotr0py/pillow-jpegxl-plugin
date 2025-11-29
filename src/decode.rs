@@ -92,6 +92,11 @@ impl JxlBox {
 
 // refer to https://github.com/Fraetor/jxl_decode/blob/902cd5d479f89f93df6105a22dc92f297ab77541/src/jxl_decode/jxl.py#L88-L110
 fn extract_boxes(data: &[u8]) -> PyResult<Vec<JxlBox>> {
+    const JXL_CONTAINER_SIGNATURE: &[u8] = b"\x00\x00\x00\x0c\x4a\x58\x4c\x20\x0d\x0a\x87\x0a";
+    if !data.starts_with(JXL_CONTAINER_SIGNATURE) {
+        return Ok(Vec::new());
+    }
+
     const JXL_CONTAINER_HEADER_SIZE: usize = 32;
     let mut boxes = Vec::new();
     let mut pos = JXL_CONTAINER_HEADER_SIZE;
@@ -272,7 +277,7 @@ impl Decoder {
         let boxes = match extract_boxes(data) {
             Ok(b) => b,
             Err(e) => {
-                println!("Warning: Failed to extract JXL boxes: {e}");
+                eprintln!("Warning: Failed to extract JXL boxes: {e}");
                 Vec::new()
             }
         };
