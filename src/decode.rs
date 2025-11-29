@@ -92,44 +92,63 @@ impl JxlBox {
 
 // refer to https://github.com/Fraetor/jxl_decode/blob/902cd5d479f89f93df6105a22dc92f297ab77541/src/jxl_decode/jxl.py#L88-L110
 fn extract_boxes(data: &[u8]) -> PyResult<Vec<JxlBox>> {
+    const JXL_CONTAINER_HEADER_SIZE: usize = 32;
     let mut boxes = Vec::new();
-    let mut pos = 32;
-    while pos + 4 <= data.len() {
+    let mut pos = JXL_CONTAINER_HEADER_SIZE;
+
+    while pos + 8 <= data.len() {
+        // A box has at least a 4-byte size and 4-byte type.
         let box_size = u32::from_be_bytes(data[pos..pos + 4].try_into().unwrap()) as usize;
-        if pos + box_size > data.len() {
-            break;
-        }
-        if 1 < box_size && box_size <= 8 {
-            pos += 4;
-            continue;
-        }
-        let header_length;
-        let box_length;
-        if box_size == 1 {
-            header_length = 16;
-            box_length = u32::from_be_bytes(data[pos + 8..pos + 16].try_into().unwrap()) as usize;
-            if box_length <= 16 {
-                pos += 4;
-                continue;
+
+        let (header_length, box_length) = if box_size == 1 {
+            // 64-bit box size
+            if pos + 16 > data.len() {
+                // Not enough data for a large box header
+                break;
             }
+            let large_box_size =
+                u64::from_be_bytes(data[pos + 8..pos + 16].try_into().unwrap()) as usize;
+            if large_box_size < 16 {
+                // The box is smaller than its own header, which is invalid.
+                return Err(PyValueError::new_err(format!(
+                    "Invalid large box size at position {pos}",
+                )));
+            }
+            (16, large_box_size)
         } else {
-            header_length = 8;
-            box_length = if box_size == 0 {
-                data.len() - pos
-            } else {
-                box_size
-            };
-        }
-        if pos + header_length + box_length > data.len() {
+            // 32-bit box size
+            if (2..=7).contains(&box_size) {
+                return Err(PyValueError::new_err(format!(
+                    "Invalid box size at position {pos}",
+                )));
+            }
+            (
+                8,
+                if box_size == 0 {
+                    data.len() - pos
+                } else {
+                    box_size
+                },
+            )
+        };
+
+        if pos
+            .checked_add(box_length)
+            .is_none_or(|end| end > data.len())
+        {
+            // Box extends beyond the end of the data, which indicates a corrupt file.
             break;
         }
+
         let data_start = pos + header_length;
         let box_type = data[pos + 4..pos + 8].try_into().unwrap();
-        let box_data = data[data_start..data_start + box_length].to_vec();
+        let box_data = data[data_start..pos + box_length].to_vec();
+
         boxes.push(JxlBox {
             box_type,
             data: box_data,
         });
+
         pos += box_length;
     }
     Ok(boxes)
@@ -250,7 +269,13 @@ impl Decoder {
             .build()
             .map_err(to_pyjxlerror)?;
         let (info, img) = decoder.reconstruct(data).map_err(to_pyjxlerror)?;
-        let boxes = extract_boxes(data)?;
+        let boxes = match extract_boxes(data) {
+            Ok(b) => b,
+            Err(e) => {
+                println!("Warning: Failed to extract JXL boxes: {e}");
+                Vec::new()
+            }
+        };
         let icc_profile: Vec<u8> = match &info.icc_profile {
             Some(x) => x.to_vec(),
             None => Vec::new(),
