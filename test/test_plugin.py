@@ -51,8 +51,10 @@ def test_decode_F():
 
 def test_decode_F16():
     img_jxl = Image.open("test/images/random_image_f16.jxl")
+    assert img_jxl.mode == "RGB"
+
     with OpenEXR.File("test/images/random_image_f16.exr") as infile:
-        img_exr = infile.channels()["RGB"].pixels
+        img_exr = infile.channels()[img_jxl.mode].pixels
         height, width = img_exr.shape[0:2]
 
     assert img_jxl.size == (width, height)
