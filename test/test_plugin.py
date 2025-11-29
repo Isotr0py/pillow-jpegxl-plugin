@@ -1,13 +1,13 @@
 import os
 import tempfile
 
+import numpy as np
 import OpenEXR
 import pyexiv2
 import pytest
-import numpy as np
 from PIL import Image
 
-import pillow_jxl
+import pillow_jxl  # noqa: F401
 
 
 def test_debug_mode():
@@ -59,7 +59,7 @@ def test_decode_F16():
     assert not img_jxl.is_animated
     assert img_jxl.n_frames == 1
 
-    img_jxl_f16 = (np.array(img_jxl).astype(np.float32) / 255.0)
+    img_jxl_f16 = np.array(img_jxl).astype(np.float32) / 255.0
     np.testing.assert_allclose(img_jxl_f16, img_exr, atol=5e-1, rtol=7e-1)
 
 

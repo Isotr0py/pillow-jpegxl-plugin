@@ -25,7 +25,7 @@ jobs:
         python-version: ['3.12', '3.13']
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
@@ -54,7 +54,7 @@ jobs:
           export DEP_HWY_LIB=$(brew --prefix highway)'/lib'
           source venv/bin/activate
           pip install -e .[dev] --config-settings=build-args="--features=dynamic"
-    
+
       - name: Test with pytest
         run: |
           brew install inih
@@ -68,5 +68,3 @@ jobs:
           path: junit/test-results-${{ matrix.python-version }}.xml
         # Use always() to always run this step to publish test results when there are test failures
         if: ${{ always() }}
-
-
