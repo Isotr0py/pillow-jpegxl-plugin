@@ -76,12 +76,7 @@ pub struct Decoder {
     num_threads: isize,
 }
 
-type DecodeResult<'a> = (
-    bool,
-    ImageInfo,
-    Cow<'a, [u8]>,
-    Cow<'a, [u8]>,
-);
+type DecodeResult<'a> = (bool, ImageInfo, Cow<'a, [u8]>, Cow<'a, [u8]>);
 
 #[pymethods]
 impl Decoder {
@@ -92,11 +87,7 @@ impl Decoder {
     }
 
     #[pyo3(signature = (data))]
-    fn __call__(
-        &self,
-        _py: Python,
-        data: &[u8],
-    ) -> PyResult<DecodeResult<'_>> {
+    fn __call__(&self, _py: Python, data: &[u8]) -> PyResult<DecodeResult<'_>> {
         _py.detach(|| self.call_inner(data))
     }
 
