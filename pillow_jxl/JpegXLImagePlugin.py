@@ -10,8 +10,6 @@ from pillow_jxl import Decoder, Encoder
 _VALID_JXL_MODES = {"RGB", "RGBA", "L", "LA"}
 DECODE_THREADS = -1  # -1 detect available cpu cores, 0 disables parallelism
 
-JXL_HEADER_WITH_EXIF = b"\x00\x00\x00\x0c\x4a\x58\x4c\x20\x0d\x0a\x87\x0a\x00\x00\x00\x14\x66\x74\x79\x70\x6a\x78\x6c\x20\x00\x00\x00\x00\x6a\x78\x6c\x20"  # noqa: E501
-
 
 def _accept(data):
     return (
