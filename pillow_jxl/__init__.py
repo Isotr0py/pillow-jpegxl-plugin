@@ -1,6 +1,8 @@
+# ruff: noqa
+from .pillow_jxl import Decoder, Encoder
+
 from pillow_jxl import JpegXLImagePlugin
 
-from .pillow_jxl import *
 
 __doc__ = pillow_jxl.__doc__
 if hasattr(pillow_jxl, "__all__"):

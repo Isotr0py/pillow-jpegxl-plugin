@@ -10,6 +10,8 @@ from pillow_jxl import Decoder, Encoder
 _VALID_JXL_MODES = {"RGB", "RGBA", "L", "LA"}
 DECODE_THREADS = -1  # -1 detect available cpu cores, 0 disables parallelism
 
+JXL_HEADER_WITH_EXIF = b"\x00\x00\x00\x0c\x4a\x58\x4c\x20\x0d\x0a\x87\x0a\x00\x00\x00\x14\x66\x74\x79\x70\x6a\x78\x6c\x20\x00\x00\x00\x00\x6a\x78\x6c\x20"  # noqa: E501
+
 
 def _accept(data):
     return (
@@ -54,7 +56,10 @@ class JXLImageFile(ImageFile.ImageFile):
 
         self.jpeg, self._jxlinfo, self._data, icc_profile = self._decoder(self.fc)
         if self._jxlinfo.mode == "F;16":
-            warnings.warn("Pillow doesn't support 16 bit floats, upcasting to 32 bits.")
+            warnings.warn(
+                "Pillow doesn't support 16 bit floats, upcasting to 32 bits.",
+                stacklevel=2,
+            )
             self._jxlinfo.mode = "F"
         # FIXME (Isotr0py): Maybe slow down jpeg reconstruction
         if self.jpeg:
@@ -70,10 +75,7 @@ class JXLImageFile(ImageFile.ImageFile):
 
             # Read the exif data from the file
             # Check if it is a JXL container first:
-            if (
-                self.fc[:32]
-                == b"\x00\x00\x00\x0c\x4a\x58\x4c\x20\x0d\x0a\x87\x0a\x00\x00\x00\x14\x66\x74\x79\x70\x6a\x78\x6c\x20\x00\x00\x00\x00\x6a\x78\x6c\x20"
-            ):
+            if self.fc[:32] == JXL_HEADER_WITH_EXIF:
                 file_size = len(self.fc)
                 container_pointer = 32
                 data_offset_not_found = True
@@ -181,7 +183,8 @@ def _save(im, fp, filename, save_all=False):
             warnings.warn(
                 "Using JPEG reconstruction to create lossless JXL image from JPEG. "
                 "This is the default behavior for JPEG encode, if you want to "
-                "disable this, please set 'lossless_jpeg'."
+                "disable this, please set 'lossless_jpeg'.",
+                stacklevel=2,
             )
         with open(im.filename, "rb") as f:
             data = enc(f.read(), im.width, im.height, jpeg_encode=True)
