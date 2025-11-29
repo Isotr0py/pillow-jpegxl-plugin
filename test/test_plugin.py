@@ -1,12 +1,12 @@
 import os
 import tempfile
 
+import numpy as np
 import pyexiv2
 import pytest
-import numpy as np
 from PIL import Image
 
-import pillow_jxl
+import pillow_jxl  # noqa: F401
 
 
 def test_debug_mode():
