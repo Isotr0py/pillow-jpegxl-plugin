@@ -10,7 +10,7 @@ authors = [
 ]
 description = "Pillow plugin for JPEG-XL, using Rust for bindings."
 readme = "README.md"
-license = { file = "LICENSE" }
+license = { file = "LICENSE", text = "GPL-3.0-or-later" }
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
