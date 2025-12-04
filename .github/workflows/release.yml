@@ -242,8 +242,8 @@ jobs:
           name: wheels-sdist
           path: dist
 
-  release-dry-run:
-    name: Release (Dry Run)
+  release-test-pypi:
+    name: Release (TestPyPI)
     runs-on: ubuntu-latest
     needs: [linux, musllinux, windows, windows-arm, macos, sdist]
     permissions:
