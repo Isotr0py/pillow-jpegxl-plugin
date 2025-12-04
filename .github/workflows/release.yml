@@ -266,7 +266,7 @@ jobs:
           MATURIN_REPOSITORY_URL: https://test.pypi.org/legacy/
         with:
           command: upload
-          args: --non-interactive --skip-existing wheels-*/*
+          args: --non-interactive wheels-*/*
 
   release:
     name: Release
