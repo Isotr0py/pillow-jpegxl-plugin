@@ -27,8 +27,13 @@ If you have [`libjxl`](https://github.com/libjxl/libjxl) installed and want to u
 pip install -e .[dev] -v --config-settings=build-args="--features=dynamic"
 ```
 
+## Development
+- Python code is formatted and linted with `ruff`, while Rust code is checked with `cargo fmt` and `cargo clippy` via [pre-commit](https://pre-commit.com/).
+- Install the tooling once with `pip install -e .[dev]` and then `pre-commit install`.
+- Run the suite manually with `pre-commit run --all-files` before opening a pull request.
+
 ## Plugin Usage
-Use `import pillow_jxl` to register the plugin in your code. 
+Use `import pillow_jxl` to register the plugin in your code.
 
 ### Example:
 ```python
@@ -59,7 +64,6 @@ with Image.open("example.jxl") as img:
 | CP3.11 |         ✔         |       ✔       |          ✔          |              ✔              |     ✔     |
 | CP3.12 |         ✔         |       ✔       |          ✔          |              ✔              |     ✔     |
 | CP3.13 |         ✔         |       ✔       |          ✔          |              ✔              |     ✔     |
-|   PyPy3.10  |         ✔         |       ❌       |          ✔          |              ✔              |     ✔     |
 |   PyPy3.11  |         ✔         |       ❌       |          ✔          |              ✔              |     ✔     |
 
 ## Credits

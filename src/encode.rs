@@ -20,6 +20,7 @@ pub struct Encoder {
     num_threads: isize,
 }
 
+#[allow(clippy::too_many_arguments)]
 #[pymethods]
 impl Encoder {
     #[new]
@@ -73,6 +74,7 @@ impl Encoder {
         })
     }
 
+    #[allow(clippy::too_many_arguments)]
     #[pyo3(signature = (data, width, height, jpeg_encode, exif=None, jumb=None, xmp=None, compress=false))]
     fn __call__(
         &self,
@@ -86,9 +88,7 @@ impl Encoder {
         xmp: Option<&[u8]>,
         compress: bool,
     ) -> PyResult<Cow<'_, [u8]>> {
-        py.detach(|| {
-            self.call_inner(data, width, height, jpeg_encode, exif, jumb, xmp, compress)
-        })
+        py.detach(|| self.call_inner(data, width, height, jpeg_encode, exif, jumb, xmp, compress))
     }
 
     fn __repr__(&self) -> PyResult<String> {
@@ -100,6 +100,7 @@ impl Encoder {
 }
 
 impl Encoder {
+    #[allow(clippy::too_many_arguments)]
     fn call_inner(
         &self,
         data: &[u8],
@@ -148,7 +149,7 @@ impl Encoder {
             _ => return Err(PyValueError::new_err("Invalid effort")),
         };
         let buffer: EncoderResult<u8> = match jpeg_encode {
-            true => encoder.encode_jpeg(&data).map_err(to_pyjxlerror)?,
+            true => encoder.encode_jpeg(data).map_err(to_pyjxlerror)?,
             false => {
                 let frame = EncoderFrame::new(data).num_channels(self.num_channels);
                 if let Some(exif_data) = exif {

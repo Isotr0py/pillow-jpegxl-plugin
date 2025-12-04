@@ -23,7 +23,7 @@ jobs:
   linux:
     runs-on: ${{ matrix.platform.runner }}
     env:
-      MATURIN_INTERPRETERS: "3.10 3.11 3.12 3.13 3.14 pypy3.10 pypy3.11"
+      MATURIN_INTERPRETERS: "3.10 3.11 3.12 3.13 3.14 pypy3.11"
     strategy:
       matrix:
         platform:
@@ -63,7 +63,7 @@ jobs:
   musllinux:
     runs-on: ${{ matrix.platform.runner }}
     env:
-      MATURIN_INTERPRETERS: "3.10 3.11 3.12 3.13 3.14 pypy3.10 pypy3.11"
+      MATURIN_INTERPRETERS: "3.10 3.11 3.12 3.13 3.14 pypy3.11"
     strategy:
       matrix:
         platform:
@@ -145,7 +145,7 @@ jobs:
         with:
           name: wheels-windows-${{ matrix.platform.target }}
           path: dist
-    
+
   windows-arm:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
@@ -202,7 +202,7 @@ jobs:
   macos:
     runs-on: ${{ matrix.platform.runner }}
     env:
-      MATURIN_INTERPRETERS: "3.10 3.11 3.12 3.13 3.14 pypy3.10 pypy3.11"
+      MATURIN_INTERPRETERS: "3.10 3.11 3.12 3.13 3.14 pypy3.11"
     strategy:
       matrix:
         platform:
@@ -297,7 +297,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         env:
           MATURIN_PYPI_TOKEN: ${{ secrets.TESTPYPI_API_TOKEN }}
-          MATURIN_REPOSITORY_URL: https://test.pypi.org/legacy/ 
+          MATURIN_REPOSITORY_URL: https://test.pypi.org/legacy/
         with:
           command: upload
           args: --non-interactive --skip-existing wheels-*/*
