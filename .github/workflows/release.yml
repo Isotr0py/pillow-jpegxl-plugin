@@ -116,7 +116,7 @@ jobs:
               mingw-w64-i686-toolchain
               mingw-w64-i686-libjxl
             toolchain: i686-pc-windows-gnu
-            features: dynamic
+            features: vendored
     steps:
       - uses: actions/checkout@v6
       - name: Install dependencys
