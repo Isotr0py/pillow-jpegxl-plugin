@@ -79,7 +79,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
-          python-version: 3.14
+          python-version: 3.x
       - name: Setup QEMU
         if: ${{ matrix.platform.target != 'x86_64' && matrix.platform.target != 'x86' }}
         uses: docker/setup-qemu-action@v3
@@ -105,12 +105,16 @@ jobs:
         platform:
           - runner: windows-latest
             target: x64
-            msys2-dependencys: "mingw-w64-x86_64-toolchain mingw-w64-x86_64-libjxl"
+            msys2-dependencys: >-
+              mingw-w64-x86_64-toolchain
+              mingw-w64-x86_64-libjxl
             toolchain: x86_64-pc-windows-gnu
             features: dynamic
           - runner: windows-latest
             target: x86
-            msys2-dependencys: "mingw-w64-i686-toolchain mingw-w64-i686-libjxl"
+            msys2-dependencys: >-
+              mingw-w64-i686-toolchain
+              mingw-w64-i686-libjxl
             toolchain: i686-pc-windows-msvc
             features: dynamic
     steps:
@@ -120,6 +124,7 @@ jobs:
         with:
           update: true
           install: ${{ matrix.platform.msys2-dependencys }}
+      - name: Put MSYS2_MinGW64 on PATH
         # there is not yet an environment variable for this path from msys2/setup-msys2
         run: echo "${{ runner.temp }}/msys64/mingw64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: Setup Python
