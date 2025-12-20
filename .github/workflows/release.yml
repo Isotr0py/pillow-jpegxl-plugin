@@ -115,7 +115,7 @@ jobs:
             msys2-dependencys: >-
               mingw-w64-i686-toolchain
               mingw-w64-i686-libjxl
-            toolchain: i686-pc-windows-msvc
+            toolchain: i686-pc-windows-gnu
             features: dynamic
     steps:
       - uses: actions/checkout@v6
