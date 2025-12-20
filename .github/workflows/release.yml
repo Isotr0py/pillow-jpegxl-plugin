@@ -79,7 +79,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
-          python-version: 3.x
+          python-version: 3.14
       - name: Setup QEMU
         if: ${{ matrix.platform.target != 'x86_64' && matrix.platform.target != 'x86' }}
         uses: docker/setup-qemu-action@v3
