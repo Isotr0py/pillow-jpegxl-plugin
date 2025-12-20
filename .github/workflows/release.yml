@@ -105,10 +105,16 @@ jobs:
         platform:
           - runner: windows-latest
             target: x64
+            msys2-dependencys: >-
+              mingw-w64-x86_64-toolchain
+              mingw-w64-x86_64-libjxl
             toolchain: x86_64-pc-windows-gnu
             features: dynamic
           - runner: windows-latest
             target: x86
+            msys2-dependencys: >-
+              mingw-w64-i686-toolchain
+              mingw-w64-i686-libjxl
             toolchain: i686-pc-windows-msvc
             features: dynamic
     steps:
@@ -117,10 +123,7 @@ jobs:
         uses: msys2/setup-msys2@v2
         with:
           update: true
-          install: >-
-            mingw-w64-x86_64-toolchain
-            mingw-w64-x86_64-libjxl
-      - name: Put MSYS2_MinGW64 on PATH
+          install: ${{ matrix.platform.msys2-dependencys }}
         # there is not yet an environment variable for this path from msys2/setup-msys2
         run: echo "${{ runner.temp }}/msys64/mingw64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: Setup Python
