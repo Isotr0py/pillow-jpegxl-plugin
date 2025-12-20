@@ -110,7 +110,7 @@ jobs:
           - runner: windows-latest
             target: x86
             toolchain: i686-pc-windows-msvc
-            features: vendored
+            features: dynamic
     steps:
       - uses: actions/checkout@v6
       - name: Install dependencys
@@ -139,7 +139,7 @@ jobs:
         if: ${{ matrix.platform.features == 'dynamic' }}
         run: |
           pip install delvewheel
-          Get-ChildItem ${{ github.workspace }}/dist/*win_amd64.whl | ForEach-Object -Process {delvewheel repair $PSItem -w dist}
+          Get-ChildItem ${{ github.workspace }}/dist/*.whl | ForEach-Object -Process {delvewheel repair $PSItem -w dist}
       - name: Upload wheels
         uses: actions/upload-artifact@v5
         with:
