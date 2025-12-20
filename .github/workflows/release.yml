@@ -105,16 +105,12 @@ jobs:
         platform:
           - runner: windows-latest
             target: x64
-            msys2-dependencys: >-
-              mingw-w64-x86_64-toolchain
-              mingw-w64-x86_64-libjxl
+            msys2-dependencys: "mingw-w64-x86_64-toolchain mingw-w64-x86_64-libjxl"
             toolchain: x86_64-pc-windows-gnu
             features: dynamic
           - runner: windows-latest
             target: x86
-            msys2-dependencys: >-
-              mingw-w64-i686-toolchain
-              mingw-w64-i686-libjxl
+            msys2-dependencys: "mingw-w64-i686-toolchain mingw-w64-i686-libjxl"
             toolchain: i686-pc-windows-msvc
             features: dynamic
     steps:
