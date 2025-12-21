@@ -183,12 +183,11 @@ jobs:
             3.13
             3.14
           architecture: arm64
-      # rust toolchain is not currently installed on windopws arm64 images https://github.com/actions/partner-runner-images/issues/77
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --interpreter ${{ steps.cp310.outputs.python-path }} ${{ steps.cp311.outputs.python-path }} ${{ steps.cp312.outputs.python-path }} ${{ steps.cp313.outputs.python-path }} ${{ steps.cp314.outputs.python-path }} --features vendored
+          args: --release --out dist --find-interpreter --features vendored
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v5
