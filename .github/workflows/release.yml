@@ -147,7 +147,7 @@ jobs:
         with:
           rust-toolchain: stable-${{ matrix.platform.toolchain }}
           target: ${{ matrix.platform.toolchain }}
-          args: --release --out dist --interpreter ${{ env.MATURIN_INTERPRETERS }} --features ${{ matrix.platform.features }}
+          args: --release --out dist --find-interpreter --features ${{ matrix.platform.features }}
           sccache: 'true'
       - name: Fix wheels with delvewheel
         if: ${{ matrix.platform.features == 'dynamic' }}
