@@ -105,28 +105,38 @@ jobs:
         platform:
           - runner: windows-latest
             target: x64
-            msys2-dependencys: >-
-              mingw-w64-x86_64-toolchain
-              mingw-w64-x86_64-libjxl
             toolchain: x86_64-pc-windows-gnu
             features: dynamic
           - runner: windows-latest
             target: x86
-            msys2-dependencys: >-
-              mingw-w64-i686-toolchain
-              mingw-w64-i686-libjxl
             toolchain: i686-pc-windows-gnu
-            features: vendored
+            features: dynamic
     steps:
       - uses: actions/checkout@v6
-      - name: Install dependencys
+      - name: Install msys2 dependencys for x64
         uses: msys2/setup-msys2@v2
+        if: ${{ matrix.platform.target == 'x64' }}
         with:
           update: true
-          install: ${{ matrix.platform.msys2-dependencys }}
+          install: >-
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-libjxl
+      - name: Install msys2 dependencys for x86
+        uses: msys2/setup-msys2@v2
+        if: ${{ matrix.platform.target == 'x86' }}
+        with:
+          update: true
+          install: >-
+            mingw-w64-i686-toolchain
+            mingw-w64-i686-libjxl
       - name: Put MSYS2_MinGW64 on PATH
         # there is not yet an environment variable for this path from msys2/setup-msys2
+        if: ${{ matrix.platform.target == 'x64' }}
         run: echo "${{ runner.temp }}/msys64/mingw64/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Put MSYS2_MinGW32 on PATH
+        # there is not yet an environment variable for this path from msys2/setup-msys2
+        if: ${{ matrix.platform.target == 'x86' }}
+        run: echo "${{ runner.temp }}/msys64/mingw32/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
