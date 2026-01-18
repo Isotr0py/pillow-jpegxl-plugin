@@ -171,7 +171,7 @@ impl Encoder {
             .build()
             .map_err(to_pyjxlerror)?;
         encoder.uses_original_profile = self.use_original_profile;
-        encoder.color_encoding = self.pixel_type.color_encoding();
+        encoder.color_encoding = Some(self.pixel_type.color_encoding());
         encoder.speed = match self.effort {
             1 => EncoderSpeed::Lightning,
             2 => EncoderSpeed::Thunder,
