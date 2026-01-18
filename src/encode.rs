@@ -132,8 +132,8 @@ impl Encoder {
             .map_err(to_pyjxlerror)?;
         encoder.uses_original_profile = self.use_original_profile;
         encoder.color_encoding = match self.num_channels {
-            1 | 2 => ColorEncoding::SrgbLuma,
-            3 | 4 => ColorEncoding::Srgb,
+            1 | 2 => Some(ColorEncoding::SrgbLuma),
+            3 | 4 => Some(ColorEncoding::Srgb),
             _ => return Err(PyValueError::new_err("Invalid num channels")),
         };
         encoder.speed = match self.effort {
