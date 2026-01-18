@@ -7,7 +7,7 @@ from PIL import Image, ImageFile
 
 from pillow_jxl import Decoder, Encoder
 
-_VALID_JXL_MODES = {"RGB", "RGBA", "L", "LA", "I;16"}
+_VALID_JXL_MODES = {"RGB", "RGBA", "L", "LA", "I;16", "F"}
 DECODE_THREADS = -1  # -1 detect available cpu cores, 0 disables parallelism
 
 
@@ -113,7 +113,7 @@ class JXLImageFile(ImageFile.ImageFile):
 
 def _save(im, fp, filename, save_all=False):
     if im.mode not in _VALID_JXL_MODES:
-        raise NotImplementedError("Only RGB, RGBA, L, LA, I;16 are supported.")
+        raise NotImplementedError("Only RGB, RGBA, L, LA, I;16, F are supported.")
 
     info = im.encoderinfo.copy()
 

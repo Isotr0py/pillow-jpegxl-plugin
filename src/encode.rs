@@ -14,6 +14,8 @@ enum PixelType {
     Uint8 { num_channels: u32, has_alpha: bool },
     /// 16-bit unsigned integer (I;16 mode, grayscale only)
     Uint16,
+    /// 32-bit float (F mode, grayscale only)
+    Float32,
 }
 
 impl PixelType {
@@ -24,14 +26,14 @@ impl PixelType {
                 3 | 4 => ColorEncoding::Srgb,
                 _ => unreachable!("Invalid number of channels for Uint8 pixel type"),
             },
-            PixelType::Uint16 => ColorEncoding::LinearSrgbLuma,
+            PixelType::Uint16 | PixelType::Float32 => ColorEncoding::LinearSrgbLuma,
         }
     }
 
     fn has_alpha(&self) -> bool {
         match self {
             PixelType::Uint8 { has_alpha, .. } => *has_alpha,
-            PixelType::Uint16 => false,
+            PixelType::Uint16 | PixelType::Float32 => false,
         }
     }
 }
@@ -81,9 +83,10 @@ impl Encoder {
                 has_alpha: false,
             },
             "I;16" => PixelType::Uint16,
+            "F" => PixelType::Float32,
             _ => {
                 return Err(PyValueError::new_err(
-                    "Only RGB, RGBA, L, LA, I;16 are supported.",
+                    "Only RGB, RGBA, L, LA, I;16, F are supported.",
                 ))
             }
         };
@@ -222,6 +225,16 @@ impl Encoder {
                     let frame = EncoderFrame::new(data_u16).num_channels(1);
                     encoder
                         .encode_frame::<u16, u16>(&frame, width, height)
+                        .map_err(to_pyjxlerror)?
+                        .data
+                }
+                PixelType::Float32 => {
+                    let data_f32: &[f32] = bytemuck::try_cast_slice(data).map_err(|e| {
+                        PyValueError::new_err(format!("Failed to cast F data to f32 slice: {e}"))
+                    })?;
+                    let frame = EncoderFrame::new(data_f32).num_channels(1);
+                    encoder
+                        .encode_frame::<f32, f32>(&frame, width, height)
                         .map_err(to_pyjxlerror)?
                         .data
                 }
