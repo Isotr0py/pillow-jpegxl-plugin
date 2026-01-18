@@ -22,7 +22,7 @@ impl PixelType {
             PixelType::Uint8 { num_channels, .. } => match num_channels {
                 1 | 2 => ColorEncoding::SrgbLuma,
                 3 | 4 => ColorEncoding::Srgb,
-                _ => ColorEncoding::Srgb,
+                _ => unreachable!("Invalid number of channels for Uint8 pixel type"),
             },
             PixelType::Uint16 => ColorEncoding::LinearSrgbLuma,
         }
@@ -216,7 +216,9 @@ impl Encoder {
                         .data
                 }
                 PixelType::Uint16 => {
-                    let data_u16: &[u16] = bytemuck::cast_slice(data);
+                    let data_u16: &[u16] = bytemuck::try_cast_slice(data).map_err(|e| {
+                        PyValueError::new_err(format!("Failed to cast I;16 data to u16 slice: {e}"))
+                    })?;
                     let frame = EncoderFrame::new(data_u16).num_channels(1);
                     encoder
                         .encode_frame::<u16, u16>(&frame, width, height)
