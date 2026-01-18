@@ -154,3 +154,23 @@ def test_metadata_encode_from_pil_exif():
         # Skip UserComment and GPSAltitude as they are broken
         if key not in ("Exif.Photo.UserComment", "Exif.GPSInfo.GPSAltitude"):
             assert ref_exif[key] == jxl_exif[key]
+
+
+def test_encode_I16():
+    """Test encoding I;16 mode (16-bit grayscale) images."""
+    temp = tempfile.mktemp(suffix=".jxl")
+
+    # Load existing I;16 test image
+    img_ori = Image.open("test/images/sample_grey.jxl")
+    assert img_ori.mode == "I;16"
+
+    # Save as JXL with lossless compression
+    img_ori.save(temp, lossless=True)
+
+    # Reload and verify
+    img_enc = Image.open(temp)
+    assert img_enc.mode == "I;16"
+    assert img_ori.size == img_enc.size
+
+    # Verify pixel data matches (lossless round-trip)
+    assert np.allclose(np.array(img_ori), np.array(img_enc), atol=0)
