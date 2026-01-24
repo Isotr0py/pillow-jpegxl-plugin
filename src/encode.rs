@@ -3,14 +3,44 @@ use std::borrow::Cow;
 use pyo3::exceptions::{PyRuntimeError, PyValueError};
 use pyo3::prelude::*;
 
-use jpegxl_rs::encode::{ColorEncoding, EncoderFrame, EncoderResult, EncoderSpeed, Metadata};
+use jpegxl_rs::encode::{ColorEncoding, EncoderFrame, EncoderSpeed, Metadata};
 use jpegxl_rs::parallel::threads_runner::ThreadsRunner;
 use jpegxl_rs::{encoder_builder, EncodeError};
 
+/// Represents different pixel types for encoding
+#[derive(Clone, Copy)]
+enum PixelType {
+    /// 8-bit unsigned integer (RGB, RGBA, L, LA modes)
+    Uint8 { num_channels: u32, has_alpha: bool },
+    /// 16-bit unsigned integer (I;16 mode, grayscale only)
+    Uint16,
+    /// 32-bit float (F mode, grayscale only)
+    Float32,
+}
+
+impl PixelType {
+    fn color_encoding(&self) -> ColorEncoding {
+        match self {
+            PixelType::Uint8 { num_channels, .. } => match num_channels {
+                1 | 2 => ColorEncoding::SrgbLuma,
+                3 | 4 => ColorEncoding::Srgb,
+                _ => unreachable!("Invalid number of channels for Uint8 pixel type"),
+            },
+            PixelType::Uint16 | PixelType::Float32 => ColorEncoding::LinearSrgbLuma,
+        }
+    }
+
+    fn has_alpha(&self) -> bool {
+        match self {
+            PixelType::Uint8 { has_alpha, .. } => *has_alpha,
+            PixelType::Uint16 | PixelType::Float32 => false,
+        }
+    }
+}
+
 #[pyclass(module = "pillow_jxl")]
 pub struct Encoder {
-    num_channels: u32,
-    has_alpha: bool,
+    pixel_type: PixelType,
     lossless: bool,
     quality: f32,
     decoding_speed: i64,
@@ -35,14 +65,28 @@ impl Encoder {
         use_original_profile: bool,
         num_threads: isize,
     ) -> PyResult<Self> {
-        let (num_channels, has_alpha) = match mode {
-            "RGBA" => (4, true),
-            "RGB" => (3, false),
-            "LA" => (2, true),
-            "L" => (1, false),
+        let pixel_type = match mode {
+            "RGBA" => PixelType::Uint8 {
+                num_channels: 4,
+                has_alpha: true,
+            },
+            "RGB" => PixelType::Uint8 {
+                num_channels: 3,
+                has_alpha: false,
+            },
+            "LA" => PixelType::Uint8 {
+                num_channels: 2,
+                has_alpha: true,
+            },
+            "L" => PixelType::Uint8 {
+                num_channels: 1,
+                has_alpha: false,
+            },
+            "I;16" => PixelType::Uint16,
+            "F" => PixelType::Float32,
             _ => {
                 return Err(PyValueError::new_err(
-                    "Only RGB, RGBA, L, LA are supported.",
+                    "Only RGB, RGBA, L, LA, I;16, F are supported.",
                 ))
             }
         };
@@ -62,8 +106,7 @@ impl Encoder {
         };
 
         Ok(Self {
-            num_channels,
-            has_alpha,
+            pixel_type,
             lossless,
             quality,
             decoding_speed,
@@ -94,7 +137,7 @@ impl Encoder {
     fn __repr__(&self) -> PyResult<String> {
         Ok(format!(
             "Encoder(has_alpha={}, lossless={}, quality={}, decoding_speed={}, effort={}, num_threads={})",
-            self.has_alpha, self.lossless, self.quality, self.decoding_speed, self.effort, self.num_threads
+            self.pixel_type.has_alpha(), self.lossless, self.quality, self.decoding_speed, self.effort, self.num_threads
         ))
     }
 }
@@ -124,18 +167,14 @@ impl Encoder {
         let mut encoder = encoder_builder()
             .parallel_runner(&parallel_runner)
             .jpeg_quality(self.quality)
-            .has_alpha(self.has_alpha)
+            .has_alpha(self.pixel_type.has_alpha())
             .lossless(self.lossless)
             .use_container(self.use_container)
             .decoding_speed(self.decoding_speed)
             .build()
             .map_err(to_pyjxlerror)?;
         encoder.uses_original_profile = self.use_original_profile;
-        encoder.color_encoding = match self.num_channels {
-            1 | 2 => Some(ColorEncoding::SrgbLuma),
-            3 | 4 => Some(ColorEncoding::Srgb),
-            _ => return Err(PyValueError::new_err("Invalid num channels")),
-        };
+        encoder.color_encoding = Some(self.pixel_type.color_encoding());
         encoder.speed = match self.effort {
             1 => EncoderSpeed::Lightning,
             2 => EncoderSpeed::Thunder,
@@ -148,31 +187,60 @@ impl Encoder {
             9 => EncoderSpeed::Tortoise,
             _ => return Err(PyValueError::new_err("Invalid effort")),
         };
-        let buffer: EncoderResult<u8> = match jpeg_encode {
-            true => encoder.encode_jpeg(data).map_err(to_pyjxlerror)?,
-            false => {
-                let frame = EncoderFrame::new(data).num_channels(self.num_channels);
-                if let Some(exif_data) = exif {
-                    encoder
-                        .add_metadata(&Metadata::Exif(exif_data), compress)
-                        .map_err(to_pyjxlerror)?
-                }
-                if let Some(xmp_data) = xmp {
-                    encoder
-                        .add_metadata(&Metadata::Xmp(xmp_data), compress)
-                        .map_err(to_pyjxlerror)?
-                }
-                if let Some(jumb_data) = jumb {
-                    encoder
-                        .add_metadata(&Metadata::Jumb(jumb_data), compress)
-                        .map_err(to_pyjxlerror)?
-                }
+
+        // Add metadata if provided (for non-JPEG encode)
+        if !jpeg_encode {
+            if let Some(exif_data) = exif {
                 encoder
-                    .encode_frame(&frame, width, height)
+                    .add_metadata(&Metadata::Exif(exif_data), compress)
                     .map_err(to_pyjxlerror)?
             }
+            if let Some(xmp_data) = xmp {
+                encoder
+                    .add_metadata(&Metadata::Xmp(xmp_data), compress)
+                    .map_err(to_pyjxlerror)?
+            }
+            if let Some(jumb_data) = jumb {
+                encoder
+                    .add_metadata(&Metadata::Jumb(jumb_data), compress)
+                    .map_err(to_pyjxlerror)?
+            }
+        }
+
+        let buffer: Vec<u8> = if jpeg_encode {
+            encoder.encode_jpeg(data).map_err(to_pyjxlerror)?.data
+        } else {
+            match self.pixel_type {
+                PixelType::Uint8 { num_channels, .. } => {
+                    let frame = EncoderFrame::new(data).num_channels(num_channels);
+                    encoder
+                        .encode_frame::<u8, u8>(&frame, width, height)
+                        .map_err(to_pyjxlerror)?
+                        .data
+                }
+                PixelType::Uint16 => {
+                    let data_u16: &[u16] = bytemuck::try_cast_slice(data).map_err(|e| {
+                        PyValueError::new_err(format!("Failed to cast I;16 data to u16 slice: {e}"))
+                    })?;
+                    let frame = EncoderFrame::new(data_u16).num_channels(1);
+                    encoder
+                        .encode_frame::<u16, u16>(&frame, width, height)
+                        .map_err(to_pyjxlerror)?
+                        .data
+                }
+                PixelType::Float32 => {
+                    let data_f32: &[f32] = bytemuck::try_cast_slice(data).map_err(|e| {
+                        PyValueError::new_err(format!("Failed to cast F data to f32 slice: {e}"))
+                    })?;
+                    let frame = EncoderFrame::new(data_f32).num_channels(1);
+                    encoder
+                        .encode_frame::<f32, f32>(&frame, width, height)
+                        .map_err(to_pyjxlerror)?
+                        .data
+                }
+            }
         };
-        Ok(Cow::Owned(buffer.data))
+        Ok(Cow::Owned(buffer))
     }
 }
 
