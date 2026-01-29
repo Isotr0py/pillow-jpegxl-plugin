@@ -64,7 +64,7 @@ with Image.open("example.png") as img:
     img.save(buffer, format="JXL")
 
 jxl_bytes = buffer.getvalue()
-img = Image.open(BytesIO(jxl_bytes))uffer = BytesIO()
+img = Image.open(BytesIO(jxl_bytes))
 display(img)
 ```
 
