@@ -37,6 +37,8 @@ Use `import pillow_jxl` to register the plugin in your code.
 
 ### Example:
 ```python
+from io import BytesIO
+
 import pillow_jxl
 from PIL import Image
 
@@ -44,7 +46,7 @@ from PIL import Image
 with Image.open("example.png") as img:
     img.save("example.jxl",lossless=True)
 
-# encode image with JPEG-Style quality
+# Encode image with JPEG-Style quality
 with Image.open("example.png") as img:
     img.save("example.jxl", quality=98)
 
@@ -55,6 +57,15 @@ with Image.open("example.jpg") as img:
 # Decode jxl image
 with Image.open("example.jxl") as img:
     display(img)
+
+# Encode/decode jxl image to buffer
+buffer = BytesIO()
+with Image.open("example.png") as img:
+    img.save(buffer, format="JXL")
+
+jxl_bytes = buffer.getvalue()
+img = Image.open(BytesIO(jxl_bytes))
+display(img)
 ```
 
 ## Wheels status
