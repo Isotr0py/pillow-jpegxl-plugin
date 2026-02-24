@@ -10,7 +10,7 @@ name = "pillow_jxl"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version="0.27.1", features = ["extension-module", "generate-import-lib"] }
+pyo3 = { version="0.28.2", features = ["extension-module", "generate-import-lib"] }
 jpegxl-rs = { version="0.12.0", default-features = false }
 half = "2.7.1"
 bytemuck = "1.24.0"
