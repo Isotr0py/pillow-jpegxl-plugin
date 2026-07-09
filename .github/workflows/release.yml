@@ -40,7 +40,7 @@ jobs:
           # - runner: ubuntu-latest
           #   target: ppc64le
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v6
         with:
           python-version: 3.x
@@ -76,7 +76,7 @@ jobs:
           - runner: ubuntu-latest
             target: armv7
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v6
         with:
           python-version: 3.x
@@ -131,7 +131,7 @@ jobs:
               3.13
               3.14
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install msys2 dependencys for x64
         uses: msys2/setup-msys2@v2
         if: ${{ matrix.platform.target == 'x64' }}
@@ -191,7 +191,7 @@ jobs:
           - runner: macos-15-intel
             target: x86_64
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v6
         with:
           python-version: 3.x
@@ -210,7 +210,7 @@ jobs:
   sdist:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Build sdist
         uses: PyO3/maturin-action@v1
         with:
@@ -241,7 +241,7 @@ jobs:
         with:
           subject-path: 'wheels-*/*'
       - name: upload to github release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             wheels-*/*.whl
