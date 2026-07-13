@@ -185,6 +185,7 @@ impl Encoder {
             7 => EncoderSpeed::Squirrel,
             8 => EncoderSpeed::Kitten,
             9 => EncoderSpeed::Tortoise,
+            10 => EncoderSpeed::Glacier,
             _ => return Err(PyValueError::new_err("Invalid effort")),
         };
 
