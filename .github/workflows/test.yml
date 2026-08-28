@@ -1,4 +1,4 @@
-name: Test Python
+name: Test
 
 on:
   # Trigger the workflow on push or pull request,
@@ -14,7 +14,38 @@ env:
   RUSTFLAGS: -C debuginfo=0  # Do not produce debug symbols to keep memory usage down
   RUST_BACKTRACE: 1
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
 jobs:
+  test-rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Make libpython discoverable at runtime
+        run: echo "LD_LIBRARY_PATH=${pythonLocation}/lib" >> "$GITHUB_ENV"
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run tests
+        run: cargo test --features vendored
+
   test-python:
     runs-on: ${{ matrix.os }}
     strategy:

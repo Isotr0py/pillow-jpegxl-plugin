@@ -248,3 +248,62 @@ impl Encoder {
 fn to_pyjxlerror(e: EncodeError) -> PyErr {
     PyRuntimeError::new_err(e.to_string())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn uint8_luma_color_encoding_and_alpha() {
+        let l = PixelType::Uint8 {
+            num_channels: 1,
+            has_alpha: false,
+        };
+        assert!(matches!(l.color_encoding(), ColorEncoding::SrgbLuma));
+        assert!(!l.has_alpha());
+
+        let la = PixelType::Uint8 {
+            num_channels: 2,
+            has_alpha: true,
+        };
+        assert!(matches!(la.color_encoding(), ColorEncoding::SrgbLuma));
+        assert!(la.has_alpha());
+    }
+
+    #[test]
+    fn uint8_rgb_color_encoding_and_alpha() {
+        let rgb = PixelType::Uint8 {
+            num_channels: 3,
+            has_alpha: false,
+        };
+        assert!(matches!(rgb.color_encoding(), ColorEncoding::Srgb));
+        assert!(!rgb.has_alpha());
+
+        let rgba = PixelType::Uint8 {
+            num_channels: 4,
+            has_alpha: true,
+        };
+        assert!(matches!(rgba.color_encoding(), ColorEncoding::Srgb));
+        assert!(rgba.has_alpha());
+    }
+
+    #[test]
+    fn uint16_color_encoding_and_alpha() {
+        let uint16 = PixelType::Uint16;
+        assert!(matches!(
+            uint16.color_encoding(),
+            ColorEncoding::LinearSrgbLuma
+        ));
+        assert!(!uint16.has_alpha());
+    }
+
+    #[test]
+    fn float32_color_encoding_and_alpha() {
+        let float32 = PixelType::Float32;
+        assert!(matches!(
+            float32.color_encoding(),
+            ColorEncoding::LinearSrgbLuma
+        ));
+        assert!(!float32.has_alpha());
+    }
+}

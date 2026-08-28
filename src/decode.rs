@@ -306,3 +306,190 @@ impl Decoder {
 fn to_pyjxlerror(e: DecodeError) -> PyErr {
     PyRuntimeError::new_err(e.to_string())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const SIGNATURE: [u8; 12] = *b"\x00\x00\x00\x0c\x4a\x58\x4c\x20\x0d\x0a\x87\x0a";
+    const HEADER_SIZE: usize = 32;
+
+    /// Builds a container header of exactly HEADER_SIZE bytes: the signature
+    /// followed by padding (real files put an ftyp box here, but extract_boxes
+    /// doesn't look at it).
+    fn container_header() -> Vec<u8> {
+        let mut header = SIGNATURE.to_vec();
+        header.resize(HEADER_SIZE, 0);
+        header
+    }
+
+    #[test]
+    fn empty_input_is_not_a_container() {
+        let result = extract_boxes(&[]).unwrap();
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn input_shorter_than_signature_is_not_a_container() {
+        let data = &SIGNATURE[..5];
+        let result = extract_boxes(data).unwrap();
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn header_only_with_no_boxes() {
+        let data = container_header();
+        let result = extract_boxes(&data).unwrap();
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn single_well_formed_32_bit_box() {
+        let mut data = container_header();
+        let box_data = b"hello";
+        let box_len = 8 + box_data.len() as u32;
+        data.extend_from_slice(&box_len.to_be_bytes());
+        data.extend_from_slice(b"jxlc");
+        data.extend_from_slice(box_data);
+
+        let boxes = extract_boxes(&data).unwrap();
+        assert_eq!(boxes.len(), 1);
+        assert_eq!(&boxes[0].box_type, b"jxlc");
+        assert_eq!(boxes[0].data, box_data);
+    }
+
+    #[test]
+    fn zero_box_size_extends_to_end_of_data() {
+        let mut data = container_header();
+        data.extend_from_slice(&0u32.to_be_bytes()); // size == 0 -> "to end of data"
+        data.extend_from_slice(b"jxlp");
+        let box_data = b"remaining bytes";
+        data.extend_from_slice(box_data);
+
+        let boxes = extract_boxes(&data).unwrap();
+        assert_eq!(boxes.len(), 1);
+        assert_eq!(&boxes[0].box_type, b"jxlp");
+        assert_eq!(boxes[0].data, box_data);
+    }
+
+    #[test]
+    fn sixty_four_bit_box_size_escape() {
+        let mut data = container_header();
+        let box_data = b"large box payload";
+        let real_size = 16 + box_data.len() as u64;
+        data.extend_from_slice(&1u32.to_be_bytes()); // box_size == 1 -> 64-bit escape
+        data.extend_from_slice(b"jxlp");
+        data.extend_from_slice(&real_size.to_be_bytes());
+        data.extend_from_slice(box_data);
+
+        let boxes = extract_boxes(&data).unwrap();
+        assert_eq!(boxes.len(), 1);
+        assert_eq!(&boxes[0].box_type, b"jxlp");
+        assert_eq!(boxes[0].data, box_data);
+    }
+
+    #[test]
+    fn sixty_four_bit_box_size_smaller_than_header_is_an_error() {
+        let mut data = container_header();
+        data.extend_from_slice(&1u32.to_be_bytes());
+        data.extend_from_slice(b"jxlp");
+        data.extend_from_slice(&10u64.to_be_bytes()); // < 16, invalid
+        data.extend_from_slice(b"padding_bytes_ok");
+
+        let result = extract_boxes(&data);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn box_extending_past_end_of_data_stops_parsing_without_error() {
+        let mut data = container_header();
+
+        // First box: well-formed and should be parsed successfully.
+        let first_data = b"ok";
+        let first_len = 8 + first_data.len() as u32;
+        data.extend_from_slice(&first_len.to_be_bytes());
+        data.extend_from_slice(b"jxlc");
+        data.extend_from_slice(first_data);
+
+        // Second box: declares a length far past the end of the buffer.
+        data.extend_from_slice(&1_000u32.to_be_bytes());
+        data.extend_from_slice(b"bad!");
+
+        let boxes = extract_boxes(&data).unwrap();
+        assert_eq!(boxes.len(), 1);
+        assert_eq!(&boxes[0].box_type, b"jxlc");
+        assert_eq!(boxes[0].data, first_data);
+    }
+
+    #[test]
+    fn reserved_32_bit_box_size_is_an_error() {
+        let mut data = container_header();
+        data.extend_from_slice(&3u32.to_be_bytes()); // 2..=7 is reserved/invalid
+        data.extend_from_slice(b"jxlc");
+
+        let result = extract_boxes(&data);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn truncated_64_bit_box_header_stops_parsing_without_error() {
+        let mut data = container_header();
+        data.extend_from_slice(&1u32.to_be_bytes()); // box_size == 1 -> 64-bit escape
+        data.extend_from_slice(b"jxlp");
+        // Missing the 8-byte large-size field entirely (truncated file).
+
+        let boxes = extract_boxes(&data).unwrap();
+        assert!(boxes.is_empty());
+    }
+
+    #[test]
+    fn empty_payload_32_bit_box() {
+        let mut data = container_header();
+        data.extend_from_slice(&8u32.to_be_bytes()); // size == header_length, no payload
+        data.extend_from_slice(b"jxlc");
+
+        let boxes = extract_boxes(&data).unwrap();
+        assert_eq!(boxes.len(), 1);
+        assert_eq!(&boxes[0].box_type, b"jxlc");
+        assert!(boxes[0].data.is_empty());
+    }
+
+    #[test]
+    fn image_info_mode_grayscale_8bit() {
+        assert_eq!(ImageInfo::mode(1, false, None).unwrap(), "L");
+    }
+
+    #[test]
+    fn image_info_mode_grayscale_alpha_8bit() {
+        assert_eq!(ImageInfo::mode(1, true, None).unwrap(), "LA");
+    }
+
+    #[test]
+    fn image_info_mode_rgba() {
+        assert_eq!(ImageInfo::mode(3, true, None).unwrap(), "RGBA");
+    }
+
+    #[test]
+    fn image_info_mode_float16_grayscale() {
+        let pixels = Pixels::Float16(vec![]);
+        assert_eq!(ImageInfo::mode(1, false, Some(&pixels)).unwrap(), "F;16");
+    }
+
+    #[test]
+    fn image_info_mode_uint16_grayscale() {
+        let pixels = Pixels::Uint16(vec![]);
+        assert_eq!(ImageInfo::mode(1, false, Some(&pixels)).unwrap(), "I;16");
+    }
+
+    #[test]
+    fn image_info_mode_float_grayscale() {
+        let pixels = Pixels::Float(vec![]);
+        assert_eq!(ImageInfo::mode(1, false, Some(&pixels)).unwrap(), "F");
+    }
+
+    #[test]
+    fn image_info_mode_unsupported_combination_errors() {
+        let result = ImageInfo::mode(2, false, None);
+        assert!(result.is_err());
+    }
+}
