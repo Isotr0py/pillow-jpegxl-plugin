@@ -100,6 +100,11 @@ impl Encoder {
             }
         };
 
+        let effort = match effort {
+            1..=10 => effort,
+            _ => return Err(PyValueError::new_err("Effort must be between 1 and 10")),
+        };
+
         let use_original_profile = match lossless {
             true => true,
             false => use_original_profile,

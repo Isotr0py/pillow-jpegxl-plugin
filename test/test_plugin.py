@@ -15,6 +15,21 @@ def test_debug_mode():
     assert exit_code == 0
 
 
+@pytest.mark.parametrize("effort", [0, 11])
+def test_encode_invalid_effort_raises(effort):
+    img = Image.open("test/images/sample.png")
+    temp = tempfile.mktemp(suffix=".jxl")
+    with pytest.raises(ValueError):
+        img.save(temp, effort=effort)
+
+
+def test_encode_boundary_effort_succeeds():
+    img = Image.open("test/images/sample.png")
+    temp = tempfile.mktemp(suffix=".jxl")
+    img.save(temp, effort=10)
+    assert Image.open(temp).size == img.size
+
+
 def test_decode():
     img_jxl = Image.open("test/images/sample.jxl")
     img_png = Image.open("test/images/sample.png")
