@@ -10,7 +10,7 @@ use jpegxl_rs::{decoder_builder, DecodeError};
 // it works even if the item is not documented:
 
 #[pyclass(module = "pillow_jxl")]
-struct ImageInfo {
+pub struct ImageInfo {
     #[pyo3(get, set)]
     mode: String, // Mode of the image
     #[pyo3(get, set)]

@@ -1,5 +1,5 @@
 # ruff: noqa
-from .pillow_jxl import Decoder, Encoder
+from .pillow_jxl import Decoder, Encoder, ImageInfo, JxlBox
 
 from pillow_jxl import JpegXLImagePlugin
 
