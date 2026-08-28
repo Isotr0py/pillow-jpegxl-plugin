@@ -196,16 +196,21 @@ impl Decoder {
                 return Ok(pixels);
             }
             Pixels::Uint16(pixels) => {
+                // NB: `>> 8` is a lossy narrowing downsample, not a reinterpret cast, so this
+                // must stay a per-element loop.
+                result.reserve(pixels.len());
                 for pixel in pixels {
                     result.push((pixel >> 8) as u8);
                 }
             }
             Pixels::Float(pixels) => {
+                result.reserve(pixels.len());
                 for pixel in pixels {
                     result.push((pixel * 255.0) as u8);
                 }
             }
             Pixels::Float16(pixels) => {
+                result.reserve(pixels.len());
                 for pixel in pixels {
                     // PERF: use native f16 ops
                     result.push((pixel.to_f32() * 255.0) as u8);
@@ -217,37 +222,21 @@ impl Decoder {
 
     fn pixels_to_bytes(&self, pixels: Pixels) -> PyResult<Vec<u8>> {
         // Convert pixels to bytes without casting
-        let mut result = Vec::new();
         match pixels {
-            Pixels::Uint8(pixels) => {
-                return Ok(pixels);
-            }
-            Pixels::Uint16(pixels) => {
-                for pixel in pixels {
-                    let pix_bytes = pixel.to_ne_bytes();
-                    for byte in pix_bytes.iter() {
-                        result.push(*byte);
-                    }
-                }
-            }
-            Pixels::Float(pixels) => {
-                for pixel in pixels {
-                    let pix_bytes = pixel.to_ne_bytes();
-                    for byte in pix_bytes.iter() {
-                        result.push(*byte);
-                    }
-                }
-            }
+            Pixels::Uint8(pixels) => Ok(pixels),
+            Pixels::Uint16(pixels) => Ok(bytemuck::cast_slice::<u16, u8>(&pixels).to_vec()),
+            Pixels::Float(pixels) => Ok(bytemuck::cast_slice::<f32, u8>(&pixels).to_vec()),
             Pixels::Float16(pixels) => {
                 // HACK: Pillow doesn't natively support float16 mode.
                 // Therefore, you have to upcast
+                let mut result = Vec::with_capacity(pixels.len() * 4);
                 for pixel in pixels {
                     let pix_bytes = pixel.to_f32().to_ne_bytes();
                     result.extend_from_slice(&pix_bytes);
                 }
+                Ok(result)
             }
         }
-        Ok(result)
     }
 
     fn convert_pil_pixels(&self, pixels: Pixels, num_channels: u32) -> PyResult<Vec<u8>> {
@@ -305,4 +294,67 @@ impl Decoder {
 
 fn to_pyjxlerror(e: DecodeError) -> PyErr {
     PyRuntimeError::new_err(e.to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn pixels_to_bytes_uint16_matches_native_endian_bytes() {
+        let decoder = Decoder::new(-1);
+        let input = vec![0u16, 1, 256, 65535];
+        let mut expected = Vec::new();
+        for pixel in &input {
+            expected.extend_from_slice(&pixel.to_ne_bytes());
+        }
+        let result = decoder.pixels_to_bytes(Pixels::Uint16(input)).unwrap();
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn pixels_to_bytes_uint16_empty_input() {
+        let decoder = Decoder::new(-1);
+        let result = decoder.pixels_to_bytes(Pixels::Uint16(vec![])).unwrap();
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn pixels_to_bytes_float_matches_native_endian_bytes() {
+        let decoder = Decoder::new(-1);
+        let input = vec![0.0f32, 1.0, -1.5, 12_345.679];
+        let mut expected = Vec::new();
+        for pixel in &input {
+            expected.extend_from_slice(&pixel.to_ne_bytes());
+        }
+        let result = decoder.pixels_to_bytes(Pixels::Float(input)).unwrap();
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn pixels_to_bytes_float_empty_input() {
+        let decoder = Decoder::new(-1);
+        let result = decoder.pixels_to_bytes(Pixels::Float(vec![])).unwrap();
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn pixels_to_bytes_float16_upcasts_to_f32_native_endian_bytes() {
+        let decoder = Decoder::new(-1);
+        let input = vec![half::f16::from_f32(0.5), half::f16::from_f32(-2.25)];
+        let mut expected = Vec::new();
+        for pixel in &input {
+            expected.extend_from_slice(&pixel.to_f32().to_ne_bytes());
+        }
+        let result = decoder.pixels_to_bytes(Pixels::Float16(input)).unwrap();
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn pixels_to_bytes_8bit_uint16_narrows_via_high_byte() {
+        let decoder = Decoder::new(-1);
+        let input = vec![0x1234u16];
+        let result = decoder.pixels_to_bytes_8bit(Pixels::Uint16(input)).unwrap();
+        assert_eq!(result, vec![0x12u8]);
+    }
 }
