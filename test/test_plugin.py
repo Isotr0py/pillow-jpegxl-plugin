@@ -1,4 +1,5 @@
-import os
+import subprocess
+import sys
 import tempfile
 
 import numpy as np
@@ -11,8 +12,12 @@ import pillow_jxl  # noqa: F401
 
 
 def test_debug_mode():
-    exit_code = os.system('python -Xdev -c "from pillow_jxl import JpegXLImagePlugin"')
-    assert exit_code == 0
+    result = subprocess.run(
+        [sys.executable, "-Xdev", "-c", "from pillow_jxl import JpegXLImagePlugin"],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
 
 
 def test_decode():
