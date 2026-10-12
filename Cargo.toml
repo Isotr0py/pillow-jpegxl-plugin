@@ -11,7 +11,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 pyo3 = { version="0.29.0", features = ["extension-module"] }
-jpegxl-rs = { version="0.15.0", default-features = false }
+jpegxl-rs = { version="0.16.0", default-features = false }
 half = "2.7.1"
 bytemuck = "1.24.0"
 
