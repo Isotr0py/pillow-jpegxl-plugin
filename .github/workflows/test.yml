@@ -22,7 +22,7 @@ jobs:
       matrix:
         # we only use macos for fast testing
         os: [macos-latest]
-        python-version: ['3.12', '3.13']
+        python-version: ['3.12', '3.13', '3.15']
 
     steps:
       - uses: actions/checkout@v7
